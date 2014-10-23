@@ -1,0 +1,15 @@
+{
+  "name": "creating_apps",
+  "version": "1.0.0",
+  "description": "Creating Apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Marco Lavielle",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.9.8",
+    "jade": "^1.7.0"
+  }
+}
