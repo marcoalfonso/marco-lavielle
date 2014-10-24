@@ -1,2 +1,10 @@
-h1 This is a Partial
-h2 {{ myVar }}
+.container
+	.jumbotron
+		h1 Creating Apps
+		p We are a technology agency focused on developing high quality applications. 
+
+	.row
+		.col-md-6
+			div(ng-include="'/partials/featured-apps'")
+		.col-md-6
+			div(ng-include="'/partials/new-apps'")
