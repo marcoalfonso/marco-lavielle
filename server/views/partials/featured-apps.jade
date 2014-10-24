@@ -1,3 +1,5 @@
 .panel.panel-primary
 	.panel-heading.text-center Featured Apps
-	.panel-body Body Goes Here
+	.panel-body
+		.row(ng-repeat="app in apps | filter:{featured:true}")
+			.col-md-12 {{app.name}}
