@@ -6,12 +6,17 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "engines": {
+    "node":"0.10.x",
+    "npm":"2.0.x"
+  },
   "author": "Marco Lavielle",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.9.1",
     "express": "^4.9.8",
     "jade": "^1.7.0",
+    "mongoose": "^3.8.18",
     "morgan": "^1.4.1",
     "stylus": "^0.49.2"
   }
