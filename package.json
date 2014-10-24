@@ -9,7 +9,10 @@
   "author": "Marco Lavielle",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.9.1",
     "express": "^4.9.8",
-    "jade": "^1.7.0"
+    "jade": "^1.7.0",
+    "morgan": "^1.4.1",
+    "stylus": "^0.49.2"
   }
 }
