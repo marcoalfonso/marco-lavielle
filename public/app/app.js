@@ -6,5 +6,5 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		requireBase: false
 	});
 	$routeProvider
-		.when('/', { templateUrl: '/partials/main', controller: 'caMainCtrl'});
+		.when('/', { templateUrl: '/partials/main/main', controller: 'caMainCtrl'});
 });

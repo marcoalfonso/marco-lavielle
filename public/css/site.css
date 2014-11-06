@@ -8,7 +8,6 @@ section {
   color: #ccc;
 }
 footer {
-  position: fixed;
   bottom: 0;
   padding-left: 15px;
   padding-right: 15px;
@@ -16,4 +15,16 @@ footer {
 footer p {
   border-top: 1px solid #d7e0e2;
   padding: 15px;
+}
+.navbar-form .form-group {
+  margin-left: 10px;
+}
+.navbar-form button {
+  margin-left: 10px;
+}
+.toast-top-right {
+  top: 70px;
+}
+.toast-success {
+  background-color: #13987e;
 }
