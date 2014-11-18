@@ -25,6 +25,9 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		})
 		.when('/profile', { templateUrl: '/partials/account/profile', 
 			controller: 'mvProfileCtrl', resolve: routeRoleChecks.user
+		})
+		.when('/clients', { templateUrl: '/partials/clients/client-list', 
+			controller: 'mvClientListCtrl'
 		});
 });
 
