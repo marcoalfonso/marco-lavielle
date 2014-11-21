@@ -10,4 +10,4 @@ exports.getClientById = function(req, res) {
 	Client.findOne({_id:req.params.id}).exec(function(err, course) {
 		res.send(course);
 	})
-}
+};
