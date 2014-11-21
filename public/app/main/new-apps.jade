@@ -1,6 +1,7 @@
 .panel.panel-primary
 	.panel-heading.text-center New Apps
 	.panel-body
-		.row(ng-repeat="app in apps | orderBy:'published':true | limitTo:10")
-			.col-md-3 {{app.published | date:'MMM d'}}
-			.col-md-9 {{app.name}}
+		.row(ng-repeat="client in clients | orderBy:'published':true | limitTo:10")
+			.col-md-3 {{client.published | date:'MMM d'}}
+			.col-md-9 
+				a(href="/clients/{{client._id}}") {{client.name}}

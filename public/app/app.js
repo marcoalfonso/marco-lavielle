@@ -28,6 +28,9 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		})
 		.when('/clients', { templateUrl: '/partials/clients/client-list', 
 			controller: 'mvClientListCtrl'
+		})
+		.when('/clients/:id', { templateUrl: '/partials/clients/client-details', 
+			controller: 'mvClientDetailCtrl'
 		});
 });
 
