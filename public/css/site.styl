@@ -1,21 +1,44 @@
 body
-	padding-top 69px
-
+	//padding-top 69px
+	background-color #171d25
+	overflow hidden
 section
-	height 100vh
-
+	//height 100vh
 .navbar-header a.navbar-brand
 	h6
 		color #ccc
-
-footer
-	//position fixed
-	bottom 0
-	padding-left 15px
-	padding-right 15px
-	p
-		border-top 1px solid #d7e0e2
-		padding 15px
+.footer
+	font-size 14px
+	font-weight 400
+	padding 36px 41px 24px 50px
+	-webkit-font-smoothing antialiased
+.loaded .desktop .home-footer
+	opacity 1
+	-webkit-transform none
+	transition-delay 550ms
+.desktop .home-footer
+	margin 230px 0 0 -160px
+	position absolute
+	top 50%
+	left 25%
+	text-align left
+	width 300px
+	transition all 300ms ease-out
+.desktop footer
+	display block
+.footer.home-footer
+	color #515e6f
+.footer.home-footer a
+	color inherit
+	font-weight inherit
+.footer a
+	display inline-block
+	margin 0 2px
+	text-decoration none
+.footer a:hover
+	color #7cb9e3
+ol, ul
+	list-style none
 .navbar-form
 	.form-group
 		margin-left 10px
@@ -33,3 +56,256 @@ footer
 
 .toast-success
 	background-color #13987e
+
+//HOMEPAGE LOGO//
+.loaded .home-logo
+	opacity 1
+	-webkit-transform translateY(0)
+.desktop .home-logo
+	display block
+	margin -48px 0 0 -150px
+	margin-top -20px
+	margin-left -118px
+	position absolute
+	top 15%
+	left 25%
+.home-logo
+	transition all 800ms ease-out 600ms
+.logo
+	color #fff
+	text-transform uppercase
+	white-space nowrap
+	-webkit-font-smoothing antialiased
+	-webkit-user-select none
+.logo span
+	-webkit-animation-name flash-letter
+	-webkit-animation-iteration-count infinite
+	-webkit-animation-duration 2400ms
+	-webkit-animation-duration 3.2s
+	-webkit-animation-timing-function ease
+	-webkit-animation-fill-mode none
+	letter-spacing 0.5em
+.logo span
+	opacity 0.35
+.home-logo span
+	font-size 18px
+.logo .c
+	-webkit-animation-delay 0
+.logo .r
+	-webkit-animation-delay 100ms
+.logo .e
+	-webkit-animation-delay 200ms
+.logo .a
+	-webkit-animation-delay 300ms
+.logo .t
+	-webkit-animation-delay 400ms
+.logo .i
+	-webkit-animation-delay 500ms
+.logo .n
+	-webkit-animation-delay 600ms
+.logo .g
+	-webkit-animation-delay 700ms
+.logo .space
+	-webkit-animation-delay 800ms
+.logo .a2
+	-webkit-animation-delay 900ms
+.logo .p
+	-webkit-animation-delay 1000ms
+.logo .p2
+	-webkit-animation-delay 1100ms
+.logo .s
+	-webkit-animation-delay 1300ms
+@-webkit-keyframes flash-letter
+	0%
+		opacity 0.35
+	30%
+		opacity 0.8
+	100%
+		opacity 0.21
+.desktop .sections-nav
+	transition all 200ms ease-out
+	display block
+	margin -220px 0 0 -150px
+	margin-top -200px
+	position absolute
+	top 55%
+	left 25%
+	height 400px
+	width 250px
+.sections-nav
+	-webkit-user-select none
+.sections-nav .selection
+	transform translateY(0) translateZ(0)
+	background #00aeef
+	border-radius 1px
+	display block
+	position absolute
+	top 16px
+	left 0
+	height 80px
+	width 6px
+	transition all 240ms cubic-bezier(0.145, 1.075, 0.345, 1.12) 600ms
+	tranistion-duration 400ms
+.sections-nav li:nth-child(2)
+	transition-delay 120ms
+.loaded .sections-nav li
+	opacity 1
+	-webkit-transform none
+	transform none
+.sections-nav li
+	margin 0 0 30px 0
+	webkit-font-smoothing antialiased
+	transition all 200ms ease-out
+.sections-nav li a
+	display block
+	padding 0 12px 0 0px
+	height 100px
+	text-decoration none
+	text-align left
+	-webkit-font-smoothing antialiased
+.sections-nav li strong
+	color #fff
+	display inline-block
+	font-size 24px
+	margin 28px 0 0 0
+	vertical-align middle
+.sections-nav li small
+	color rgba(152,175,197,0.7)
+	font-size 16px
+	display block
+.sections-nav li .icon
+	margin 25px 0 0 8px
+	vertical-align middle
+	trasform translateZ(0)
+	-webkit-transform-style preserve-3d
+.icon
+	display inline-block
+	overflow hidden
+	position relative
+	vertical-align middle
+	height 24px
+	width 24px
+.icon .bar
+	background #00aeef
+	display block
+	margin 4px 0 0 0
+	height 3px
+	width 100%
+	-webkit-animation-name bar-slide
+	-webkit-animation-duration 1.3s
+	-webkit-animation-timing-function ease-in-out
+	-webkit-animation-direction alternate
+	-webkit-animation-iteration-count infinite
+	-webkit-animation-play-state running
+.icon .bar.two
+	-webkit-animation-name bar-slide2
+	-webkit-animation-duration 1.4s
+.icon .bar.three
+	-webkit-animation-name bar-slide3
+	-webkit-animation-duration 0.9s
+@-webkit-keyframes bar-slide
+	0%
+		-webkit-transform translateX(-5%)
+	100%
+		-webkit-transform translateX(-60%)
+@-webkit-keyframes bar-slide2
+	0%
+		-webkit-transform translateX(-10%)
+	100%
+		-webkit-transform:translateX(-35%)
+@-webkit-keyframes bar-slide3
+	0%
+		-webkit-transform:translateX(-44%)
+	100%
+		-webkit-transform:translateX(-70%)
+		
+//SPINNERS
+.spinner.desktop-only.spinning
+	transform rotateZ(-240deg) translateZ(0)
+.spinner.desktop-only
+	transition all 300ms ease-in-out 200ms
+	display block
+@media (min-width: 1400px)
+	.desktop .spinner.desktop-only
+		right 45% !important
+		margin-right -250px !important
+.desktop .spinner.desktop-only
+	display block
+	margin -220px -200px 0 0
+	margin-top -200px
+	position absolute
+	top 55%
+	right 35%
+	height 400px
+	width 400px
+.spinner.desktop-only
+	display none
+.desktop .desktop-only
+	display none
+.desktop-only
+	display none
+.spinner .rings
+	opacity 1
+	-webkit-transform scale(1) rotateZ(0)
+	transform scale(1) rotateZ(0)
+.spinner .rings
+	position absolute
+	top 0
+	left 0
+	height 100%
+	width 100%
+	transition all 800ms ease
+	//opacity 0.15
+	-webkit-transform-style flat
+	//-webkit-transform scale(0.2) rotateZ(-300deg)
+	//transform scale(0.2) rotateZ(-300deg)
+.desktop .spinner .ring.zero
+	background-image url(../images/rings_desktop/0.png)
+	margin -175px 0 0 -175px
+	height 350px
+	width 350px
+.desktop .spinner .ring
+	-webkit-animation-name spin
+@-webkit-keyframes spin
+	0%
+		-webkit-transform rotateZ(0)
+		transform rotateZ(0)
+	100%
+		-webkit-transform rotateZ(360deg)
+		transform rotateZ(360deg)
+.spinner .ring.zero
+	-webkit-animation-duration 70s
+.desktop .spinner .ring
+	background url(../images/rings_desktop/1.png) no-repeat center center
+	background-size 470px 470px
+	margin -235px 0 0 -235px
+	height 470px
+	width 470px
+.spinner .ring
+	display block
+	position absolute
+	top 50%
+	left 50%
+	pointer-events none
+	-webkit-animation-timing-function linear
+	-webkit-animation-iteration-count infinite
+	-webkit-animation-fill-mode none
+	-webkit-animation-delay 700ms
+.desktop .spinner .ring.one
+	-webkit-animation-direction reverse
+.spinner .ring.one
+	-webkit-animation-duration 70s
+.desktop .spinner .ring.two
+	background-image url(../images/rings_desktop/2.png)
+.spinner .ring.two
+	-webkit-animation-duration 190s
+.desktop .spinner .ring.three
+	background-image url(../images/rings_desktop/3.png)
+	-webkit-animation-direction reverse
+	display none
+.spinner .ring.three
+	-webkit-animation-duration 80s
+.spinner .ring.four
+	display none
+	-webkit-animation-duration 20s
+	-webkit-animation-direction reverse

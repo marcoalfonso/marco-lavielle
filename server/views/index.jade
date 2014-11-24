@@ -1,11 +1,10 @@
 extends ../includes/layout
 
 block main-content
-	.navbar.navbar-inverse.navbar-fixed-top
+	//.navbar.navbar-inverse.navbar-fixed-top
 		.container
 			.navbar-header
 				a.navbar-brand(href="/") Creating Apps
-					//h6 Extreme Tech 
 			.navbar-collapse.collapse
 				ul.nav.navbar-nav
 					li
@@ -13,9 +12,10 @@ block main-content
 					li
 						a(href="/clients") Clients
 				div(ng-include="'/partials/account/navbar-login'")
+
 	section.content
 		div(ng-view)
 
 	footer.container.text-center
 
-		p &copy; 2014 Creating Apps
+		//p &copy; 2014 Creating Apps
