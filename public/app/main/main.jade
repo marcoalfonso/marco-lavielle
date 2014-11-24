@@ -30,7 +30,7 @@
 		ul.sections-nav
 			span.selection.cursor-only
 			li.technology
-				a(href="/technology")
+				a(href="/technology" data-section="technology")
 					strong Technology
 					span.alive.icon.technology-icon
 						span.bar.one
@@ -39,7 +39,7 @@
 					small
 						| Technologies we use
 			li.clients
-				a(href="clients" data-section="clients")
+				a(href="/clients" data-section="clients")
 					strong Our Work
 					small 
 						| Showcase of work
@@ -58,6 +58,24 @@
 				span.group-3
 					span.ring.three
 					span.ring.four
+			.technology-preview.desktop-only
+				span.mini-preview
+					span.symbol
+						span.text
+							| Tech
+			.clients-preview.desktop-only
+				span.mini-preview
+					span.symbol
+						span.text
+							| Work
+			.contact-preview.desktop-only
+				span.mini-preview
+					span.symbol
+						span.text
+							| Contact
+				a(href="/contact" class="full-preview contact" data-section="contact")
+					span.big-circle.backdrop
+					span.big-circle.actual
 		.footer.home-footer
 			p.copyright
 				a(href="/about" data-section="about") About us
