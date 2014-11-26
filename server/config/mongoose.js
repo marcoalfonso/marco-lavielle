@@ -7,7 +7,7 @@ module.exports = function(config) {
 	var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error..'));
 	db.once('open', function callback() {
-		console.log('creating apps db opened');
+		console.log('marco lavielle db opened');
 	});
 
 	userModel.createDefaultUsers();
