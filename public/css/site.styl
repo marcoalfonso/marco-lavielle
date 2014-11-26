@@ -89,31 +89,33 @@ ol, ul
 	opacity 0.35
 .home-logo span
 	font-size 18px
-.logo .c
+.logo .m
 	-webkit-animation-delay 0
-.logo .r
-	-webkit-animation-delay 100ms
-.logo .e
-	-webkit-animation-delay 200ms
 .logo .a
+	-webkit-animation-delay 100ms
+.logo .r
+	-webkit-animation-delay 200ms
+.logo .c
 	-webkit-animation-delay 300ms
-.logo .t
+.logo .o
 	-webkit-animation-delay 400ms
-.logo .i
-	-webkit-animation-delay 500ms
-.logo .n
-	-webkit-animation-delay 600ms
-.logo .g
-	-webkit-animation-delay 700ms
 .logo .space
-	-webkit-animation-delay 800ms
+	-webkit-animation-delay 500ms
+.logo .l
+	-webkit-animation-delay 600ms
 .logo .a2
+	-webkit-animation-delay 700ms
+.logo .v
+	-webkit-animation-delay 800ms
+.logo .i
 	-webkit-animation-delay 900ms
-.logo .p
+.logo .e
 	-webkit-animation-delay 1000ms
-.logo .p2
+.logo .l2
 	-webkit-animation-delay 1100ms
-.logo .s
+.logo .l3
+	-webkit-animation-delay 1200ms
+.logo .e2
 	-webkit-animation-delay 1300ms
 @-webkit-keyframes flash-letter
 	0%
@@ -364,15 +366,15 @@ ol, ul
 	top 69%
 	left 90.5%
 	display block
-.spinner.desktop-only .contact-preview
+.spinner.desktop-only .journal-preview
 	position absolute
 	top 72%
 	left 8.5%
 	display block
-.spinner.desktop-only .full-preview.contact
+.spinner.desktop-only .full-preview.journal
 	//-webkit-transform scale(0.8) rotateZ(-120deg)
 	transform scale(0.8) rotateZ(-120deg)
-.spinner.desktop-only .contact-preview .full-preview
+.spinner.desktop-only .journal-preview .full-preview
 	margin -70px 0 0 -80px
 .spinner.desktop-only .full-preview
 	display block
@@ -397,8 +399,33 @@ ol, ul
 	left 0
 	height 160px
 	width 160px
-.spinner.desktop-only .full-preview.contact .big-circle.actual
+.spinner.desktop-only .full-preview.journal .big-circle.actual
 	background #14bfff
 	opacity 0.95
 	transform scale(1) translateZ(0)
-	transition all 130ms ease-out	
+	transition all 130ms ease-out
+.spinner.desktop-only .top-circle-contents.journal
+	opacity 1
+	trasnform scale(1)
+	transition-delay 400ms
+.spinner.desktop-only .top-circle-contents
+	display block
+	margin 0 0 0 -61px
+	pointer-events none
+	position absolute
+	top -8px
+	left 50%
+	height 80px
+	width 120px
+	transition all 180ms ease 600ms
+	//-webkit-transform scale(0.9)
+	//transform scale(0.9)
+	//opacity 0
+	z-index 11
+.spinner.desktop-only .top-circle-contents small
+	color #fff
+	display block
+	font-size 16px
+	letter-spacing 1px
+	text-align center
+	text-transform uppercase

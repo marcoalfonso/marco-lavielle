@@ -1,53 +1,59 @@
 .container
 	.desktop
 		h1.logo.home-logo
-			span.c
-				| C
-			span.r
-				| R
-			span.e
-				| E
+			span.m
+				| M
 			span.a
 				| A
-			span.t
-				| T
-			span.i
-				| I
-			span.n
-				| N
-			span.g
-				| G
+			span.r
+				| R
+			span.c
+				| C
+			span.o
+				| O
 			span.space
 				| 
+			span.l
+				| L
 			span.a2
 				| A
-			span.p
-				| P
-			span.p2
-				| P
-			span.s
-				| S
+			span.v
+				| V
+			span.i
+				| I
+			span.e
+				| E
+			span.l2
+				| L
+			span.l3
+				| L
+			span.e2
+				| E
 		ul.sections-nav
 			span.selection.cursor-only
 			li.technology
-				a(href="/technology" data-section="technology")
-					strong Technology
+				a(href="/clients" data-section="clients")
+					strong My Work
 					span.alive.icon.technology-icon
 						span.bar.one
 						span.bar.two
 						span.bar.three
 					small
-						| Technologies we use
+						| Portfolio
 			li.clients
-				a(href="/clients" data-section="clients")
-					strong Our Work
+				a(href="/experience" data-section="experience")
+					strong Experience
 					small 
-						| Showcase of work
-			li.contact
-				a(href="/contact" data-section="contact")
-					strong Contact Us
+						| Technology
+			li.journal
+				a(href="/journal" data-section="journal")
+					strong Thoughts
 					small 
-						| Get a quote
+						| Ideas on technology
+		.spinner.stationary.desktop-only
+			.journal.top-circle-contents
+				//strong The
+				small Work
 		.spinner.spinning.desktop-only
 			span.rings
 				span.group-1
@@ -62,23 +68,23 @@
 				span.mini-preview
 					span.symbol
 						span.text
-							| Tech
+							| Journal
 			.clients-preview.desktop-only
 				span.mini-preview
 					span.symbol
 						span.text
-							| Work
-			.contact-preview.desktop-only
+							| Tech
+			.journal-preview.desktop-only
 				span.mini-preview
 					span.symbol
 						span.text
-							| Contact
-				a(href="/contact" class="full-preview contact" data-section="contact")
+							| Journal
+				a(href="/journal" class="full-preview journal" data-section="journal")
 					span.big-circle.backdrop
 					span.big-circle.actual
 		.footer.home-footer
 			p.copyright
-				a(href="/about" data-section="about") About us
+				a(href="/about" data-section="about") About and Contact
 //.site-wrapper
 	.site-wrapper-inner
 		.cover-container

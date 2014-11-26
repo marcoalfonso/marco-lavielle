@@ -103,43 +103,46 @@ ul {
 .home-logo span {
   font-size: 18px;
 }
-.logo .c {
+.logo .m {
   -webkit-animation-delay: 0;
 }
-.logo .r {
+.logo .a {
   -webkit-animation-delay: 100ms;
 }
-.logo .e {
+.logo .r {
   -webkit-animation-delay: 200ms;
 }
-.logo .a {
+.logo .c {
   -webkit-animation-delay: 300ms;
 }
-.logo .t {
+.logo .o {
   -webkit-animation-delay: 400ms;
 }
-.logo .i {
+.logo .space {
   -webkit-animation-delay: 500ms;
 }
-.logo .n {
+.logo .l {
   -webkit-animation-delay: 600ms;
 }
-.logo .g {
+.logo .a2 {
   -webkit-animation-delay: 700ms;
 }
-.logo .space {
+.logo .v {
   -webkit-animation-delay: 800ms;
 }
-.logo .a2 {
+.logo .i {
   -webkit-animation-delay: 900ms;
 }
-.logo .p {
+.logo .e {
   -webkit-animation-delay: 1000ms;
 }
-.logo .p2 {
+.logo .l2 {
   -webkit-animation-delay: 1100ms;
 }
-.logo .s {
+.logo .l3 {
+  -webkit-animation-delay: 1200ms;
+}
+.logo .e2 {
   -webkit-animation-delay: 1300ms;
 }
 @-webkit-keyframes flash-letter {
@@ -440,16 +443,16 @@ ul {
   left: 90.5%;
   display: block;
 }
-.spinner.desktop-only .contact-preview {
+.spinner.desktop-only .journal-preview {
   position: absolute;
   top: 72%;
   left: 8.5%;
   display: block;
 }
-.spinner.desktop-only .full-preview.contact {
+.spinner.desktop-only .full-preview.journal {
   transform: scale(0.8) rotateZ(-120deg);
 }
-.spinner.desktop-only .contact-preview .full-preview {
+.spinner.desktop-only .journal-preview .full-preview {
   margin: -70px 0 0 -80px;
 }
 .spinner.desktop-only .full-preview {
@@ -478,9 +481,34 @@ ul {
   height: 160px;
   width: 160px;
 }
-.spinner.desktop-only .full-preview.contact .big-circle.actual {
+.spinner.desktop-only .full-preview.journal .big-circle.actual {
   background: #14bfff;
   opacity: 0.95;
   transform: scale(1) translateZ(0);
   transition: all 130ms ease-out;
+}
+.spinner.desktop-only .top-circle-contents.journal {
+  opacity: 1;
+  trasnform: scale(1);
+  transition-delay: 400ms;
+}
+.spinner.desktop-only .top-circle-contents {
+  display: block;
+  margin: 0 0 0 -61px;
+  pointer-events: none;
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  height: 80px;
+  width: 120px;
+  transition: all 180ms ease 600ms;
+  z-index: 11;
+}
+.spinner.desktop-only .top-circle-contents small {
+  color: #fff;
+  display: block;
+  font-size: 16px;
+  letter-spacing: 1px;
+  text-align: center;
+  text-transform: uppercase;
 }
