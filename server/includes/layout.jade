@@ -6,7 +6,7 @@ html
 		link(rel="stylesheet", href="/css/bootstrap.css")
 		link(rel="stylesheet", href="/vendor/toastr/toastr.css")
 		link(rel="stylesheet", href="/css/site.css")
-	body(ng-app='app', ng-class="loaded")
+	body(ng-app='app', ng-class="[loaded, preview]")
 		include currentUser
 		block main-content
 		include scripts

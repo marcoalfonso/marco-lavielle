@@ -1,4 +1,4 @@
-.container
+.detected.container
 	.desktop
 		h1.logo.home-logo
 			span.m
@@ -31,29 +31,29 @@
 				| E
 		ul.sections-nav
 			span.selection.cursor-only
-			li.technology
+			li.section-1(ng-mouseleave="myClass=''" ng-mouseenter="preview='preview-section-1'")
 				a(href="/clients" data-section="clients")
 					strong My Work
-					span.alive.icon.technology-icon
+					span.alive.icon.section-1-icon
 						span.bar.one
 						span.bar.two
 						span.bar.three
 					small
 						| Portfolio
-			li.clients
+			li.section-2
 				a(href="/experience" data-section="experience")
 					strong Experience
 					small 
 						| Technology
-			li.journal
+			li.section-3
 				a(href="/journal" data-section="journal")
 					strong Thoughts
 					small 
 						| Ideas on technology
 		.spinner.stationary.desktop-only
-			.journal.top-circle-contents
+			.section-3.top-circle-contents
 				//strong The
-				small Work
+				//small Work
 		.spinner.spinning.desktop-only
 			span.rings
 				span.group-1
@@ -64,22 +64,38 @@
 				span.group-3
 					span.ring.three
 					span.ring.four
-			.technology-preview.desktop-only
+			.section-1-preview.desktop-only
 				span.mini-preview
 					span.symbol
 						span.text
-							| Journal
-			.clients-preview.desktop-only
+							| Work
+				a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
+					span.circle-a.circle.backdrop
+					span.circle-b.circle.backdrop
+					span.circle-c.circle.backdrop
+					span.circle-a.full.circle
+						span.the-circle
+						strong 47
+						small Work
+					span.circle-b.full.circle
+						span.the-circle
+						strong 64
+						small Apps
+					span.circle-c.full.circle
+						span.the-circle
+						strong 1
+						small Mobile
+			.section-2-preview.desktop-only
 				span.mini-preview
 					span.symbol
 						span.text
 							| Tech
-			.journal-preview.desktop-only
+			.section-3-preview.desktop-only
 				span.mini-preview
 					span.symbol
 						span.text
 							| Journal
-				a(href="/journal" class="full-preview journal" data-section="journal")
+				a(href="/journal" class="full-preview section-3" data-section="section-3")
 					span.big-circle.backdrop
 					span.big-circle.actual
 		.footer.home-footer
