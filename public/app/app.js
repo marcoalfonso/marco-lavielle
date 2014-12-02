@@ -34,6 +34,9 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		})
 		.when('/experience', { templateUrl: '/partials/experience/experience-details', 
 			controller: 'mvExperienceCtrl'
+		})
+		.when('/about', { templateUrl: '/partials/about/about-details', 
+			controller: 'mvAboutCtrl'
 		});
 });
 

@@ -1,3 +1,3 @@
-angular.module('app').controller('mvClientListCtrl', function($scope, $rootScope){
+angular.module('app').controller('mvExperienceCtrl', function($scope, $rootScope){
 	$rootScope.loaded = "loaded";
-}
+})
