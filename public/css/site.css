@@ -1,6 +1,10 @@
+html {
+  background-color: #171d25;
+}
 body {
   background-color: #171d25;
   overflow: hidden;
+  font: 13px/18px "Lucida Grande", verdana, sans-serif;
 }
 .navbar-header a.navbar-brand h6 {
   color: #ccc;
@@ -820,4 +824,202 @@ a.uplevel.pjax {
   left: 38%;
   right: 0;
   background: #fff;
+}
+.fancy-header {
+  margin: 56px 42px 36px 42px;
+}
+.loaded .fancy-header h1 {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.fancy-header h1 {
+  color: #00bff3;
+  font: 500 14px/1.2 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  transition: all 300ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(28px);
+}
+.loaded .fancy-header h2 {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.fancy-header h2 {
+  color: #fff;
+  font: 600 36px/1.3 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  margin: 12px auto 0 auto;
+  text-align: center;
+  max-width: 18em;
+  -webkit-font-smoothing: antialiased;
+  transition: all 300ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(21px);
+}
+.loaded .personal-info {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.about-content .personal-info {
+  margin-bottom: 60px;
+}
+.personal-info {
+  background: #000;
+  background: -webkit-linear-gradient(-10deg, #000, rgba(0,0,0,0.5));
+  border-top: 1px solid rgba(255,255,255,0.04);
+  display: block;
+  overflow: hidden;
+  margin: 8px 0;
+  padding: 8px 0;
+  transition: all 250ms ease-out;
+  opacity: 0.3;
+  -webkit-transform: scaleY(0);
+}
+.personal-info .container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.loaded .personal-info .text {
+  opacity: 1;
+  -webkit-transform: none;
+  transition-delay: 380ms;
+}
+.personal-info .text {
+  color: #9eacbf;
+  float: left;
+  font: 15px/1.8 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  margin: 42px 0 24px 0;
+  width: 40%;
+  -webkit-font-smoothing: antialiased;
+  max-width: 440px;
+  transition: all 300ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(15px);
+}
+.personal-info .text p {
+  margin: 0 16px 24px 16px;
+  max-width: 25em;
+}
+.personal-info .stats {
+  float: left;
+  margin: 24px 0 0 2.5%;
+  width: 30%;
+  -webkit-font-smoothing: antialiased;
+}
+.loaded .personal-info .stats dl {
+  opacity: 1;
+  -webkit-transform: none;
+  transition-delay: 470ms;
+}
+.personal-info .stats dl {
+  float: left;
+  width: 50%;
+  max-width: 18em;
+  transition: all 280ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(15px);
+}
+.personal-info .stats dt {
+  color: #00bff3;
+  line-height: 21px;
+  margin-left: 24px;
+  margin-top: 18px;
+}
+dl dt {
+  color: #788b94;
+  display: inline-block;
+  font: 500 12px/1.4 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  margin: 8px 0 0 0;
+  -webkit-font-smoothing: antialiased;
+  text-transform: uppercase;
+}
+.personal-info .stats dd {
+  color: #ccd4de;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 24px;
+  margin-left: 24px;
+}
+dl dd {
+  color: #c3d7ef;
+  display: block;
+  font: 500 21px/1.4 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  letter-spacing: -0.05em;
+  margin: 0 0 8px 0;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+.loaded .personal-info .stats dl.smaller {
+  transition-delay: 500ms;
+}
+.personal-info .stats dl.smaller {
+  margin-top: 12px;
+}
+.loaded .personal-info .stats dl {
+  opacity: 1;
+  -webkit-transform: none;
+  transition-delay: 470ms;
+}
+.personal-info .stats dl {
+  float: left;
+  width: 50%;
+  max-width: 18em;
+  transition: all 280ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(15px);
+}
+.personal-info .stats dl.smaller dt {
+  color: #4e5f76;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 18px;
+  margin-top: 6px;
+}
+.personal-info .stats dl.smaller dd {
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 22px;
+}
+.about-content .attribution {
+  display: block;
+  margin: -48px auto 28px auto;
+  position: relative;
+  height: 100px;
+}
+.desktop .attribution {
+  display: block;
+}
+.attribution {
+  display: none;
+  margin: 0 auto;
+  position: relative;
+  height: 100px;
+  max-width: 1000px;
+}
+.loaded .attribution h1 {
+  opacity: 1;
+  -webkit-transform: none;
+  transition-delay: 300ms;
+}
+.attribution h1 {
+  color: #4c586a;
+  display: block;
+  font: 600 12px/18px "DINWeb", "Lucida Grande", verdana, sans-serif;
+  letter-spacing: 0.18em;
+  padding: 52px 0 0 0;
+  text-align: right;
+  text-transform: uppercase;
+  width: 18%;
+  -webkit-font-smoothing: antialiased;
+  transition: all 200ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(8px);
+}
+.attribution ul {
+  position: absolute;
+  bottom: 16px;
+  left: 20%;
+  right: 0;
 }

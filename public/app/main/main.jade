@@ -1,106 +1,105 @@
-.detected.container
-	.desktop
-		h1.logo.home-logo
-			span.m
-				| M
-			span.a
-				| A
-			span.r
-				| R
-			span.c
-				| C
-			span.o
-				| O
-			span.space
-				| 
-			span.l
-				| L
-			span.a2
-				| A
-			span.v
-				| V
-			span.i
-				| I
-			span.e
-				| E
-			span.l2
-				| L
-			span.l3
-				| L
-			span.e2
-				| E
-		ul.sections-nav
-			span.selection.cursor-only
-			li.section-1(ng-mouseleave="myClass=''" ng-mouseenter="preview='preview-section-1'")
-				a(href="/clients" data-section="clients")
-					strong My Work
-					span.alive.icon.section-1-icon
-						span.bar.one
-						span.bar.two
-						span.bar.three
-					small
-						| Portfolio
-			li.section-2
-				a(href="/experience" data-section="experience")
-					strong Experience
-					small 
-						| Technology
-			li.section-3
-				a(href="/journal" data-section="journal")
-					strong Thoughts
-					small 
-						| Ideas on technology
-		.spinner.stationary.desktop-only
-			.section-3.top-circle-contents
-				//strong The
-				//small Work
-		.spinner.spinning.desktop-only
-			span.rings
-				span.group-1
-					span.ring.zero
-				span.ring.one
-				span.group-2
-					span.ring.two
-				span.group-3
-					span.ring.three
-					span.ring.four
-			.section-1-preview.desktop-only
-				span.mini-preview
-					span.symbol
-						span.text
-							| Work
-				a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
-					span.circle-a.circle.backdrop
-					span.circle-b.circle.backdrop
-					span.circle-c.circle.backdrop
-					span.circle-a.full.circle
-						span.the-circle
-						strong 47
-						small Work
-					span.circle-b.full.circle
-						span.the-circle
-						strong 64
-						small Apps
-					span.circle-c.full.circle
-						span.the-circle
-						strong 1
-						small Mobile
-			.section-2-preview.desktop-only
-				span.mini-preview
-					span.symbol
-						span.text
-							| Tech
-			.section-3-preview.desktop-only
-				span.mini-preview
-					span.symbol
-						span.text
-							| Journal
-				a(href="/journal" class="full-preview section-3" data-section="section-3")
-					span.big-circle.backdrop
-					span.big-circle.actual
-		.footer.home-footer
-			p.copyright
-				a(href="/about" data-section="about") About and Contact
+main#page.page
+	h1.logo.home-logo
+		span.m
+			| M
+		span.a
+			| A
+		span.r
+			| R
+		span.c
+			| C
+		span.o
+			| O
+		span.space
+			| 
+		span.l
+			| L
+		span.a2
+			| A
+		span.v
+			| V
+		span.i
+			| I
+		span.e
+			| E
+		span.l2
+			| L
+		span.l3
+			| L
+		span.e2
+			| E
+	ul.sections-nav
+		span.selection.cursor-only
+		li.section-1(ng-mouseleave="myClass=''" ng-mouseenter="preview='preview-section-1'")
+			a(href="/clients" data-section="clients")
+				strong My Work
+				span.alive.icon.section-1-icon
+					span.bar.one
+					span.bar.two
+					span.bar.three
+				small
+					| Portfolio
+		li.section-2
+			a(href="/experience" data-section="experience")
+				strong Experience
+				small 
+					| Technology
+		li.section-3
+			a(href="/journal" data-section="journal")
+				strong Thoughts
+				small 
+					| Ideas on technology
+	.spinner.stationary.desktop-only
+		.section-3.top-circle-contents
+			//strong The
+			//small Work
+	.spinner.spinning.desktop-only
+		span.rings
+			span.group-1
+				span.ring.zero
+			span.ring.one
+			span.group-2
+				span.ring.two
+			span.group-3
+				span.ring.three
+				span.ring.four
+		.section-1-preview.desktop-only
+			span.mini-preview
+				span.symbol
+					span.text
+						| Work
+			a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
+				span.circle-a.circle.backdrop
+				span.circle-b.circle.backdrop
+				span.circle-c.circle.backdrop
+				span.circle-a.full.circle
+					span.the-circle
+					strong 47
+					small Work
+				span.circle-b.full.circle
+					span.the-circle
+					strong 64
+					small Apps
+				span.circle-c.full.circle
+					span.the-circle
+					strong 1
+					small Mobile
+		.section-2-preview.desktop-only
+			span.mini-preview
+				span.symbol
+					span.text
+						| Tech
+		.section-3-preview.desktop-only
+			span.mini-preview
+				span.symbol
+					span.text
+						| Journal
+			a(href="/journal" class="full-preview section-3" data-section="section-3")
+				span.big-circle.backdrop
+				span.big-circle.actual
+	.footer.home-footer
+		p.copyright
+			a(href="/about" data-section="about") About and Contact
 
 
 //.container

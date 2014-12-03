@@ -14,7 +14,7 @@ block main-content
 				div(ng-include="'/partials/account/navbar-login'")
 
 	section.content
-		div(ng-view)
+		div(ng-view, ng-class="[desktop, detected]")#device-info
 
 	footer.container.text-center
 
