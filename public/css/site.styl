@@ -836,3 +836,44 @@ dl dd
 	bottom 16px
 	left 20%
 	right 0
+.personal-info .mri
+	display block
+	float left
+	margin 8px 2.5%
+	width 20%
+	height 300px
+	transition-delay 240ms
+.loaded .mri
+	opacity 1
+	-webkit-transform scale(1)
+	transform scale(1)
+.mri
+	display none
+	overflow hidden
+	opacity 0
+	-webkit-transform translateY(-21px)
+	transform translateY(-21px)
+	-webkit-transform-origin 25% 50%
+	transition all 360ms ease-out
+.mri .layer.grey
+	background-image url(../images/mri/mri-dark.jpg)
+	opacity 0.8
+	-webkit-animation none
+.scan-faster .mri .layer
+	-webkit-animation-delay 0
+	-webkit-animation-duration 4.2s
+	-webkit-animation-iteration-count 1
+.mri .layer
+	background url(../images/mri/mri-light.jpg) no-repeat 55% 0
+	background-size 100px 300px
+	display block
+	position absolute
+	top 20px
+	left 0
+	height 100%
+	width 100%
+	opacity 0
+	-webkit-animation-timing-function ease-in-out
+	-webkit-animation-direction normal
+	-webkit-animation-fill-mode both
+	
