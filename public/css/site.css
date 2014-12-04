@@ -417,7 +417,7 @@ ul {
   height: 100px;
   width: 100px;
   transition: all 200ms ease-out 200ms;
-  -webkit-transfrom: scale(0.6);
+  -webkit-transform: scale(0.6);
   transform: scale(0.6);
 }
 .spinner.desktop-only .mini-preview .symbol {
@@ -1068,4 +1068,144 @@ dl dd {
   -webkit-animation-timing-function: ease-in-out;
   -webkit-animation-direction: normal;
   -webkit-animation-fill-mode: both;
+}
+@-webkit-keyframes mri-glow-1 {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  64% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes mri-glow-2 {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0;
+  }
+  23% {
+    opacity: 1;
+  }
+  68% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes mri-glow-3 {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes mri-glow-4 {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0;
+  }
+  64% {
+    opacity: 0.9;
+  }
+  84% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes mri-glow-5 {
+  0% {
+    opacity: 0;
+  }
+  35% {
+    opacity: 0;
+  }
+  79% {
+    opacity: 1;
+  }
+  110% {
+    opacity: 0;
+  }
+}
+.mri .layer.one {
+  -webkit-mask-image: -webkit-linear-gradient(top, #fff, #fff 10%, transparent 25%);
+}
+.scan-faster .mri .layer {
+  -webkit-animation-delay: 0;
+  -webkit-animation-duration: 4.2s;
+  -webkit-animation-iteration-count: 1;
+}
+.mri .layer.two {
+  -webkit-mask-image: -webkit-linear-gradient(top, transparent, #fff 22%, transparent 45%);
+}
+.mri .layer.three {
+  -webkit-mask-image: -webkit-linear-gradient(top, transparent, transparent 18%, #fff 40%, transparent 65%);
+}
+.mri .layer.four {
+  -webkit-mask-image: -webkit-linear-gradient(top, transparent, transparent 20%, #fff 75%, transparent 120%);
+}
+.mri .yaer.five {
+  -webkit-mask-image: -webkit-linear-gradient(top, transparent, transparent 45%, #fff 130%);
+}
+@-webkit-keyframes mri-blip {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(-20px) scaleX(0.65) scaleY(1);
+    transform: translateY(-20px) scaleX(0.65) scaleY(1);
+  }
+  25% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+  }
+  79% {
+    -webkit-transform: translateY(270px) translateX(-5px) scaleX(1) scaleY(0.6);
+    transform: translateY(270px) translateX(-5px) scaleX(1) scaleY(0.6);
+  }
+  100% {
+    -webkit-transform: translateY(300px) translateX(-5px) scaleX(0.05) scaleY(0.3);
+    transform: translateY(300px) translateX(-5px) scaleX(0.05) scaleY(0.3);
+    opacity: 0;
+  }
+}
+.scan-faster .mri .mri-blip {
+  -webkit-animation-duration: 4.2s;
+  -webkit-animation-delay: 0;
+  -webkit-animation-name: mri-blip;
+  -webkit-animation-iteration-count: 1;
+}
+.mri .blip {
+  background: url("../images/mri/mri-blip.png") no-repeat center bottom;
+  background-size: 100% 100%;
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 7%;
+  height: 40px;
+  width: 95%;
+  opacity: 0;
+  -webkit-transform: translateY(0%);
+  transform: translateY(0%);
+  -webkit-animation-fill-mode: both;
+  -webkit-animation-easing-function: ease-in-out;
+  -webkit-animation-direction: normal;
+}
+.mri .blip .cover-below {
+  background: -webkit-linear-gradient(top, #000, transparent);
+  display: block;
+  opacity: 0.9;
+  position: absolute;
+  top: 100%;
+  width: 100%;
+  height: 1000%;
 }
