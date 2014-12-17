@@ -1,49 +1,74 @@
-.desktop
-	.column-2.backdrop
-	.column-3.backdrop.for-section-1
-	.section-header.backdrop.for-section-1
-	.section-1.columns
-		.column-1
-			a(href="/" class="uplevel pjax" data-section="home")
-				span.arrow ‹
-				strong.logo
-					span.m
-						| M
-					span.a
-						| A
-					span.r
-						| R
-					span.c
-						| C
-					span.o
-						| O
-					span.space
-						| 
-					span.l
-						| L
-					span.a2
-						| A
-					span.v
-						| V
-					span.i
-						| I
-					span.e
-						| E
-					span.l2
-						| L
-					span.l3
-						| L
-					span.e2
-						| E
-				h1.section-title Work
-				span.smaller.alive.icon.section-1-icon
-					span.bar.one
-					span.bar.two
-					span.bar.three
-		.column-2.for-section-1
-
-
-
+main#page.page
+	//.column-2.backdrop
+	.wide.column-3.backdrop.for-section-1
+	.wide.section-header.backdrop
+	
+	.column-1
+		a(href="/" class="uplevel pjax" data-section="home")
+			span.arrow ‹
+			strong.logo
+				span.m
+					| M
+				span.a
+					| A
+				span.r
+					| R
+				span.c
+					| C
+				span.o
+					| O
+				span.space
+					| 
+				span.l
+					| L
+				span.a2
+					| A
+				span.v
+					| V
+				span.i
+					| I
+				span.e
+					| E
+				span.l2
+					| L
+				span.l3
+					| L
+				span.e2
+					| E
+			h1.section-title Work
+			span.smaller.alive.icon.section-1-icon
+				span.bar.one
+				span.bar.two
+				span.bar.three
+	.l1.level-1-container
+		.wide.column-3
+			header.wide.section-header.section-1-header
+				.map-container
+					a.pjax.blip.go-to-day.positioned.showing
+						span.circle-1
+						span.circle-2
+						span.circle-3
+						span.circle
+							img.symbol
+						.map-goes-here
+				.current-location
+					h3 Coded in
+					h1
+						a Sydney
+					.lat-long
+						span.lat
+							small Latitude
+							span.value 37.777913
+						span.long
+							small Longitude
+							span.value -122.432433
+			section.content
+				.clients-list
+					.client-example(ng-repeat="client in clients | orderBy:sortOrder")
+						.client-title
+							a(href="/clients/{{client._id}}") {{client.name}}
+						ul.tags
+							li.tag {{client.tags}}
 
 
 //.container.top-padding-med
