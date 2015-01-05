@@ -598,6 +598,15 @@ ul {
   transform: scale(1.5);
   transition-delay: 400ms;
 }
+.loaded.preview-section-1 .content-preview.section-1-spinner-content,
+.loaded.preview-section-2 .content-preview.section-2-spinner-content,
+.loaded.preview-section-3 .content-preview.section-3-spinner-content {
+  opacity: 1;
+  -webkit-transform: none;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 600ms;
+}
 .section-1-circles {
   height: 175px;
   width: 180px;
@@ -1634,4 +1643,120 @@ dl dd .age-decimal {
   display: block;
   font: 12px/1.2 "DINWeb", "Lucida Grande", verdana, sans-serif;
   margin: 4px 16px 0 16px;
+}
+.content-preview {
+  margin: -100px 0 0 -100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  text-align: center;
+  height: 200px;
+  width: 200px;
+  -webkit-font-smoothing: antialiased;
+  transition: all 320ms ease-out;
+  opacity: 0;
+  -webkit-transform: scale(0.95) translateY(-10px);
+  transform: scale(0.95) translateY(-10px);
+  pointer-events: none;
+}
+.spinner .map-container {
+  position: absolute;
+  margin: -100px 0 0 -155px;
+  overflow: hidden;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 200px;
+}
+.spinner .map-container .map-goes-here {
+  display: block;
+  position: relative;
+  height: 160px;
+  width: 240px;
+  margin: 0 auto;
+  transition: all 220ms ease-out;
+  opacity: 0.7;
+}
+.spinner .map-container .the-map {
+  background: url("../images/maps/250.png") no-repeat 0 0;
+  background-size: 250px 160px;
+  display: block;
+  margin: 0 0 0 -5px;
+  height: 160px;
+  width: 250px;
+}
+.content-preview .location-details {
+  margin: 170px 0 0 0;
+}
+.content-preview h3 {
+  color: #fff;
+  font: 16px/18px "DINWeb", "Lucida Grande", verdana, sans-serif;
+  text-shadow: 1px 2px 5px rgba(0,0,0,0.6);
+  margin-bottom: 3px;
+}
+.content-preview h4 {
+  color: rgba(255,255,255,0.6);
+  font: 15px/18px "DINWeb", "Lucida Grande", verdana, sans-serif;
+  margin-top: 0px;
+}
+.map-container .blip {
+  display: block;
+  position: absolute;
+  margin: -8px 0 0 -8px;
+  top: 0;
+  left: 0;
+  height: 16px;
+  width: 16px;
+}
+.map-container .blip .blip-ring.one {
+  -webkit-animation-delay: 0;
+}
+.map-container .blip .blip-ring.two {
+  -webkit-animation-delay: 600ms;
+}
+.map-container .blip .blip-ring.three {
+  -webkit-animation-delay: 1200ms;
+}
+.loaded .map-container .blip .blip-ring {
+  -webkit-animation-name: blip-ring;
+}
+.home .map-container .blip .blip-ring {
+  background: #00bff3;
+}
+.map-container .blip .blip-ring {
+  background: #2888ff;
+  border-radius: 10px;
+  position: absolute;
+  margin: -10px 0 0 -10px;
+  top: 50%;
+  left: 50%;
+  height: 20px;
+  width: 20px;
+  -webkit-transform: scale(0.2);
+  transform: scale(0.2);
+  -webkit-animation-duration: 1800ms;
+  -webkit-animation-timing-function: ease-out;
+  -webkit-animation-iteration-count: infinite;
+  -webkit-animation-fill-mode: both;
+}
+@-webkit-keyframes blip-ring {
+  0% {
+    opacity: 1;
+    -webkit-transform: scale(0.1);
+  }
+  100% {
+    opacity: 0;
+    -webkit-transform: scale(1.8);
+  }
+}
+.map-container .blip .center {
+  background: #fff;
+  border-radius: 3px;
+  display: block;
+  margin: -2px 0 0 -2px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 4px;
+  width: 4px;
 }

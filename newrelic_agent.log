@@ -433,3 +433,11 @@
 {"v":0,"level":40,"name":"newrelic","hostname":"r5003426w.ffx.jfh.com.au","pid":3080,"time":"2014-12-17T02:53:14.692Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
 {"v":0,"level":40,"name":"newrelic","hostname":"r5003426w.ffx.jfh.com.au","pid":3080,"time":"2014-12-17T02:59:21.466Z","msg":"No connection has been established to New Relic after 4 attempts.","component":"collector_api"}
 {"v":0,"level":50,"name":"newrelic","hostname":"r5003426w.ffx.jfh.com.au","pid":3080,"time":"2014-12-17T03:04:55.196Z","msg":"New Relic for Node.js halted startup due to an error:","syscall":"connect","errno":"ETIMEDOUT","code":"ETIMEDOUT"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":880,"time":"2015-01-05T11:21:24.370Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":880,"time":"2015-01-05T11:21:24.650Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":892,"time":"2015-01-05T11:21:39.118Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":892,"time":"2015-01-05T11:21:39.300Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":892,"time":"2015-01-05T11:27:42.201Z","msg":"No connection has been established to New Relic after 4 attempts.","component":"collector_api"}
+{"v":0,"level":50,"name":"newrelic","hostname":"R5003426.local","pid":892,"time":"2015-01-05T11:33:13.561Z","msg":"New Relic for Node.js halted startup due to an error:","syscall":"connect","errno":"ETIMEDOUT","code":"ETIMEDOUT"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":9530,"time":"2015-01-05T14:23:12.940Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":9530,"time":"2015-01-05T14:23:13.458Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}

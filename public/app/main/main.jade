@@ -50,9 +50,24 @@ main#page.page
 				small 
 					| Ideas on technology
 	.spinner.stationary.desktop-only
+		.section-1-spinner-content.content-preview
+			.map-container
+				#map-goes-here.map-goes-here
+					.the-map
+					span.blip.location-coordinates.positioned.showing(style="left: 220px; top: 136px;")
+						span.blip-ring.one
+						span.blip-ring.two
+						span.blip-ring.three
+						span.center
+							span
+			.location-details
+				h3.location-city
+					| Sydney, NSW
+				h4.location-time-ago
+					| Australia
+		.section-1.top-circle-contents
+			small Currently At
 		.section-3.top-circle-contents
-			//strong The
-			//small Work
 	.spinner.spinning.desktop-only
 		span.rings
 			span.group-1
@@ -68,6 +83,14 @@ main#page.page
 				span.symbol
 					span.text
 						| Work
+			a(href="/clients" class="full-preview section-2" data-section="section-2")
+				span.big-circle.backdrop
+				span.big-circle.actual
+		.section-2-preview.desktop-only
+			span.mini-preview
+				span.symbol
+					span.text
+						| Tech
 			a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
 				span.circle-a.circle.backdrop
 				span.circle-b.circle.backdrop
@@ -84,11 +107,6 @@ main#page.page
 					span.the-circle
 					strong 1
 					small Mobile
-		.section-2-preview.desktop-only
-			span.mini-preview
-				span.symbol
-					span.text
-						| Tech
 		.section-3-preview.desktop-only
 			span.mini-preview
 				span.symbol
