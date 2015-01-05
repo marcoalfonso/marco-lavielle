@@ -44,7 +44,7 @@ main#page.page
 		.wide.column-3
 			header.wide.section-header.section-1-header
 				.map-container
-					a.pjax.blip.go-to-day.positioned.showing
+					a.pjax.blip.go-to-day.positioned.showing(style="left: 111px; top: 80px;")
 						span.circle-1
 						span.circle-2
 						span.circle-3
@@ -67,10 +67,15 @@ main#page.page
 					.client-example(ng-repeat="client in clients | orderBy:sortOrder")
 						.client-title
 							a(href="/clients/{{client._id}}") {{client.name}}
-						ul.tags
-							li.tag {{client.tags}}
-
-
+							ul.tags
+								li.tag {{client.tags}}
+						.client-url
+							.text
+								small
+									a(href="{{client.url}}") {{client.url}}
+						.client-photos
+							.photo
+								img
 //.container.top-padding-med
 	.pull-right
 		form.form-inline
