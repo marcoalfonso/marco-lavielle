@@ -1,4 +1,4 @@
-main#page.page
+main#page.page()
 	h1.logo.home-logo
 		span.m
 			| M
@@ -30,7 +30,7 @@ main#page.page
 			| E
 	ul.sections-nav
 		span.selection.cursor-only
-		li.section-1(ng-mouseleave="myClass=''" ng-mouseenter="preview='preview-section-1'")
+		li.section-1(ng-mouseenter="section='preview-section-1'")
 			a(href="/clients" data-section="clients")
 				strong My Work
 				span.alive.icon.section-1-icon
@@ -39,12 +39,12 @@ main#page.page
 					span.bar.three
 				small
 					| Portfolio
-		li.section-2
+		li.section-2(ng-mouseenter="section='preview-section-2'")
 			a(href="/experience" data-section="experience")
 				strong Experience
 				small 
 					| Technology
-		//li.section-3
+		li.section-3(ng-mouseenter="section='preview-section-3'")
 			a(href="/journal" data-section="journal")
 				strong Thoughts
 				small 
@@ -65,10 +65,33 @@ main#page.page
 					| Sydney, NSW
 				h4.location-time-ago
 					| Australia
-		.top-circle-contents.section-1
-			small
-				| My Current Location
+		.section-2-spinner-content.content-preview
+			.map-container
+				#map-goes-here.map-goes-here
+					.the-map
+					span.blip.location-coordinates.positioned.showing(style="left: 220px; top: 136px;")
+						span.blip-ring.one
+						span.blip-ring.two
+						span.blip-ring.three
+						span.center
+							span
+			.location-details
+				h3.location-city
+					| Sydney, NSW
+				h4.location-time-ago
+					| Australia
+		.section-2.top-circle-contents
+			small Currently at
+			span.location-name Sydney
+			span.location-icon
+				img(src="../images/home_32.png")
+		.section-3-spinner-content.content-preview
+			h2 Coming Soon
+			p Blog posts about technology coming soon
+			a.all(href="/journal" data-section="journal") Read More
 		.section-3.top-circle-contents
+			strong 0
+			small Articles
 	.spinner.spinning.desktop-only
 		span.rings
 			span.group-1
@@ -83,33 +106,33 @@ main#page.page
 			span.mini-preview
 				span.symbol
 					span.text
-						| Work
-			a(href="/clients" class="full-preview section-2" data-section="section-2")
-				span.big-circle.backdrop
-				span.big-circle.actual
-		.section-2-preview.desktop-only
-			span.mini-preview
-				span.symbol
-					span.text
-						| Tech
+						| Work		
 			a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
 				span.circle-a.circle.backdrop
 				span.circle-b.circle.backdrop
 				span.circle-c.circle.backdrop
 				span.circle-a.full.circle
 					span.the-circle
-					strong 47
-					small Work
+					strong 5
+					small Countries
 				span.circle-b.full.circle
 					span.the-circle
-					strong 64
+					strong 11
 					small Apps
 				span.circle-c.full.circle
 					span.the-circle
 					strong 1
-					small Mobile
-		.section-3-preview.desktop-only
+					small Laptop
+		.section-2-preview.desktop-only
 			span.mini-preview
+				span.symbol
+					span.text
+						| Tech
+			a(href="/experience" class="full-preview section-2" data-section="section-2")
+				span.big-circle.backdrop
+				span.big-circle.actual
+		.section-3-preview.desktop-only
+			span.mini-preview()
 				span.symbol
 					span.text
 						| Journal
@@ -119,15 +142,3 @@ main#page.page
 	.footer.home-footer
 		p.copyright
 			a(href="/about" data-section="about") About and Contact
-
-
-//.container
-	.jumbotron
-		h1 Creating Apps
-		p We are a technology agency focused on developing high quality applications. 
-
-	.row
-		.col-md-6
-			div(ng-include="'/partials/main/featured-apps'")
-		.col-md-6
-			div(ng-include="'/partials/main/new-apps'")

@@ -5,6 +5,7 @@ body
 	background-color #171d25
 	overflow hidden
 	font 13px/18px "Lucida Grande",verdana,sans-serif
+	overflow-y scroll
 section
 	//height 100vh
 .navbar-header a.navbar-brand
@@ -188,7 +189,6 @@ ol, ul
 .sections-nav
 	-webkit-user-select none
 .sections-nav .selection
-	transform translateY(0) translateZ(0)
 	background #00aeef
 	border-radius 1px
 	display block
@@ -198,7 +198,16 @@ ol, ul
 	height 80px
 	width 6px
 	transition all 240ms cubic-bezier(0.145, 1.075, 0.345, 1.12) 600ms
-	tranistion-duration 400ms
+	transition-duration 400ms
+.preview-section-1 .sections-nav .selection
+	-webkit-transform translateY(0) translateZ(0)
+	transform translateY(0) translateZ(0)
+.preview-section-2 .sections-nav .selection
+	-webkit-transform translateY(130px) translateZ(0)
+	transform translateY(130px) translateZ(0)
+.preview-section-3 .sections-nav .selection
+	-webkit-transform translateY(260px) translateZ(0)
+	transform translateY(260px) translateZ(0)
 .sections-nav li:nth-child(2)
 	transition-delay 120ms
 .loaded .sections-nav li
@@ -273,8 +282,6 @@ ol, ul
 		-webkit-transform:translateX(-70%)
 		
 //SPINNERS
-.spinner.desktop-only.spinning
-	transform rotateZ(-240deg) translateZ(0)
 .spinner.desktop-only
 	transition all 300ms ease-in-out 200ms
 	display block
@@ -386,9 +393,18 @@ ol, ul
 	transition all 200ms ease-out 200ms
 	-webkit-transform scale(0.6)
 	transform scale(0.6)
+.loaded .preview-section-3 .spinner.desktop-only .section-3-preview .full-preview
+	-webkit-transform rotateZ(-120deg) translateZ(0)
+	transform rotateZ(-120deg) translateZ(0)
 //.loaded .spinner.desktop-only .mini-preview .symbol
 	//-webkit-transform rotateZ(-120deg) translateZ(0)
 	//transform rotateZ(-120deg) translateZ(0)
+.preview-section-2 .spinner.desktop-only .section-1-preview .mini-preview .symbol, .preview-section-2 .spinner.desktop-only .section-3-preview .mini-preview .symbol
+	-webkit-transform rotateZ(120deg) translateZ(0)
+	transform rotateZ(120deg) translateZ(0)
+.preview-section-3 .spinner.desktop-only .section-1-preview .mini-preview .symbol, .preview-section-3 .spinner.desktop-only .section-2-preview .mini-preview .symbol
+	-webkit-transform rotateZ(-120deg) translateZ(0)
+	transform rotateZ(-120deg) translateZ(0)
 .spinner.desktop-only .mini-preview .symbol
 	display block
 	color #000
@@ -415,16 +431,22 @@ ol, ul
 	transition all 150ms ease-out
 .spinner.desktop-only .section-2-preview
 	position absolute
-	top 69%
-	left 90.5%
+	top 72%
+	left 89.5%
 	display block
 .spinner.desktop-only .section-3-preview
 	position absolute
 	top 72%
 	left 8.5%
 	display block
+.spinner.desktop-only .top-circle-contents strong
+	color #111
+	display block
+	font 42px/1.2 "DINWeb","Lucida Grande",verdana,sans-serif
+	margin 0
+	text-align center
 .spinner.desktop-only .full-preview.section-3
-	//-webkit-transform scale(0.8) rotateZ(-120deg)
+	-webkit-transform scale(0.8) rotateZ(-120deg)
 	transform scale(0.8) rotateZ(-120deg)
 .spinner.desktop-only .section-3-preview .full-preview
 	margin -70px 0 0 -80px
@@ -444,6 +466,7 @@ ol, ul
 .spinner.desktop-only .full-preview .big-circle.backdrop
 	background #171d25
 	transform scale(1.16)
+	-webkit-transform scale(1.16)
 .spinner.desktop-only .full-preview .big-circle
 	background #00aeef
 	border-radius 80px
@@ -458,13 +481,9 @@ ol, ul
 	opacity 0.95
 	transform scale(1) translateZ(0)
 	transition all 130ms ease-out
-.spinner.desktop-only .top-circle-contents.section-3
-	opacity 1
-	trasnform scale(1)
-	transition-delay 400ms
 .spinner.desktop-only .top-circle-contents
 	display block
-	margin 0 0 0 -61px
+	margin 0 0 0 -60px
 	pointer-events none
 	position absolute
 	top -32px
@@ -476,6 +495,22 @@ ol, ul
 	transform scale(0.9)
 	opacity 0
 	z-index 11
+.spinner.desktop-only .top-circle-contents.section-2 small
+	font-size 12px
+	line-height 14px
+	margin 0 0 8px 0
+.spinner.desktop-only .top-circle-contents .location-name
+	color #111
+	display block
+	font 22px/1.2 "DINWeb","Lucida Grande",verdana,sans-serif
+	margin 0 0 0 0
+	text-align center
+.spinner.desktop-only .top-circle-contents .location-icon
+	display block
+	margin 0 auto
+.spinner.desktop-only .top-circle-contents .location-icon img
+	display block
+	margin 0 auto
 .spinner.desktop-only .top-circle-contents small
 	color #fff
 	display block
@@ -483,22 +518,65 @@ ol, ul
 	letter-spacing 1px
 	text-align center
 	text-transform uppercase
-.loaded.preview-section-1 .spinner.desktop-only .section-1-preview .full-preview, .loaded.preview-section-2 .spinner.desktop-only .section-2-preview .full-preview, .loaded.preview-section-3 .spinner.desktop-only .section-3-preview .full-preview
+.loaded .preview-section-3 .spinner.desktop-only .top-circle-contents.section-3, .loaded .preview-section-2 .spinner.desktop-only .top-circle-contents.section-2
 	opacity 1
 	-webkit-transform scale(1)
 	transform scale(1)
 	transition-delay 400ms
-.loaded.preview-section-1 .spinner.desktop-only .section-1-preview .mini-preview, .loaded.preview-section-2 .spinner.desktop-only .section-2-preview .mini-preview, .loaded.preview-section-3 .spinner.desktop-only .section-3-preview .mini-preview
+.loaded .preview-section-1 .spinner.desktop-only .section-1-preview .full-preview, .loaded .preview-section-2 .spinner.desktop-only .section-2-preview .full-preview, .loaded .preview-section-3 .spinner.desktop-only .section-3-preview .full-preview
+	opacity 1
+	-webkit-transform scale(1)
+	transform scale(1)
+	transition-delay 400ms
+.loaded .preview-section-1 .spinner.desktop-only .section-1-preview .mini-preview, .loaded .preview-section-2 .spinner.desktop-only .section-2-preview .mini-preview, .loaded .preview-section-3 .spinner.desktop-only .section-3-preview .mini-preview
 	opacity 0
 	-webkit-transform scale(1.5)
 	transform scale(1.5)
 	transition-delay 400ms
-.loaded.preview-section-1 .content-preview.section-1-spinner-content, .loaded.preview-section-2 .content-preview.section-2-spinner-content, .loaded.preview-section-3 .content-preview.section-3-spinner-content
+.loaded .preview-section-1 .content-preview.section-1-spinner-content, .loaded .preview-section-2 .content-preview.section-2-spinner-content, .loaded .preview-section-3 .content-preview.section-3-spinner-content
 	opacity 1
 	-webkit-transform none
 	transform none
 	pointer-events auto
 	transition-delay 600ms
+.content-preview h2
+	color #fff
+	display block
+	font 20px/24px "DINWeb","Lucida Grande",verdana,sans-serif
+	margin 24px 8px 8px 8px
+.content-preview .all
+	background #00bff3
+	border-radius 3px
+	color #111
+	display inline-block
+	font 12px/18px "DINWeb","Lucida Grande",verdana,sans-serif
+	letter-spacing 1px
+	margin 16px 0 0 0
+	padding 1px 6px 0 6px
+	position relative
+	text-decoration none
+	text-transform uppercase
+	z-index 10
+	transition all 240ms ease
+.content-preview p
+	color #aaa
+.content-preview .goto
+	display block
+	position absolute
+	top 0
+	left 0
+	height 100%
+	width 100%
+	z-index 11
+.loaded .preview-section-2 .spinner.desktop-only .section-2-preview .full-preview
+	-webkit-transform rotateZ(120deg) translateZ(0)
+	transform rotateZ(120deg) translateZ(0)
+.spinner.desktop-only .full-preview.section-2 .big-circle.actual
+	background #14bfff
+	opacity 0.95
+	-webkit-transform scale(1) translateZ(0)
+	transform scale(1) translateZ(0)
+	transition all 130ms ease-out
 .section-1-circles
 	height 175px
 	width 180px
@@ -606,12 +684,21 @@ ol, ul
 .section-1-circles .circle.circle-c small
 	font-size 10px
 .preview-section-1 .spinner.desktop-only.spinning
-	-webkit-transform rotateZ(0)
+	-webkit-transform rotateZ(0) translateZ(0)
 	trasnform rotateZ(0) translateZ(0)
+.preview-section-2 .spinner.desktop-only.spinning
+	-webkit-transform rotateZ(-120deg) translateZ(0) 
+	trasnform rotateZ(-120deg) translateZ(0)
+.preview-section-3 .spinner.desktop-only.spinning
+	-webkit-transform rotateZ(-240deg) translateZ(0) 
+	trasnform rotateZ(-240deg) translateZ(0)
 .detected .spinner.desktop-only
 	transition all 300ms ease-in-out 200ms
-	
-
+.spinner.desktop-only .full-preview.section-2
+	-webkit-transform scale(0.8) rotateZ(120deg)
+	transform scale(0.8) rotateZ(120deg)
+.spinner.desktop-only .section-2-preview .full-preview
+	margin -70px 0 0 -70px
 //WORK PAGE STYLES
 .loaded .desktop .column-1
 	opacity 1
@@ -999,17 +1086,13 @@ dl dd
 		opacity 0
 .mri .layer.one
 	-webkit-mask-image -webkit-linear-gradient(top, #fff, #fff 10%, transparent 25%)
-.scan-faster .mri .layer
-	-webkit-animation-delay 0
-	-webkit-animation-duration 4.2s
-	-webkit-animation-iteration-count 1
 .mri .layer.two
 	-webkit-mask-image -webkit-linear-gradient(top, transparent, #fff 22%, transparent 45%)
 .mri .layer.three
 	-webkit-mask-image -webkit-linear-gradient(top, transparent, transparent 18%, #fff 40%, transparent 65%)
 .mri .layer.four
 	-webkit-mask-image -webkit-linear-gradient(top, transparent, transparent 20%, #fff 75%, transparent 120%)
-.mri .yaer.five
+.mri .layer.five
 	-webkit-mask-image -webkit-linear-gradient(top, transparent, transparent 45%, #fff 130%)
 @-webkit-keyframes mri-blip
 	0%
@@ -1027,7 +1110,17 @@ dl dd
 		-webkit-transform translateY(300px) translateX(-5px) scaleX(0.05) scaleY(0.3)
 		transform translateY(300px) translateX(-5px) scaleX(0.05) scaleY(0.3)
 		opacity 0
-.scan-faster .mri .mri-blip
+.intro .mri .layer.one, .leaving .mri .layer.one, .scan-faster .mri .layer.one
+	-webkit-animation-name mri-glow-1
+.intro .mri .layer.two, .leaving .mri .layer.two, .scan-faster .mri .layer.two
+	-webkit-animation-name mri-glow-2
+.intro .mri .layer.three, .leaving .mri .layer.three, .scan-faster .mri .layer.three
+	-webkit-animation-name mri-glow-3
+.intro .mri .layer.four, .leaving .mri .layer.four, .scan-faster .mri .layer.four
+	-webkit-animation-name mri-glow-4
+.intro .mri .layer.five, .leaving .mri .layer.five, .scan-faster .mri .layer.five
+	-webkit-animation-name mri-glow-5
+.scan-faster .mri .blip
 	-webkit-animation-duration 4.2s
 	-webkit-animation-delay 0
 	-webkit-animation-name mri-blip
@@ -1453,19 +1546,79 @@ dl dd .age-decimal
 	display block
 	font 10px/1.1 "Lucida Grande",verdana,sans-serif
 	opacity 0.6
+	pointer-events all
 .spinner.desktop-only .top-circle-contents.section-1 small
 	font-size 12px
 	line-height 14px
 	margin 37px 0 8px 0
-.spinner.desktop-only .top-circle-contents small
-	color #fff
-	display block
-	font 16px/18px "DINWeb","Lucida Grande",verdana,sans-serif
-	letter-spacing 1px
-	text-align center
-	text-transform uppercase
 .loaded.preview-section-1 .spinner.desktop-only .top-circle-contents.section-1, .loaded.preview-section-2 .spinner.desktop-only .top-circle-contents.section-2
 	opacity 1
 	-webkit-transform scale(1)
 	transform scale(1)
 	transition-delay 400ms
+.desktop .section-1-header .map-container .blip.showing
+	opacity 1
+	-webkit-transform scale(1)
+	transform scale(1)
+.desktop .section-1-header .map-container .blip.positioned
+	transition all 420ms ease-out
+	transition-timing-function cubic-bezier(0.015, 0.83, 0.205, 1.56)
+.desktop .section-1-header .map-container .blip
+	display block
+	position absolute
+	margin -16px 0 0 -16px
+	height 32px
+	width 32px
+	opacity 0
+	-webkit-transform scale(0.1)
+	transform scale(0.1)
+	-webkit-transform scale(2.3) translateY(-8px) translateX(-3px)
+	transform scale(2.3) translateY(-8px) translateX(-3px)
+	z-index 5
+@-webkit-keyframes map-blip
+	0%
+		opacity 0.35
+		-webkit-transform scale(0.3)
+	100%
+		opacity 0
+		-webkit-transform scale(3.8)
+.desktop .section-1-header .map-container .blip.showing .circle-1, .desktop .section-1-header .map-container .blip.showing .circle-2, .desktop .section-1-header .map-container .blip.showing .circle-3
+	-webkit-animation-name map-blip
+.desktop .section-1-header .map-container .blip .circle-1, .desktop .section-1-header .map-container .blip .circle-2, .desktop .section-1-header .map-container .blip .circle-3
+	background #00bff3
+	border-radius 32px
+	display block
+	opacity 0
+	position absolute
+	top 0
+	left 0
+	height 100%
+	width 100%
+	-webkit-animation-duration 2400ms
+	-webkit-animation-timing-function ease-out
+	-webkit-animation-iteration-count infinite
+.desktop .section-1-header .map-container .blip .circle-2
+	-webkit-animation-delay 792ms
+.desktop .section-1-header .map-container .blip .circle-3
+	-webkit-animation-delay 1608ms
+.desktop .section-1-header .map-container .blip .circle
+	background #1161c9
+	background -webkit-linear-gradient(top, #2179ec, #1161c9)
+	border-radius 32px
+	box-shadow 1px 1px 3px rgba(0,0,0,0.24)
+	display block
+	margin -12px 0 0 -12px
+	position absolute
+	top 50%
+	left 50%
+	height 100%
+	width 100%
+	height 24px
+	width 24px
+.desktop .clients-list .client-photos .photo img
+	border-radius 3px
+	display block
+	width 100%
+	border-radius 0
+	-webkit-transform scale(1.06)
+	transform scale(1.06)

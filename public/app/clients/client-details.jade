@@ -1,12 +1,45 @@
-.container
-	h1 {{client.title}}
-	.row
-		.col-md-6
-			h3(ng-show="client.featured") Featured
-			h3 Published on {{client.published | date}}
-
-		.col-md-6
-			.panel.panel-primary
-				.panel-heading Tags
-				.panel-body
-					div(ng-repeat="tag in client.tags") {{tag}}
+main#page.page
+	.wide.column-3.backdrop.for-section-1
+	.wide.section-header.backdrop
+	
+	.column-1
+		a(href="/clients" class="uplevel pjax" data-section="clients")
+			span.arrow ‹
+			strong.logo
+				span.m
+					| M
+				span.a
+					| A
+				span.r
+					| R
+				span.c
+					| C
+				span.o
+					| O
+				span.space
+					| 
+				span.l
+					| L
+				span.a2
+					| A
+				span.v
+					| V
+				span.i
+					| I
+				span.e
+					| E
+				span.l2
+					| L
+				span.l3
+					| L
+				span.e2
+					| E
+			h1.section-title {{client.name}}
+	l1.level-1-container
+		.wide.column-3
+			header.wide.section-header.section-1-header
+				h1 {{client.name}}
+				img(src="{{client.photo}}")
+				h2 Technology: {{client.tags}}
+			section.content
+				p {{client.description}}

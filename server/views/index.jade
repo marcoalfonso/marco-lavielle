@@ -1,20 +1,8 @@
 extends ../includes/layout
 
 block main-content
-	//.navbar.navbar-inverse.navbar-fixed-top
-		.container
-			.navbar-header
-				a.navbar-brand(href="/") Creating Apps
-			.navbar-collapse.collapse
-				ul.nav.navbar-nav
-					li
-						a(href="/") Home
-					li
-						a(href="/clients") Clients
-				div(ng-include="'/partials/account/navbar-login'")
-
 	section.content
-		div(ng-view, ng-class="[desktop, detected]")#device-info
+		div(ng-view, ng-class="[loaded, desktop, detected, section]")#device-info
 
 	footer.container.text-center
 
