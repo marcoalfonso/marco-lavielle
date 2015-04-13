@@ -371,7 +371,7 @@ ul {
   display: none;
 }
 .desktop .desktop-only {
-  display: none;
+  display: block;
 }
 .desktop-only {
   display: none;
@@ -529,7 +529,6 @@ ul {
   position: absolute;
   top: 72%;
   left: 89.5%;
-  display: block;
 }
 .spinner.desktop-only .section-3-preview {
   position: absolute;
@@ -595,7 +594,7 @@ ul {
   left: 50%;
   height: 80px;
   width: 120px;
-  transition: all 180ms ease 600ms;
+  transition: all 180ms ease 60ms;
   -webkit-transform: scale(0.9);
   transform: scale(0.9);
   opacity: 0;
@@ -726,7 +725,7 @@ ul {
 .preview-section-1.loaded .section-1-circles .circle,
 .section-1.loaded .section-1-circles .circle {
   opacity: 1;
-  tranistion-duration: 320ms;
+  transition-duration: 320ms;
 }
 .section-1-circles .circle.circle-a {
   -webkit-transform: scale(0.35);
@@ -785,10 +784,6 @@ ul {
   left: 108px;
   height: 55px;
   width: 55px;
-}
-.preview-section-1.loaded .section-1-circles .circle.circle-a,
-.section-1.loaded .section-1-circles .circle.circle-a {
-  transition-delay: 0ms;
 }
 .preview-section-1.loaded .section-1-circles .circle.full,
 .section-1.loaded .section-1-circles .circle.full {
@@ -1918,13 +1913,6 @@ dl dd .age-decimal {
   font-size: 12px;
   line-height: 14px;
   margin: 37px 0 8px 0;
-}
-.loaded.preview-section-1 .spinner.desktop-only .top-circle-contents.section-1,
-.loaded.preview-section-2 .spinner.desktop-only .top-circle-contents.section-2 {
-  opacity: 1;
-  -webkit-transform: scale(1);
-  transform: scale(1);
-  transition-delay: 400ms;
 }
 .desktop .section-1-header .map-container .blip.showing {
   opacity: 1;
