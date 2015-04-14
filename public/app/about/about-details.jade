@@ -1,4 +1,4 @@
-main#page.page
+main#page.page(ng-controller="mvAboutCtrl", ng-class="scan")
 	.column-1
 		a(href="/" class="uplevel pjax" data-section="home")
 			span.arrow ‹
@@ -39,16 +39,16 @@ main#page.page
 		.personal-info
 			.container
 				.mri.mobile-only
-					span.grey.layer
-					span.layer.one
-					span.layer.two
-					span.layer.three
-					span.layer.four
-					span.layer.five
-					span.blip
+					span.grey.layer(style="-webkit-animation-name: none;")
+					span.layer.one(style="-webkit-animation-name: mri-glow-1;")
+					span.layer.two(style="-webkit-animation-name: mri-glow-2;")
+					span.layer.three(style="-webkit-animation-name: mri-glow-3;")
+					span.layer.four(style="-webkit-animation-name: mri-glow-4;")
+					span.layer.five(style="-webkit-animation-name: mri-glow-5;")
+					span.blip(style="-webkit-animation-name: mri-blip;")
 						span.cover-below
 				.text
-					p Hi, I'm Marco Lavielle. I live in Sydney and develop/design mobile and web apps. I enjoy running, chess and beaches. I am really passionate about the start-up scene. Ruby on Rails full stack engineer by day, iOS engineer by night.
+					p Hi, I'm Marco Lavielle. I live in Sydney and develop/design mobile and web apps. I enjoy running, chess and beaches. I am really passionate about the start-up scene. Javascript full stack engineer by day, iOS engineer by night.
 					p This site is a showcase of my work. Please get in touch if you want to discuss projects to work on. Although I am usually involved in quite a few projects at the same time, I love to hear ideas and think of ways to solve hard problems.
 				.stats
 					dl.stats-1
@@ -57,16 +57,16 @@ main#page.page
 						dt Birthday
 						dd October 13
 						dt Born in
-						dd Mexico
+						dd Cuba
 						dt Currently in
 						dd Sydney
 					dl.stats-2.smaller
 						dt Telephone
 						dd 0423478156
 						dt Email
-						dd contact@marcolavielle.com
+						dd marcoalfonso@gmail.com
 						dt Address
-						dd Redfern, NSW, Sydney
+						dd Ultimo, NSW, Sydney
 		.attribution
 			//h1 Social Links
 			ul

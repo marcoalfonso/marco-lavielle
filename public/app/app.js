@@ -37,6 +37,9 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		})
 		.when('/about', { templateUrl: '/partials/about/about-details', 
 			controller: 'mvAboutCtrl'
+		})
+		.when('/journal', { templateUrl: '/partials/journal/journal-details',
+			controller: 'mvJournalCtrl'
 		});
 });
 

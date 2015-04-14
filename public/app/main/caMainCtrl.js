@@ -1,8 +1,7 @@
-angular.module('app').controller('caMainCtrl', function($scope, mvCachedClients, $rootScope) {
-	$rootScope.loaded = "loaded";
-	$rootScope.desktop = "desktop";
-	$rootScope.detected = "detected";
-	//$rootScope.preview="preview-section-1";
-	$rootScope.section = "preview-section-1";
+angular.module('app').controller('caMainCtrl', function($scope, mvCachedClients) {
+	$scope.loaded = "loaded";
+	$scope.desktop = "desktop";
+	$scope.detected = "detected";
+	$scope.section = "preview-section-1";
 	$scope.clients = mvCachedClients.query();
 });
