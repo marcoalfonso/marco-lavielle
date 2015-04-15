@@ -162,13 +162,13 @@ module.exports = function(grunt) {
         });
 
         // Default task(s).
-        grunt.registerTask('default', ['lint', 'concurrent:default']);
+        grunt.registerTask('default', ['lint']);
 
         // Debug task.
-        grunt.registerTask('debug', ['lint', 'concurrent:debug']);
+        grunt.registerTask('debug', ['lint']);
 
         // Secure task(s).
-        grunt.registerTask('secure', ['env:secure', 'lint', 'concurrent:default']);
+        grunt.registerTask('secure', ['env:secure', 'lint']);
 
         // Lint task(s).
         grunt.registerTask('lint', ['jshint', 'csslint']);
