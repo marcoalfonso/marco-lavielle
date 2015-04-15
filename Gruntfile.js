@@ -23,7 +23,7 @@ module.exports = function(grunt) {
                         },
                         serverJS: {
                                 files: watchFiles.serverJS,
-                                tasks: ['jshint'],
+                                //tasks: ['jshint'],
                                 options: {
                                         livereload: true
                                 }
@@ -36,7 +36,7 @@ module.exports = function(grunt) {
                         },
                         clientJS: {
                                 files: watchFiles.clientJS,
-                                tasks: ['jshint'],
+                                //tasks: ['jshint'],
                                 options: {
                                         livereload: true
                                 }
@@ -53,14 +53,14 @@ module.exports = function(grunt) {
                                 tasks: ['test:server'],
                                                 }
                         },
-                jshint: {
-                        all: {
-                                src: watchFiles.clientJS.concat(watchFiles.serverJS),
-                                options: {
-                                        jshintrc: true
-                                }
-                        }
-                },
+                //jshint: {
+                        //all: {
+                                //src: watchFiles.clientJS.concat(watchFiles.serverJS),
+                                //options: {
+                                        //jshintrc: true
+                                //}
+                        //}
+                //},
                 csslint: {
                         options: {
                                 csslintrc: '.csslintrc'
@@ -171,7 +171,7 @@ module.exports = function(grunt) {
         grunt.registerTask('secure', ['env:secure', 'lint']);
 
         // Lint task(s).
-        grunt.registerTask('lint', ['jshint', 'csslint']);
+        grunt.registerTask('lint', ['csslint']);
 
         // Build task(s).
         grunt.registerTask('build', ['lint', 'loadConfig', 'ngAnnotate', 'uglify', 'cssmin']);
