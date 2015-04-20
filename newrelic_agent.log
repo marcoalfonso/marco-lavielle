@@ -1255,3 +1255,9 @@
 {"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":8669,"time":"2015-04-20T17:00:15.580Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
 {"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8669,"time":"2015-04-20T17:00:18.664Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/833715/applications/6109977","component":"new_relic_response"}
 {"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8669,"time":"2015-04-20T17:00:18.665Z","msg":"Connected to collector-153.newrelic.com:443 with agent run ID 1358670453.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8852,"time":"2015-04-20T17:03:08.339Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":8852,"time":"2015-04-20T17:03:08.521Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8859,"time":"2015-04-20T17:03:11.654Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":8859,"time":"2015-04-20T17:03:11.843Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8859,"time":"2015-04-20T17:03:16.236Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/833715/applications/6109977","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":8859,"time":"2015-04-20T17:03:16.237Z","msg":"Connected to collector-153.newrelic.com:443 with agent run ID 1358676761.","component":"collector_api"}
