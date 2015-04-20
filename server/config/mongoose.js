@@ -12,5 +12,6 @@ module.exports = function(config) {
 
 	userModel.createDefaultUsers();
 	clientModel.createDefaultClients();
+	console.log(mongoose.connection.readyState);
 };
 
