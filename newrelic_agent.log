@@ -1531,3 +1531,11 @@
 {"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":23395,"time":"2015-04-21T12:34:52.550Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
 {"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23395,"time":"2015-04-21T12:34:57.672Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/833715/applications/6109977","component":"new_relic_response"}
 {"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23395,"time":"2015-04-21T12:34:57.672Z","msg":"Connected to collector-153.newrelic.com:443 with agent run ID 1361176718.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23614,"time":"2015-04-21T12:37:05.060Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":23614,"time":"2015-04-21T12:37:05.410Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23614,"time":"2015-04-21T12:37:07.937Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/833715/applications/6109977","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23614,"time":"2015-04-21T12:37:07.938Z","msg":"Connected to collector-153.newrelic.com:443 with agent run ID 1361180619.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23821,"time":"2015-04-21T12:40:22.298Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":40,"name":"newrelic","hostname":"R5003426.local","pid":23821,"time":"2015-04-21T12:40:22.566Z","msg":"Unrecognized version NaN of Express detected; not instrumenting","component":"express"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23821,"time":"2015-04-21T12:40:26.900Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/833715/applications/6109977","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"R5003426.local","pid":23821,"time":"2015-04-21T12:40:26.900Z","msg":"Connected to collector-153.newrelic.com:443 with agent run ID 1361186628.","component":"collector_api"}
