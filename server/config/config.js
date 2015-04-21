@@ -10,7 +10,7 @@ module.exports = {
 	},
 	production: {
 		rootPath: rootPath,
-		db: 'mongodb://marco_lavielle:Vy9icjlzcjIrR1VoZ3FyOHRpd3ZNcVE4UWgzSjBucFFlR3FtVTRCZXNsQT0K@172.17.0.14:27017/marco_lavielle-production',
+		db: 'mongodb://marco_lavielle:Vy9icjlzcjIrR1VoZ3FyOHRpd3ZNcVE4UWgzSjBucFFlR3FtVTRCZXNsQT0K@172.17.0.33:27017/marco_lavielle-production',
 		port: process.env.PORT || 80
 	}
 }
