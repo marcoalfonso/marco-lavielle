@@ -15,6 +15,13 @@ var Client = mongoose.model('Client', clientSchema);
 function createDefaultClients() {
 	Client.find({}).exec(function(err, collection) {
 		if(collection.length === 0) {
+			Client.create({name: 'Service NSW', 
+				featured: true, 
+				published: new Date('18/05/2015'), 
+				tags: ['AngularJS'], 
+				url: "http://service.nsw.gov.au",
+				photo: "../images/thumbnails/service_nsw.png",
+				description:"I developed the front-end for the NSW goverment portal. I use AngularJS and Bootstrap for the UI/UX. The website has 20M+ uniques a month and has been developed to comply with WCAG standards."});
 			Client.create({name: 'Commercial Real Estate', 
 				featured: true, 
 				published: new Date('25/10/2014'), 
