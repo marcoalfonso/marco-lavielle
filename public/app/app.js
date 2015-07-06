@@ -16,9 +16,16 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 	});
 
 	$routeProvider
-		.when('/', { templateUrl: '/partials/main/main', controller: 'caMainCtrl'})
+		.when('/', { templateUrl: '/partials/main/main', controller: 'mvMainCtrl'})
+
 		.when('/admin/users', { templateUrl: '/partials/admin/user-list', 
 			controller: 'mvUserListCtrl', resolve: routeRoleChecks.admin
+		})
+		.when('/admin/dashboard', { templateUrl: '/partials/dashboard/dashboard', 
+			controller: 'mvDashboardCtrl', resolve: routeRoleChecks.admin
+		})
+		.when('/signin', { templateUrl: '/partials/account/signin', 
+			controller: 'mvNavBarLoginCtrl'
 		})
 		.when('/signup', { templateUrl: '/partials/account/signup', 
 			controller: 'mvSignupCtrl'

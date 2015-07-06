@@ -1,0 +1,27 @@
+.container
+	.well
+		form.form-horizontal(name="postsForm")
+			fieldset
+				legend Create a Post
+				.form-group
+					label.col-md-2.control-label(for="title") Title
+					.col-md-10
+						input.form-control(name="title", type="text", placeholder="Title", ng-model="title", required)
+				.form-group
+					label.col-md-2.control-label(for="subtitle") Sub-Title
+					.col-md-10
+						input.form-control(name="subtitle", type="text", placeholder="Subtitle", ng-model="subtitle", required)
+				.form-group
+					label.col-md-2.control-label(for="author") Author
+					.col-md-10
+						input.form-control(name="author", type="text", placeholder="Author", ng-model="author", required)
+				.form-group
+					label.col-md-2.control-label(for="body") Body
+					.col-md-10
+						textarea.form-control(name="body", rows="5", placeholder="Body", ng-model="body", required)
+				.form-group
+					.col-md-10.col-md-offset-2
+						.pull-right
+							button.btn.btn-primary(ng-click="createPost()", ng-disabled="signupForm.$invalid") Post
+							| &nbsp;
+							a.btn.btn-default(href="/") Cancel

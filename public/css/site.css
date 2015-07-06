@@ -1997,3 +1997,16 @@ dl dd .age-decimal {
   -webkit-transform: scale(1.06);
   transform: scale(1.06);
 }
+.well {
+  background-color: initial;
+  border: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+}
+legend {
+  color: #00bff3;
+  border: none;
+}

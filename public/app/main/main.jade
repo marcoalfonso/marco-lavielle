@@ -81,16 +81,16 @@ main#page.page()
 				h4.location-time-ago
 					| Australia
 		.section-2.top-circle-contents
-			small Currently at
+			small Currently accordion-toggle
 			span.location-name Sydney
 			span.location-icon
 				img(src="../images/home_32.png")
 		.section-3-spinner-content.content-preview
-			h2 Coming Soon
-			p Blog posts about technology coming soon
+			h2 {{posts[posts.length - 1].title}}
+			p {{posts[posts.length - 1].subtitle}}
 			a.all(href="/journal" data-section="journal") Read More
 		.section-3.top-circle-contents
-			strong 0
+			strong {{posts.length}}
 			small Articles
 	.spinner.spinning.desktop-only
 		span.rings

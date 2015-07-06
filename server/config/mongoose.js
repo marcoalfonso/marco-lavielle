@@ -1,6 +1,7 @@
 var mongoose = require('mongoose'),
 	userModel = require('../models/User')
 	clientModel = require('../models/Client');
+	postModel = require('../models/Post');
 
 module.exports = function(config) {
 	mongoose.connect(config.db);
@@ -12,6 +13,7 @@ module.exports = function(config) {
 
 	userModel.createDefaultUsers();
 	clientModel.createDefaultClients();
+	postModel.createDefaultPosts();
 	console.log(mongoose.connection.readyState);
 };
 

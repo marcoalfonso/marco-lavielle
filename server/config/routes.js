@@ -3,6 +3,7 @@
 var auth = require('./auth'),
 	users = require('../controllers/users'),
 	clients = require('../controllers/clients'),
+	posts = require('../controllers/posts'),
 	mongoose = require('mongoose'),
 	User = mongoose.model('User');
 
@@ -11,11 +12,18 @@ module.exports = function(app) {
 	app.get('/api/users', auth.requiresRole('admin'), users.getUsers);
 
 	app.post('/api/users', users.createUser);
-	
+
 	app.put('/api/users', users.updateUser);
 
 	app.get('/api/clients', clients.getClients);
+
 	app.get('/api/clients/:id', clients.getClientById);
+
+	app.post('/api/posts', posts.createPost);
+
+	app.get('/api/posts', posts.getPosts);
+
+	app.get('/api/posts/:id', posts.getPostById);
 
 	app.get('/partials/*', function(req, res) {
 		res.render('../../public/app/' + req.params[0]);
