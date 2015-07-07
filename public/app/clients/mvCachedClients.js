@@ -9,5 +9,5 @@ angular.module('app').factory('mvCachedClients', function(mvClient) {
 
 			return clientList;
 		}
-	}
-})
+	};
+});

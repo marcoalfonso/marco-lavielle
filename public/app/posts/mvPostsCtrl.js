@@ -12,5 +12,5 @@ angular.module('app').factory('mvPosts', function($http, $q, mvPost) {
 
 			return dfd.promise;
 		}
-	}
+	};
 });

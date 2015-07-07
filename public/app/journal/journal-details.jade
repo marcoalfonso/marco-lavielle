@@ -1,46 +1,48 @@
 main#page.page
-	.column-2.backdrop
-	.column-3.backdrop.for-section-2
-	.section-header.backdrop.for-section-2
-	.section-2-columns
-		.column-1
-			a(href="/" class="uplevel pjax" data-section="home")
-				span.arrow ‹
-				strong.logo
-					span.m
-						| M
-					span.a
-						| A
-					span.r
-						| R
-					span.c
-						| C
-					span.o
-						| O
-					span.space
-						| 
-					span.l
-						| L
-					span.a2
-						| A
-					span.v
-						| V
-					span.i
-						| I
-					span.e
-						| E
-					span.l2
-						| L
-					span.l3
-						| L
-					span.e2
-						| E
-				h1.section-title Journal
-				span.smaller.alive.icon.section-1-icon
-					span.bar.one
-					span.bar.two
-					span.bar.three
-		.column-2.for-section-2
-			dl.bigger.stats
-				.age
-					dt Coming Soon...
+	.column-2.wider.backdrop.for-section-3
+	.column-3.backdrop.for-section-3
+	.column-4.backdrop.for-section-3
+	.column-1.slim.for-level-1.for-section-3
+		a(href="/" class="uplevel pjax" data-section="home")
+			span.arrow ‹
+			strong.logo
+				span.m
+					| M
+				span.a
+					| A
+				span.r
+					| R
+				span.c
+					| C
+				span.o
+					| O
+				<br> 
+				span.l
+					| L
+				span.a2
+					| A
+				span.v
+					| V
+				span.i
+					| I
+				span.e
+					| E
+				span.l2
+					| L
+				span.l3
+					| L
+				span.e2
+					| E
+			h1.section-title Journal
+		dl.stats.journal-stats
+	.column-2.scrollable.wider.for-section-3
+	.l1.level-1-container
+		.column-3
+			.journal-content
+				.articles-list
+					.article-preview(ng-repeat="post in posts")
+						h1
+							a {{post.title}}
+						p {{post.subtitle}}
+						a(href="" class="pjax read-more" data-section="journal" data-level="1") Read More
+		

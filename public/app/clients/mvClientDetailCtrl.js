@@ -4,8 +4,8 @@ angular.module('app').controller('mvClientDetailCtrl', function($scope, mvCached
 			if (client._id === $routeParams.id) {
 				$scope.client = client;
 			}
-		})
-	})
+		});
+	});
 	$rootScope.loaded = "loaded";
 	$rootScope.desktop = "desktop";
 });
