@@ -11,4 +11,7 @@ angular.module('app').controller('mvClientDetailCtrl', function($scope, mvCached
 	});
 	$rootScope.loaded = "loaded";
 	$rootScope.desktop = "desktop";
+	$rootScope.sectionSelector = "section-1";
+	$rootScope.scrollable = "scrollable";
+	$rootScope.levelUp = "level-1";
 });

@@ -2240,3 +2240,21 @@ legend {
 .journal-photos img:hover {
   opacity: 1;
 }
+.section-1 .column-2.backdrop {
+  display: none;
+}
+.wide.column-3.backdrop.for-section-1 {
+  opacity: 0;
+  transition-duration: 400ms;
+  transition-delay: 80ms;
+  -webkit-transform: scaleX(1.5);
+}
+.level-1 .desktop .column-1,
+.level-2 .desktop .column-1 {
+  opacity: 0;
+  -webkit-transform: translateX(16px);
+}
+.level-1 .desktop .column-3,
+.level-2 .desktop .column-3 {
+  display: none;
+}

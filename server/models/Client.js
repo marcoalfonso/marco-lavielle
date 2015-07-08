@@ -57,7 +57,7 @@ function createDefaultClients() {
 		    	photo: "../images/thumbnails/ad_roller.png",
 		    	description: "The website of Ad-roller was done using wordpress. I started with an empty theme and built the whole UI and UX using several wordpress libraries."});
 		}
-	})
+	});
 }
 
 exports.createDefaultClients = createDefaultClients;

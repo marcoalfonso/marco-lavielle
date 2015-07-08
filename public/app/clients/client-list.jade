@@ -65,7 +65,8 @@ main#page.page
 				.clients-list
 					.client-example(ng-repeat="client in clients | orderBy:sortOrder")
 						.client-title
-							a(href="/clients/{{client.slug}}") {{client.name}}
+							//- a(href="/clients/{{client.slug}}") {{client.name}}
+							a {{client.name}}
 							ul.tags
 								li.tag {{client.tags}}
 						.client-url

@@ -1,7 +1,7 @@
-main#page.page
+main#page.page.section-1
+	.column-2.backdrop
 	.wide.column-3.backdrop.for-section-1
 	.wide.section-header.backdrop
-	
 	.column-1
 		a(href="/clients" class="uplevel pjax" data-section="clients")
 			span.arrow ‹
@@ -43,3 +43,9 @@ main#page.page
 				h2 Technology: {{client.tags}}
 			section.content
 				p {{client.description}}
+		//- a(class="back-button close-active-day" href="/clients")
+		//- 	span.arrow <
+		//- 	span.text
+		.full-column
+			.month-header
+				.content.explorer-content
