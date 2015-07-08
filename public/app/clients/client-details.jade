@@ -38,9 +38,9 @@ main#page.page.section-1
 	l1.level-1-container
 		.wide.column-3
 			header.wide.section-header.section-1-header
-				h1 {{client.name}}
-				img(src="{{client.photo}}")
-				h2 Technology: {{client.tags}}
+				//- h1 {{client.name}}
+				//- img(src="{{client.photo}}")
+				//- h2 Technology: {{client.tags}}
 			section.content
 				p {{client.description}}
 		//- a(class="back-button close-active-day" href="/clients")
@@ -48,4 +48,13 @@ main#page.page.section-1
 		//- 	span.text
 		.full-column
 			.month-header
-				.content.explorer-content
+				a(class="back pjax uplevel" href="/clients" data-level="0" data-section="section-1")
+					span.arrow <
+					span.text Clients
+				.covering
+				.top-covering
+				.container
+					.title
+						h1 {{client.name}}
+						h2 {{client.url}}
+			.content.explorer-content
