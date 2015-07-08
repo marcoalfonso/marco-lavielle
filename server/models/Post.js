@@ -23,8 +23,8 @@ function createDefaultPosts() {
 	Post.find({}).exec(function(err, collection) {
 		if(collection.length === 0) {
 			Post.create({title: 'Hello World', 
-				subtitle: 'This is a test post', 
-				body: "HELLO I AM A POST!!"});
+				subtitle: 'Welcome To My Blog', 
+				body: "Hi, welcome to my blog. I hope the code snippets you find in here will be useful in your coding journey. I also post stock images that can be used in your website under the creative commons licence. \n\nHopefully you will find some of these helpful. :)"});
 		}
 	});
 }

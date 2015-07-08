@@ -11,3 +11,9 @@ exports.getClientById = function(req, res) {
 		res.send(client);
 	});
 };
+
+exports.getClientBySlug = function(req, res) {
+	Client.findOne({slug:req.params.slug}).exec(function(err, client) {
+		res.send(client);
+	});
+};

@@ -11,9 +11,10 @@ body {
   color: #ccc;
 }
 .footer {
-  font-size: 14px;
-  font-weight: 400;
-  padding: 36px 41px 24px 50px;
+  display: none;
+  color: #555;
+  font: 400 15px/18px "DINWeb", "Lucida Grande", verdana, sans-serif;
+  padding: 36px 42px 24px 50px;
   -webkit-font-smoothing: antialiased;
 }
 .loaded .desktop .home-footer {
@@ -97,12 +98,36 @@ body {
   font-weight: inherit;
 }
 .footer a {
+  color: #67a4f2;
+  color: #555;
   display: inline-block;
+  font-weight: 400;
   margin: 0 2px;
   text-decoration: none;
 }
 .footer a:hover {
   color: #7cb9e3;
+}
+.footer .twitter .logo {
+  background: url("../images/attribution/twitter_32.png") no-repeat 0 0;
+  background-size: 16px 16px;
+  display: inline-block;
+  margin: 0;
+  height: 16px;
+  width: 16px;
+  vertical-align: middle;
+}
+.footer .instagram {
+  color: #977969;
+}
+.footer .instagram .logo {
+  background: url("../images/attribution/instagram_32.png") no-repeat 0 0;
+  background-size: 16px 16px;
+  display: inline-block;
+  margin: -1px 0 0 2px;
+  height: 16px;
+  width: 16px;
+  vertical-align: middle;
 }
 ol,
 ul {
@@ -1574,9 +1599,6 @@ dl dd {
   margin: 0 0.4em 0 0;
   white-space: nowrap;
 }
-.desktop .column-1 dl {
-  margin: 128px 0 0 42px;
-}
 dl dt {
   color: #788b94;
   display: inline-block;
@@ -2104,4 +2126,117 @@ legend {
 }
 .articles-list .article-preview h1 a:hover {
   color: #136ce1;
+}
+.stats.journal-stats .twitter-follow-button-wrapper {
+  margin: 0 0 16px 0;
+}
+.stats.journal-stats dd {
+  font-size: 16px;
+  word-wrap: break-word;
+}
+.stats.journal-stats dd a {
+  color: inherit;
+  display: block;
+  text-decoration: none;
+}
+.loaded.level-1 .desktop .column-4 {
+  opacity: 1;
+  -webkit-transform: translateX(0);
+}
+.article-content {
+  color: #333;
+}
+.article-content .container {
+  margin: 0 auto;
+  max-width: 900px;
+}
+.article-content .uplevel {
+  color: #b1bac6;
+  display: block;
+  font: 500 13px/1.4 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  margin: 24px 0 0 0;
+  padding: 8px 0 32px 0;
+  text-decoration: none;
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+}
+.article-content .uplevel .arrow {
+  color: #b1bac6;
+  display: block;
+  float: left;
+  font-size: 32px;
+  line-height: 16px;
+  margin: 0 0.5em 0 36px;
+  opacity: 0.25;
+  transition: all 150ms ease-out;
+}
+.article-content .uplevel .text {
+  display: block;
+  letter-spacing: 0.3em;
+  margin: 0 0 0 64px;
+}
+.uplevel .section-title.mobile-only {
+  display: none;
+}
+.article-content .article-info {
+  padding: 32px 64px 0 64px;
+}
+.article-content .article-info h1 {
+  color: #485463;
+  font: 500 48px/1.3 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.article-content .article-body {
+  border-bottom: 1px solid #eee;
+  padding: 16px 64px 64px 64px;
+  font: 18px/1.4 "DINWeb", "Lucida Grande", verdana, sans-serif;
+}
+.article-content .article-body p {
+  color: #333;
+  clear: left;
+  font: 15px/1.4 "Lucida Grande", verdana, sans-serif;
+  margin: 0 0 16px 0;
+  max-width: 40em;
+}
+.article-content .article-body h2 {
+  font: 500 28px/1.3 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  padding: 49px 0 8px 0;
+}
+.level-1 .desktop .column-2.backdrop.for-section-3 {
+  opacity: 0;
+  -webkit-transform: translateX(-16px);
+}
+.journal-content .footer {
+/*border-top: 1px solid #eee;*/
+  padding: 42px 80px;
+}
+.desktop .footer {
+  display: block;
+}
+.journal-photos {
+  margin: 242px 16px 128px 16px;
+  margin-top: 64px;
+}
+.journal-photos a {
+  color: #fff;
+  display: block;
+  margin: 16px auto 42px auto;
+  text-align: center;
+  text-decoration: none;
+  -webkit-font-smoothing: antialiased;
+  max-width: 160px;
+}
+.loaded .journal-photos img {
+  -webkit-transform: scale(1) translateZ(0);
+  opacity: 0.5;
+}
+.journal-photos img {
+  border-radius: 4px;
+  max-width: 100%;
+  transition: all 200ms ease-out;
+  -webkit-transform: scale(0.8) translateX(90%);
+  opacity: 0;
+}
+.journal-photos img:hover {
+  opacity: 1;
 }

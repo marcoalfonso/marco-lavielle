@@ -35,14 +35,26 @@ main#page.page
 					| E
 			h1.section-title Journal
 		dl.stats.journal-stats
+			.twitter-follow-button-wrapper
+				a.twitter-follow-button(href='https://twitter.com/marcolavielle', data-show-count='false') Follow @marcolavielle
+			dt Instagram
+			dd
+				a(href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow") cuban_papi_chulo
 	.column-2.scrollable.wider.for-section-3
 	.l1.level-1-container
 		.column-3
-			.journal-content
-				.articles-list
-					.article-preview(ng-repeat="post in posts")
-						h1
-							a {{post.title}}
-						p {{post.subtitle}}
-						a(href="" class="pjax read-more" data-section="journal" data-level="1") Read More
-		
+		.column-4
+			.article-content
+				.container
+					a(class="back pjax uplevel" href="/journal" data-level="0" data-section="section-3")
+						span.arrow <
+						span.text See All
+						span.section-title.mobile-only Journal
+					header.article-info
+						h1 {{post.title}}
+						h2 {{post.subtitle}}
+						small
+					.article-body
+						p {{post.body}}
+				.footer
+					.container

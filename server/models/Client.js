@@ -1,7 +1,9 @@
-var mongoose = require('mongoose');
+var mongoose = require('mongoose'),
+	monguurl = require('monguurl');
 
 var clientSchema = mongoose.Schema({
 	name: {type:String, required:'{PATH} is required!'},
+	slug: { type:String, index: { unique: true } },
 	featured: {type:Boolean, required:'{PATH} is required!'},
 	published: {type:Date, required:'{PATH} is required!'},
 	tags: {type:String},
@@ -10,6 +12,10 @@ var clientSchema = mongoose.Schema({
 	description: {type:String}
 });
 
+clientSchema.plugin(monguurl({
+  source: 'name',
+  target: 'slug'
+}));
 var Client = mongoose.model('Client', clientSchema);
 
 function createDefaultClients() {

@@ -3,12 +3,12 @@ angular.module('app', ['ngResource', 'ngRoute']);
 angular.module('app').config(function($routeProvider, $locationProvider){
 	var routeRoleChecks = {
 		admin: {auth: function(mvAuth) {
-			return mvAuth.authorizeCurrentUserForRoute('admin')
+			return mvAuth.authorizeCurrentUserForRoute('admin');
 		}},
 		user: {auth: function(mvAuth) {
-			return mvAuth.authorizeAuthenticatedUserForRoute()
+			return mvAuth.authorizeAuthenticatedUserForRoute();
 		}}
-	}
+	};
 
 	$locationProvider.html5Mode({
 		enabled: true,
@@ -36,7 +36,10 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		.when('/clients', { templateUrl: '/partials/clients/client-list', 
 			controller: 'mvClientListCtrl'
 		})
-		.when('/clients/:id', { templateUrl: '/partials/clients/client-details', 
+		/*.when('/clients/:id', { templateUrl: '/partials/clients/client-details', 
+			controller: 'mvClientDetailCtrl'
+		})*/
+		.when('/clients/:slug', { templateUrl: '/partials/clients/client-details', 
 			controller: 'mvClientDetailCtrl'
 		})
 		.when('/experience', { templateUrl: '/partials/experience/experience-details', 
@@ -45,8 +48,11 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		.when('/about', { templateUrl: '/partials/about/about-details', 
 			controller: 'mvAboutCtrl'
 		})
-		.when('/journal', { templateUrl: '/partials/journal/journal-details',
+		.when('/journal', { templateUrl: '/partials/journal/journal',
 			controller: 'mvJournalCtrl'
+		})
+		.when('/journal/:slug', { templateUrl: '/partials/posts/post-details', 
+			controller: 'mvPostDetailCtrl'
 		});
 });
 
@@ -56,5 +62,5 @@ angular.module('app').run(function($rootScope, $location) {
 		if(rejection === 'not authorized') {
 			$location.path('/');
 		}
-	})
-})
+	});
+});

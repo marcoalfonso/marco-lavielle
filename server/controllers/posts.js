@@ -3,13 +3,19 @@ var Post = require('mongoose').model('Post');
 exports.getPosts = function(req, res) {
 	Post.find({}).exec(function(err, collection) {
 		res.send(collection);
-	})
+	});
 };
 
 exports.getPostById = function(req, res) {
-	Post.findOne({_id:req.params.id}).exec(function(err, course) {
-		res.send(course);
-	})
+	Post.findOne({_id:req.params.id}).exec(function(err, post) {
+		res.send(post);
+	});
+};
+
+exports.getPostBySlug = function(req, res) {
+	Post.findOne({slug:req.params.slug}).exec(function(err, post) {
+		res.send(post);
+	});
 };
 
 exports.createPost = function(req, res, next) {
@@ -24,5 +30,5 @@ exports.createPost = function(req, res, next) {
 		} else {
 			res.send(post);
 		}		
-	})
+	});
 };

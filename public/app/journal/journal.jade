@@ -1,0 +1,69 @@
+main#page.page
+	.column-2.wider.backdrop.for-section-3
+	.column-3.backdrop.for-section-3
+	.column-4.backdrop.for-section-3
+	.column-1.slim.for-level-1.for-section-3
+		a(href="/" class="uplevel pjax" data-section="home")
+			span.arrow ‹
+			strong.logo
+				span.m
+					| M
+				span.a
+					| A
+				span.r
+					| R
+				span.c
+					| C
+				span.o
+					| O
+				<br> 
+				span.l
+					| L
+				span.a2
+					| A
+				span.v
+					| V
+				span.i
+					| I
+				span.e
+					| E
+				span.l2
+					| L
+				span.l3
+					| L
+				span.e2
+					| E
+			h1.section-title Journal
+		dl.stats.journal-stats
+			.twitter-follow-button-wrapper
+				a.twitter-follow-button(href='https://twitter.com/marcolavielle', data-show-count='false') Follow @marcolavielle
+			dt Instagram
+			dd
+				a(href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow") cuban_papi_chulo
+	.column-2.scrollable.wider.for-section-3
+		.journal-photos
+			#instafeed
+	.l1.level-1-container
+		.column-3
+			.journal-content
+				.articles-list
+					.article-preview(ng-repeat="post in posts")
+						h1
+							a(href="/journal/{{post.slug}}") {{post.title}}
+						p {{post.subtitle}}
+						a(href="/journal/{{post.slug}}" class="pjax read-more" data-section="journal" data-level="1") Read More
+				.footer
+					.container
+						p.copyright
+							a.about(href="/about" data-section="about") About this site | 
+							a.twitter(href="http://twitter.com/marcolavielle" target="_blank" rel="nofollow")
+								span.logo
+							a.instagram(href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow")
+								span.logo
+script(type='text/javascript').
+	var userFeed = new Instafeed({
+		get: 'user',
+		userId: 48584866,
+		accessToken: '48584866.467ede5.cd3c1ed9ddfa44bf8cd1b533daca73e8'
+		});
+		userFeed.run();

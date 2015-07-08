@@ -1,4 +1,4 @@
-angular.module('app').factory('mvPosts', function($http, $q, mvPost) {
+angular.module('app').factory('mvPostsService', function($http, $q, mvPost) {
 	return {
 		createPost: function(newPostData) {
 			var newPost = new mvPost(newPostData);

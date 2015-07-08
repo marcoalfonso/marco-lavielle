@@ -4,7 +4,7 @@ var User = require('mongoose').model('User'),
 exports.getUsers = function(req, res) {
 	User.find({}).exec(function(err, collection) {
 		res.send(collection);
-	})
+	});
 };
 
 exports.createUser = function(req, res, next) {
@@ -23,8 +23,8 @@ exports.createUser = function(req, res, next) {
 		req.logIn(user, function(err) {
 			if(err) {return next(err);}
 			res.send(user);
-		})
-	})
+		});
+	});
 };
 
 exports.updateUser = function(req, res) {
