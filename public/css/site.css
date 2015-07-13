@@ -978,6 +978,9 @@ a.uplevel.pjax {
   -webkit-transform: translateX(0);
   transition-delay: 60ms;
 }
+.loaded .desktop .dashboard .column-2.backdrop {
+  width: 100%;
+}
 .desktop .column-2.backdrop {
   background: #1d242e;
   height: 100%;
@@ -2027,6 +2030,11 @@ dl dd .age-decimal {
   left: 50%;
   transform: translate(-50%, -50%);
   width: 500px;
+}
+.well.create-post {
+  top: 54%;
+  left: 58%;
+  width: 900px;
 }
 legend {
   color: #00bff3;
