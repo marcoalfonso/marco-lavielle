@@ -76,20 +76,3 @@ main#page.page
 						.client-photos
 							.photo
 								img(src="{{client.photo}}")
-//.container.top-padding-med
-	.pull-right
-		form.form-inline
-			.form-group
-				input.form-conrol(ng-model="searchText", placeholder="Filter")
-			.form-group.margin-left-med
-				select.form-group(ng-model="sortOrder", ng-options="item.value as item.text for item in sortOptions")
-	table.table.table-hover.table-striped.table-condensed
-		thead
-			tr
-				th Name
-				th Publish Date
-			tbody
-				tr(ng-repeat="client in clients | filter:searchText | orderBy:sortOrder")
-					td
-						a(href="/clients/{{client._id}}") {{client.name}}
-					td {{client.published | date}}

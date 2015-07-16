@@ -5,7 +5,7 @@ var postSchema = mongoose.Schema({
 	title: {type:String, required:'{PATH} is required!'},
 	slug: { type:String, index: { unique: true } },
 	subtitle: {type:String, required:'{PATH} is required!'},
-	published: {type:Date},
+	published: { type : Date, default: Date.now },
 	author: {type:String},
 	url: {type:String},
 	photo: {type:String},

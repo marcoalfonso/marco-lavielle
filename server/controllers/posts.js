@@ -18,6 +18,12 @@ exports.getPostBySlug = function(req, res) {
 	});
 };
 
+exports.deletePostById = function(req, res) {
+	Post.findByIdAndRemove(req.params.id, function(err, post) {
+		res.send(post);
+	})
+}
+
 exports.createPost = function(req, res, next) {
 	var postData = req.body;
 	Post.create(postData, function(err, post) {

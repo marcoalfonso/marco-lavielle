@@ -1,18 +1,34 @@
-angular.module('app').controller('mvDashboardCtrl', function ($scope, $http, mvNotifier, mvPostsService , $location) {
+angular.module('app').controller('mvDashboardCtrl', function (mvPost, $scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts) {
+	$scope.createPostVisible = false;
+	$scope.posts = mvCachedPosts.query();
 
-	$scope.createPost = function(title, subtitle, author, body) {
-		var newPostData = {
-			title: $scope.title,
-			subtitle: $scope.subtitle,
-			author: $scope.author,
-			body: $scope.body
-		};
+	$scope.sortOptions = [{value:"name", text: "Sort by Name"},
+		{value: "published", text: "Sort by Publish Date"}];
+	$scope.sortOrder = $scope.sortOptions[0].value;
 
-		mvPostsService.createPost(newPostData).then(function() {
-			mvNotifier.notify('Post created!');
+	$scope.editPost = function (userId) {
+        $location.path('/posts/' + userId);
+    };
+
+	$scope.postsClick = function() {
+		$location.path('/admin/dashboard');
+	}
+
+	$scope.createPostsClick = function() {
+		$location.path('/post-creation');
+		/*$scope.createPostVisible = true;*/
+	}
+
+	$scope.deletePost = function(postId) {
+        mvPost.delete({id: postId });
+        mvNotifier.notify('Post deleted!');
+        $location.path('/');
+
+        /*mvPostsService.deletePost().then(function() {
+			mvNotifier.notify('Post deleted!');
 			$location.path('/');
 		}, function(reason) {
 			mvNotifier.error(reason);
-		});
-	};
+		});*/
+    };
 });

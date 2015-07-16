@@ -32,14 +32,14 @@ main#page.page.dashboard
 				span.e2
 					| E
 		dl
-			dt Posts
+			dt(ng-click="postsClick()") Posts
 			dd
 				span.value
 				span.low.bar
 					span.fill(style="width: 100%")
 				span.critical.low.alert
 					span.icon
-			dt Create A Post
+			dt(ng-click="createPostsClick()") Create A Post
 			dd
 				span.value
 				span.low.bar
@@ -47,33 +47,27 @@ main#page.page.dashboard
 				span.critical.low.alert
 					span.icon
 	l1.level-1-container
-		.container
-			.well.create-post
-				form.form-horizontal(name="postsForm")
-					fieldset
-						legend Create a Post
-						.form-group
-							label.col-md-2.control-label(for="title") Title
-							.col-md-10
-								input.form-control(name="title", type="text", placeholder="Title", ng-model="title", required)
-						.form-group
-							label.col-md-2.control-label(for="subtitle") Sub-Title
-							.col-md-10
-								input.form-control(name="subtitle", type="text", placeholder="Subtitle", ng-model="subtitle", required)
-						.form-group
-							label.col-md-2.control-label(for="author") Author
-							.col-md-10
-								input.form-control(name="author", type="text", placeholder="Author", ng-model="author", required)
-						.form-group
-							label.col-md-2.control-label(for="body") Body
-							.col-md-10
-								textarea.form-control(name="body", id="bodyTextArea", rows="20", placeholder="Body", ng-model="body", required)
-						.form-group
-							.col-md-10.col-md-offset-2
-								.pull-right
-									button.btn.btn-primary(ng-click="createPost()", ng-disabled="signupForm.$invalid") Post
-									| &nbsp;
-									a.btn.btn-default(href="/") Cancel
-script(type="text/javascript", src="/app/vendor/textboxio.js")
-script.
-	var editor = textboxio.replace('#bodyTextArea');
+		.container(ng-show="!createPostVisible")
+			.well.post-list
+				form.form-inline.filter-options
+					.form-group
+						input.form-control(ng-model="searchText", placeholder="Filter")
+					.form-group.margin-left-med
+						select.form-group(ng-model="sortOrder", ng-options="item.value as item.text for item in sortOptions")
+				table.table.table-hover.table-striped.table-condensed
+					thead
+						tr
+							th Title
+							th Publish Date
+							th
+							th
+						tbody
+							tr(ng-repeat="post in posts | filter:searchText | orderBy:sortOrder")
+								td
+									a(href="/journal/{{post.slug}}") {{post.title}}
+								td {{post.published | date}}
+								td
+									a(ng-click="editPost(post._id)", class="btn btn-small btn-primary") Edit
+								td
+									a(ng-click="deletePost(post._id)", class="btn btn-small btn-danger") Delete
+		

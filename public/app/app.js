@@ -1,4 +1,4 @@
-angular.module('app', ['ngResource', 'ngRoute']);
+angular.module('app', ['ngResource', 'ngRoute', 'ephox.textboxio']);
 
 angular.module('app').config(function($routeProvider, $locationProvider){
 	var routeRoleChecks = {
@@ -24,6 +24,12 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		.when('/admin/dashboard', { templateUrl: '/partials/dashboard/dashboard', 
 			controller: 'mvDashboardCtrl', resolve: routeRoleChecks.admin
 		})
+		.when('/posts/:id', { templateUrl: '/partials/posts/post-edit', 
+			controller: 'mvPostEditCtrl', resolve: routeRoleChecks.admin
+		})
+		.when('/post-creation', { templateUrl: '/partials/posts/post-creation', 
+			controller: 'mvPostCreationCtrl', resolve: routeRoleChecks.admin
+		})
 		.when('/signin', { templateUrl: '/partials/account/signin', 
 			controller: 'mvNavBarLoginCtrl'
 		})
@@ -36,9 +42,6 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		.when('/clients', { templateUrl: '/partials/clients/client-list', 
 			controller: 'mvClientListCtrl'
 		})
-		/*.when('/clients/:id', { templateUrl: '/partials/clients/client-details', 
-			controller: 'mvClientDetailCtrl'
-		})*/
 		.when('/clients/:slug', { templateUrl: '/partials/clients/client-details', 
 			controller: 'mvClientDetailCtrl'
 		})

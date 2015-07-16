@@ -2036,6 +2036,20 @@ dl dd .age-decimal {
   left: 58%;
   width: 900px;
 }
+.well.post-list {
+  top: 0;
+  width: 900px;
+  margin-top: 15px;
+  margin-left: 220px;
+  transform: initial;
+  left: initial;
+}
+.well.post-list .filter-options {
+  margin-bottom: 30px;
+}
+.well.post-list td {
+  background-color: #1d242e !important;
+}
 legend {
   color: #00bff3;
   border: none;

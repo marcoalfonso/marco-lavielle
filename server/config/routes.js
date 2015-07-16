@@ -27,7 +27,9 @@ module.exports = function(app) {
 
 	app.get('/api/posts/:id', posts.getPostById);
 
-	app.get('/api/posts/:slug', clients.getClientBySlug);
+	app.get('/api/posts/:slug', posts.getPostBySlug);
+
+	app.delete('/api/posts/:id', posts.deletePostById);
 
 	app.get('/partials/*', function(req, res) {
 		res.render('../../public/app/' + req.params[0]);
