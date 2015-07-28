@@ -38,7 +38,7 @@ function createDefaultUsers() {
 			hash = encrypt.hashPwd(salt, 'dev2');
 			User.create({firstName:'Dev2',lastName:'Test2',username:'dev2',salt: salt, hashed_pwd: hash}); 
 		}
-	})
-};
+	});
+}
 
 exports.createDefaultUsers = createDefaultUsers;
