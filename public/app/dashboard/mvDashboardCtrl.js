@@ -12,23 +12,15 @@ angular.module('app').controller('mvDashboardCtrl', function (mvPost, $scope, $h
 
 	$scope.postsClick = function() {
 		$location.path('/admin/dashboard');
-	}
+	};
 
 	$scope.createPostsClick = function() {
 		$location.path('/post-creation');
-		/*$scope.createPostVisible = true;*/
-	}
+	};
 
 	$scope.deletePost = function(postId) {
         mvPost.delete({id: postId });
         mvNotifier.notify('Post deleted!');
-        $location.path('/');
-
-        /*mvPostsService.deletePost().then(function() {
-			mvNotifier.notify('Post deleted!');
-			$location.path('/');
-		}, function(reason) {
-			mvNotifier.error(reason);
-		});*/
+        $location.path('/admin/dashboard');
     };
 });

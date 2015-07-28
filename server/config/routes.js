@@ -31,6 +31,8 @@ module.exports = function(app) {
 
 	app.delete('/api/posts/:id', posts.deletePostById);
 
+	app.put('/api/posts', posts.updatePost);
+
 	app.get('/partials/*', function(req, res) {
 		res.render('../../public/app/' + req.params[0]);
 	});

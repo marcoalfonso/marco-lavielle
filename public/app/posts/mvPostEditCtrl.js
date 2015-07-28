@@ -1,4 +1,4 @@
-angular.module('app').controller('mvPostEditCtrl', function ($rootScope, $scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts, mvPost, $routeParams) {
+angular.module('app').controller('mvPostEditCtrl', function ($rootScope, $scope, mvNotifier, mvPostsService , $location, mvCachedPosts, mvPost, $routeParams) {
 	$scope.post = mvPost.show({id: $routeParams.id});
 
 	$scope.postsClick = function() {
@@ -9,20 +9,11 @@ angular.module('app').controller('mvPostEditCtrl', function ($rootScope, $scope,
 		$location.path('/post-creation');
 	};
 
-	$scope.updatePost = function(title, subtitle, author, body) {
-		/*var newPostData = {
-			title: $scope.title,
-			subtitle: $scope.subtitle,
-			author: $scope.author,
-			body: $scope.body
-		};
+	$scope.updatePost = function() {
 
-		mvPostsService.createPost(newPostData).then(function() {
-			mvNotifier.notify('Post created!');
-			$location.path('/');
-		}, function(reason) {
-			mvNotifier.error(reason);
-		});*/
+		mvPost.update($scope.post);
+        mvNotifier.notify('Post Updated!');
+        $location.path('/admin/dashboard');
 	};
 
 });

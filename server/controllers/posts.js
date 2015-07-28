@@ -21,8 +21,8 @@ exports.getPostBySlug = function(req, res) {
 exports.deletePostById = function(req, res) {
 	Post.findByIdAndRemove(req.params.id, function(err, post) {
 		res.send(post);
-	})
-}
+	});
+};
 
 exports.createPost = function(req, res, next) {
 	var postData = req.body;
@@ -37,4 +37,18 @@ exports.createPost = function(req, res, next) {
 			res.send(post);
 		}		
 	});
+};
+
+exports.updatePost = function(req, res) {
+	var obj = req.body;
+	var id = obj._id;
+	delete obj._id;
+	if (id) {
+		Post.update({_id: id}, obj, {upsert: true}, function(err) {
+			if(err) {
+				res.status(400);
+				return res.send({reason:err.toString()});
+			}
+		});
+	}
 };
