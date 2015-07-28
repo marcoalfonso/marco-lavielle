@@ -54,7 +54,6 @@ main#page.page
 						h1 {{post.title}}
 						h2 {{post.subtitle}}
 						small
-					.article-body
-						p {{post.body}}
+					.article-body(ng-bind-html="post.body")
 				.footer
 					.container
