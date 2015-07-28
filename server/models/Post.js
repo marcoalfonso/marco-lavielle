@@ -24,7 +24,7 @@ function createDefaultPosts() {
 		if(collection.length === 0) {
 			Post.create({title: 'Hello World', 
 				subtitle: 'Welcome To My Blog', 
-				body: "Hi, welcome to my blog. I hope the code snippets you find in here will be useful in your coding journey. I also post stock images that can be used in your website under the creative commons licence. \n\nHopefully you will find some of these helpful. :)"});
+				body: "<p>Hi, welcome to my blog. I hope the code snippets you find in here will be useful in your coding journey. I also post stock images that can be used in your website under the creative commons licence. \n\nHopefully you will find some of these helpful. :)</p>"});
 		}
 	});
 }

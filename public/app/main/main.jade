@@ -88,7 +88,7 @@ main#page.page()
 		.section-3-spinner-content.content-preview
 			h2 {{posts[posts.length - 1].title}}
 			p {{posts[posts.length - 1].subtitle}}
-			a.all(href="/journal" data-section="journal") Read More
+			a.all(href="/journal/{{posts[posts.length - 1].slug}}" data-section="journal") Read More
 		.section-3.top-circle-contents
 			strong {{posts.length}}
 			small Articles
