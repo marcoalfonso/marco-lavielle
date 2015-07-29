@@ -16,8 +16,7 @@ main#page.page
 					| C
 				span.o
 					| O
-				span.space
-					| 
+				<br> 
 				span.l
 					| L
 				span.a2
@@ -39,7 +38,19 @@ main#page.page
 				span.bar.one
 				span.bar.two
 				span.bar.three
-	.l1.level-1-container
+		dl.stats.section-1-stats
+			//- dt Seconds tracked
+			//- dd
+				span.uninitialized.incrementable-seconds
+			dt Web Applications
+			dd 3
+			dt Mobile Applications
+			dd 3
+			dt Websites
+			dd 5
+			dt Countries
+			dd 5
+	.l1.level-1-container.client-screen
 		.wide.column-3
 			header.wide.section-header.section-1-header
 				.map-container
@@ -76,3 +87,13 @@ main#page.page
 						.client-photos
 							.photo
 								img(src="{{client.photo}}")
+			.footer
+				.container
+					p.copyright
+						© 2015 Marco Lavielle ·
+						a.about(href="/about" data-section="about") About this site · 
+						a.twitter(href="http://twitter.com/marcolavielle" target="_blank" rel="nofollow")
+							span.logo
+							· 
+						a.instagram(href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow")
+							span.logo
