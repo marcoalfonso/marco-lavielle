@@ -31,7 +31,7 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 			controller: 'mvPostCreationCtrl', resolve: routeRoleChecks.admin
 		})
 		.when('/signin', { templateUrl: '/partials/account/signin', 
-			controller: 'mvNavBarLoginCtrl'
+			controller: 'mvLoginCtrl'
 		})
 		.when('/signup', { templateUrl: '/partials/account/signup', 
 			controller: 'mvSignupCtrl'

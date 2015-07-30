@@ -8,16 +8,16 @@
 				.form-group
 					input.form-control(type="password", placeholder="Password", ng-model="password")
 				button.btn.btn-primary(ng-click="signin(username, password)") Sign In
-.container(ng-show="identity.isAuthenticated()")
-	.well
-		li.dropdown
-			a.dropdown-toggle(href="", data-toggle="dropdown")
-				| {{identity.currentUser.firstName + " " + identity.currentUser.lastName}}
-				b.caret
-			ul.dropdown-menu
-				li(ng-show="identity.currentUser.isAdmin()")
-					a(href="/admin/users") User Admin
-				li
-					a(href="/profile") Profile
-				li
-					a(href="", ng-click="signout()") Sign Out
+//- .container(ng-show="identity.isAuthenticated()")
+//- 	.well
+//- 		li.dropdown
+//- 			a.dropdown-toggle(href="", data-toggle="dropdown")
+//- 				| {{identity.currentUser.firstName + " " + identity.currentUser.lastName}}
+//- 				b.caret
+//- 			ul.dropdown-menu
+//- 				li(ng-show="identity.currentUser.isAdmin()")
+//- 					a(href="/admin/users") User Admin
+//- 				li
+//- 					a(href="/profile") Profile
+//- 				li
+//- 					a(href="", ng-click="signout()") Sign Out
