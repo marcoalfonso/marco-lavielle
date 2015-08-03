@@ -1,4 +1,4 @@
-angular.module('app', ['ngResource', 'ngRoute', 'ephox.textboxio']);
+angular.module('app', ['ngResource', 'ngRoute', 'ngCookies', 'ephox.textboxio']);
 
 angular.module('app').config(function($routeProvider, $locationProvider){
 	var routeRoleChecks = {

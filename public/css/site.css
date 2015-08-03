@@ -1842,6 +1842,14 @@ dl dd .age-decimal {
   height: 160px;
   width: 250px;
 }
+.spinner .map-container .the-small-map {
+  background: url("../images/maps/250_2.png") no-repeat 0 0;
+  background-size: 250px 160px;
+  display: block;
+  margin: 0 0 0 -5px;
+  height: 160px;
+  width: 250px;
+}
 .content-preview .location-details {
   margin: 170px 0 0 0;
 }
@@ -2436,4 +2444,9 @@ text-decoration none,
   -webkit-transform: translateX(16px);
   transition-duration: 350ms;
   transition-timing-function: ease-out;
+}
+.content-preview .run-details .details {
+  position: relative;
+  margin: 130px 0 0 0;
+  z-index: 2;
 }

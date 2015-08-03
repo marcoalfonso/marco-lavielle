@@ -1,4 +1,4 @@
-angular.module('app').factory('mvAuth', function($http, mvIdentity, $q, mvUser) {
+angular.module('app').factory('mvAuth', function($http, mvIdentity, $q, mvUser, $cookieStore) {
 	return {
 		authenticateUser: function(username, password) {
 			var dfd = $q.defer();
@@ -51,18 +51,23 @@ angular.module('app').factory('mvAuth', function($http, mvIdentity, $q, mvUser) 
 			return dfd.promise;
 		},
 		authorizeCurrentUserForRoute: function(role) {
+			var adminCookie = $cookieStore.get('loggedin');
+			console.log("DID IT ALL FOR THE NOOKIE", adminCookie);
 			if(mvIdentity.isAuthorized(role)) {
-				return true;
+				if(adminCookie) {
+					return true;
+				}
 			} else {
 				return $q.reject('not authorized');
 			}
 		},
 		authorizeAuthenticatedUserForRoute: function() {
+			
 			if(mvIdentity.isAuthenticated()) {
 				return true;
 			} else {
 				return $q.reject('not authorized');
 			}
 		}
-	}
-})
+	};
+});
