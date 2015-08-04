@@ -30,7 +30,7 @@ function createDefaultClients() {
 				description: "I developed the front-end for the NSW goverment portal. I use AngularJS and Bootstrap for the UI/UX. The website has 20M+ uniques a month and has been developed to comply with WCAG standards."});
 			Client.create({name: 'CRE', 
 				featured: true, 
-				published: new Date('25/10/2014'), 
+				published: new Date('26/10/2014'), 
 				tags: ['KnockoutJS'], 
 				url: "http://www.commercialrealestate.com.au",
 				photo: "../images/thumbnails/cre.png",
