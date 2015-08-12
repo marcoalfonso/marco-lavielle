@@ -8,6 +8,6 @@ AngularJS
 CSS3
 HTML5
 
-The design is based on April-Zero's super amazing website :D
+The design is based on April-Zero's super amazing website
 
 Coded By Marco Lavielle
