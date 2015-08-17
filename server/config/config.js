@@ -10,7 +10,7 @@ module.exports = {
 	},
 	production: {
 		rootPath: rootPath,
-		db: 'mongodb://marco_lavielle:@172.17.0.64:27017/lavielle-production',
+		db: 'mongodb://heroku_x76h987r:fe6lefsp2an82ag43go39j4nfh@ds033143.mongolab.com:33143/heroku_x76h987r',
 		port: process.env.PORT || 80
 	}
 };
