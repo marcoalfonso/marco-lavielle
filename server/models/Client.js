@@ -28,7 +28,7 @@ function createDefaultClients() {
 				url: "http://service.nsw.gov.au",
 				photo: "../images/thumbnails/service_nsw.png",
 				description: "I developed the front-end for the NSW goverment portal. I use AngularJS and Bootstrap for the UI/UX. The website has 20M+ uniques a month and has been developed to comply with WCAG standards."});
-			Client.create({name: 'Sydney Morning Herald', 
+			Client.create({name: 'SMH', 
 				featured: true, 
 				published: new Date('20/12/2014'), 
 				tags: ['Jquery'], 
