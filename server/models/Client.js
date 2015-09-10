@@ -28,6 +28,13 @@ function createDefaultClients() {
 				url: "http://service.nsw.gov.au",
 				photo: "../images/thumbnails/service_nsw.png",
 				description: "I developed the front-end for the NSW goverment portal. I use AngularJS and Bootstrap for the UI/UX. The website has 20M+ uniques a month and has been developed to comply with WCAG standards."});
+			Client.create({name: 'Sydney Morning Herald', 
+				featured: true, 
+				published: new Date('20/11/2014'), 
+				tags: ['Jquery'], 
+				url: "http://www.smh.com.au",
+				photo: "../images/thumbnails/sydeny_morning_herald.png",
+				description: "I developed widgets to be used in the Sydney Morning Herald, Australia's biggest newspaper. They were optimized for speed and high device coverage"});
 			Client.create({name: 'CRE', 
 				featured: true, 
 				published: new Date('26/10/2014'), 
