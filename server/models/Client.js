@@ -33,7 +33,7 @@ function createDefaultClients() {
 				published: new Date('20/12/2014'), 
 				tags: ['Jquery'], 
 				url: "http://www.smh.com.au",
-				photo: "../images/thumbnails/sydeny_morning_herald.png",
+				photo: "../images/thumbnails/sydney_morning_herald.png",
 				description: "I developed widgets to be used in the Sydney Morning Herald, Australia's biggest newspaper. They were optimized for speed and high device coverage"});
 			Client.create({name: 'CRE', 
 				featured: true, 
