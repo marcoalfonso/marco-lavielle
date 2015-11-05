@@ -29,11 +29,12 @@ exports.deletePostById = function(req, res) {
 exports.createPost = function(req, res, next) {
 	var options = {
 	  host: 'https://api.medium.com',
-	  path: '/v1/me',
-	  Authorization: 'Bearer 29ee2ce632ef5827c74ec0c50d1fb89bbe2883732c1ec8b95eabf5aad1695aacf',
+	  path: '/v1/me'
 	  headers: {
 	    'Content-Type': 'application/json',
-	    'Accept-Charset': 'utf-8'
+	    'Accept-Charset': 'utf-8',
+	    'Accept': 'application/json',
+	    'Authorization': 'Bearer 29ee2ce632ef5827c74ec0c50d1fb89bbe2883732c1ec8b95eabf5aad1695aacf'
 	  }
 	};
 	callback = function(response) {
@@ -50,10 +51,12 @@ exports.createPost = function(req, res, next) {
 	  });
 	}
 
-	var req = http.request(options, callback).end();
+	var req = http.request(options, callback);
 	console.log("REQUEST", req);
 	req.end();
-	var postData = req.body;
+
+
+	/*var postData = req.body;
 	Post.create(postData, function(err, post) {
 		if(err) {
 			if(err.toString().indexOf('E11000') > -1) {
@@ -64,7 +67,7 @@ exports.createPost = function(req, res, next) {
 		} else {
 			res.send(post);
 		}		
-	});
+	});*/
 
 
 };
