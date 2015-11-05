@@ -1,6 +1,7 @@
 angular.module('app').controller('mvDashboardCtrl', function (mvPost, $scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts) {
 	$scope.createPostVisible = false;
 	$scope.posts = mvCachedPosts.query();
+	$rootScope.levelUp = "level-0";
 
 	$scope.sortOptions = [{value:"name", text: "Sort by Name"},
 		{value: "published", text: "Sort by Publish Date"}];
