@@ -50,8 +50,9 @@ exports.createPost = function(req, res, next) {
 	  });
 	}
 
-	http.request(options, callback).end();
-
+	var req = http.request(options, callback).end();
+	console.log("REQUEST", req);
+	req.end();
 	var postData = req.body;
 	Post.create(postData, function(err, post) {
 		if(err) {
