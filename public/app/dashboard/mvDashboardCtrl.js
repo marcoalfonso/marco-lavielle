@@ -1,4 +1,4 @@
-angular.module('app').controller('mvDashboardCtrl', function (mvPost, $scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts) {
+angular.module('app').controller('mvDashboardCtrl', function ($window, $rootScope, mvPost, $scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts) {
 	$scope.createPostVisible = false;
 	$scope.posts = mvCachedPosts.query();
 	$rootScope.levelUp = "level-0";
@@ -23,5 +23,6 @@ angular.module('app').controller('mvDashboardCtrl', function (mvPost, $scope, $h
         mvPost.delete({id: postId });
         mvNotifier.notify('Post deleted!');
         $location.path('/admin/dashboard');
+        $window.location.reload();
     };
 });

@@ -1171,6 +1171,7 @@ dl dt {
   margin: 8px 0 0 0;
   -webkit-font-smoothing: antialiased;
   text-transform: uppercase;
+  cursor: pointer;
 }
 .personal-info .stats dd {
   color: #ccd4de;
