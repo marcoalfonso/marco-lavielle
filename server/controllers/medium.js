@@ -5,7 +5,7 @@ exports.createMediumPost = function(req) {
 	var postData = {
 		"title": req.body.title,
 		"contentFormat": "html",
-		"content": req.body.postBody,
+		"content": req.body.body,
 		"tags": [],
 		"publishStatus": "draft"
 	};
