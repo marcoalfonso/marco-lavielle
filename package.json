@@ -18,13 +18,13 @@
     "express": "^4.9.8",
     "express-session": "^1.9.1",
     "jade": "^1.7.0",
-    "medium-sdk": "0.0.1",
     "mongoose": "3.8.23",
     "monguurl": "^0.1.0",
     "morgan": "^1.4.1",
     "newrelic": "^1.14.0",
     "passport": "^0.2.1",
     "passport-local": "^1.0.0",
+    "request": "^2.65.0",
     "stylus": "^0.49.2"
   },
   "devDependencies": {
