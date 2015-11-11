@@ -2,6 +2,6 @@ angular.module('app').controller('mvJournalCtrl', function($scope, $rootScope, m
 	$rootScope.loaded = "loaded";
 	$rootScope.desktop = "desktop";
 	$rootScope.levelUp = "level-0";
-	$scope.posts = mvCachedPosts.query();
+	$scope.posts = mvPost.query();
 	$timeout = twttr.widgets.load();
 });
