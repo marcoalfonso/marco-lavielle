@@ -28,10 +28,6 @@ exports.deletePostById = function(req, res) {
 };
 
 exports.createPost = function(req, res, next) {
-	console.log("REQUEST", req);
-	
-	medium.createMediumPost(req);
-
 	var postData = req.body;
 	Post.create(postData, function(err, post) {
 		if(err) {
@@ -41,7 +37,7 @@ exports.createPost = function(req, res, next) {
 			res.status(400);
 			return res.send({reason:err.toString()});
 		} else {
-			
+			medium.createMediumPost(req);
 			res.send(post);
 		}		
 	});
