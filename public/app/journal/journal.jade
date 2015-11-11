@@ -47,7 +47,7 @@ main#page.page
 		.column-3
 			.journal-content
 				.articles-list
-					.article-preview(ng-repeat="post in posts | orderBy:'published':reverse")
+					.article-preview(ng-repeat="post in posts | orderBy:'published':true")
 						h1
 							a(href="/journal/{{post.slug}}") {{post.title}}
 						p {{post.subtitle}}
