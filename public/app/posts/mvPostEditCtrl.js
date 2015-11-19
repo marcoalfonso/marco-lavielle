@@ -10,10 +10,10 @@ angular.module('app').controller('mvPostEditCtrl', function ($rootScope, $scope,
 	};
 
 	$scope.updatePost = function() {
-
 		mvPost.update($scope.post);
         mvNotifier.notify('Post Updated!');
         $location.path('/admin/dashboard');
+        $window.location.reload();
 	};
 
 });
