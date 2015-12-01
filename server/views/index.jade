@@ -2,8 +2,6 @@ extends ../includes/layout
 
 block main-content
 	section.content
-		div(ng-view, ng-class="[loaded, desktop, detected, section]")#device-info
+		div(ng-view, ng-class="[loaded, device, detected, section]", watch-resize)#device-info
 
 	footer.container.text-center
-
-		//p &copy; 2014 Creating Apps
