@@ -2063,3 +2063,158 @@ body.mobile
 .mobile .page
 	height 100%
 	max-width 100%
+.mobile .spinner.spinning.mobile-only
+	display block
+	position absolute
+	margin 0 0 0 -650px
+	left 50%
+	top -1218px
+	height 1300px
+	width 1300px
+.mobile .loaded .spinner .rings
+	opacity 0.88
+	transition -webkit-transform 700ms ease-out 100ms,opacity 400ms ease-out
+	transition -webkit-transform 600ms ease-in,opacity 300ms ease-out
+	-webkit-transform scale(1) rotateZ(0deg)
+	transform scale(1) rotateZ(0deg)
+.loaded .mobile .rings .group-1
+	opacity 1
+	-webkit-transform scale(1)
+	transform scale(1)
+.mobile .rings .group-1
+	opacity 0.5
+	-webkit-transform scale(0.994)
+	transform scale(0.994)
+.mobile .rings .group-1, .mobile .rings .group-2, .mobile .rings .group-3
+	margin -650px 0 0 -650px
+	position absolute
+	top 50%
+	left 50%
+	height 1300px
+	width 1300px
+	transition all 800ms ease-out
+	-webkit-transform-style flat
+.mobile .spinner .rings .ring.zero
+	background-image url(../images/rings_mobile/0.png)
+	-webkit-animation none
+@-webkit-keyframes slight-spin
+	0%
+		-webkit-transform rotateZ(-20deg)
+		transform rotateZ(-20deg)
+	100%
+		-webkit-transform rotateZ(20deg)
+		transform rotateZ(20deg)
+.mobile .loaded .spinner .rings .ring
+	-webkit-animation-name slight-spin
+.mobile .spinner .rings .ring
+	background url(../images/rings_mobile/1.png) no-repeat 0 bottom
+	background-size 1300px 350px
+	margin -650px 0 0 -650px
+	height 1300px
+	width 1300px
+	-webkit-animation-direction alternate
+	-webkit-animation-timing-function ease-out
+	-webkit-transform rotateZ(-20deg)
+	transform rotateZ(-20deg)
+.mobile .spinner .rings .ring.one
+	background-image url(../images/rings_mobile/1.png)
+.loaded .mobile .rings .group-2
+	-webkit-transform scale(1) rotateZ(0)
+	transform scale(1) rotateZ(0)
+.mobile .rings .group-2
+	-webkit-transform scale(1.025) rotateZ(-4deg)
+	transform scale(1.025) rotateZ(-4deg)
+.mobile .spinner .rings .ring.two
+	background-image url(../images/rings_mobile/2.png)
+	-webkit-animation-duration 16s
+.loaded .mobile .rings .group-3
+	-webkit-transform scale(1)
+	transform scale(1)
+.mobile .rings .group-3
+	-webkit-transform rotateZ(-10deg)
+	transform rotateZ(-10deg)
+.mobile .spinner .rings .ring.three
+	-webkit-animation-direction alternate-reverse
+	background-image url(../images/rings_mobile/3.png)
+	-webkit-transform rotateZ(20deg)
+	transform rotateZ(20deg)
+.mobile .spinner .rings .ring.four
+	background-image url(../images/rings_mobile/4.png)
+	display block
+	-webkit-animation-direction alternate-reverse
+	-webkit-transform rotateZ(20deg)
+	transform rotateZ(20deg)
+.mobile .spinner-cover
+	background -webkit-linear-gradient(top, #000, rgba(0,0,0,0))
+	display block
+	position absolute
+	top 0
+	left 0
+	width 100%
+	height 50px
+.mobile .home-last-location
+	display block
+	position absolute
+	top 60px
+	top 42px
+	height 20%
+	width 100%
+.loaded .home-last-location h3
+	opacity 1
+	-webkit-transform none
+	transform none
+.home-last-location
+	display none
+	position relative
+	text-align center
+	z-index 5
+	-webkit-font-smoothing antialiased
+.home-last-location h3
+	transition all 360ms ease-out
+	opacity 0
+	-webkit-transform rotateZ(-2.3deg)
+	-webkit-transform-origin center -800px
+	transform rotateZ(-2.3deg)
+	transform-origin center -800px
+.mobile h3, .mobile .h3-style
+	background #000
+	background transparent
+	border-radius 3px
+	border 1px solid #105a76
+	color #10d0d0
+	color #3faed9
+	color #00bff3
+	display inline-block
+	font 600 9px/13px "D","Lucida Grande",verdana,sans-serif
+	padding 1px 4px 0 4px
+	text-transform uppercase
+	-webkit-font-smoothing antialiased
+.loaded .home-last-location .location-details
+	opacity 1
+	-webkit-transform none
+	transform none
+.home-last-location .location-details
+	display block
+	opacity 0
+	-webkit-transform rotateZ(-3deg)
+	transform rotateZ(-3deg)
+	-webkit-transform-origin center -860px
+	transition -webkit-transform 490ms ease-out,opacity 900ms ease
+.home-last-location h1.long
+	font-size 18px
+.home-last-location h1
+	color rgba(255,255,255,0.7)
+	font 500 24px/1 "D","Lucida Grande",verdana,sans-serif
+	margin 12px 0 -4px 0
+.home-last-location h1 a
+	color inherit
+	display block
+.mobile a
+	-webkit-tap-highlight-color transparent
+.home-last-location h1 .name
+	display inline-block
+	vertical-align middle
+.home-last-location small
+	color #627895
+	font 400 14px/1.2 "D","Lucida Grande",verdana,sans-serif
+	opacity 0.8
