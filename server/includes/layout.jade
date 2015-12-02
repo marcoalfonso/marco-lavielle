@@ -31,7 +31,7 @@ html
 			};
 			return t;
 			}(document, "script", "twitter-wjs"));
-	body(ng-app='app', ng-controller="mainCtrl", ng-class="[loaded, detected, levelUp, sectionSelector, scrollable]")
+	body(ng-app='app', ng-controller="mainCtrl", ng-class="[loaded, detected, levelUp, sectionSelector, scrollable, device]", watch-resize)
 		include currentUser
 		block main-content
 		include scripts
