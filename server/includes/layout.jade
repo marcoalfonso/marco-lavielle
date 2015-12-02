@@ -1,5 +1,5 @@
 doctype html
-html
+html(ng-app='app', ng-controller="mainCtrl", ng-class="[device]", watch-resize)
 	head
 		title Marco Lavielle
 		link(href="/favicon.ico", rel="shortcut icon", type="image/x-icon")
@@ -31,7 +31,7 @@ html
 			};
 			return t;
 			}(document, "script", "twitter-wjs"));
-	body(ng-app='app', ng-controller="mainCtrl", ng-class="[loaded, detected, levelUp, sectionSelector, scrollable, device]", watch-resize)
+	body(ng-controller="mainCtrl", ng-class="[loaded, detected, levelUp, sectionSelector, scrollable, device]", watch-resize)
 		include currentUser
 		block main-content
 		include scripts
