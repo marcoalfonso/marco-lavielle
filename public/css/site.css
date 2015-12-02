@@ -2502,11 +2502,22 @@ legend {
   line-height: 16px;
   margin: 0 auto;
 }
-body.mobile {
-  height: 100%;
-  max-width: 100%;
+/*body.mobile
+	height 100%
+	max-width 100%
+	overflow hidden
+	overflow-x hidden
+	background #000
+	min-height 100%
+	height auto
+	overflow auto
+	-webkit-user-select none
+	-webkit-perspective 900px*/
+.mobile body.home {
   overflow: hidden;
   overflow-x: hidden;
+}
+.mobile body {
   background: #000;
   min-height: 100%;
   height: auto;
