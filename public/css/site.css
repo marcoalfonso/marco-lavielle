@@ -2502,17 +2502,6 @@ legend {
   line-height: 16px;
   margin: 0 auto;
 }
-/*body.mobile
-	height 100%
-	max-width 100%
-	overflow hidden
-	overflow-x hidden
-	background #000
-	min-height 100%
-	height auto
-	overflow auto
-	-webkit-user-select none
-	-webkit-perspective 900px*/
 .mobile body.home {
   overflow: hidden;
   overflow-x: hidden;
@@ -2752,4 +2741,110 @@ legend {
 }
 .mobile-only {
   display: none;
+}
+.mobile .column-2 {
+  display: block;
+}
+.mobile .column-1 {
+  display: block;
+  width: 100%;
+}
+.mobile .uplevel {
+  color: #fff;
+  cursor: pointer;
+  display: block;
+  padding: 24px 0;
+  text-decoration: none;
+  -webkit-user-select: none;
+  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  min-height: 19px;
+}
+.loaded .mobile .uplevel .arrow {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.mobile .uplevel .arrow {
+  color: #00bff3;
+  font: 32px/1 "D", "Lucida Grande", verdana, sans-serif;
+  position: absolute;
+  top: 50%;
+  left: 0;
+  margin: -16px 0 0 16px;
+  -webkit-font-smoothing: antialiased;
+  transition: all 200ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateX(-18px);
+}
+.loaded .mobile .uplevel .section-title {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.mobile .uplevel .section-title {
+  display: block;
+  font: 400 18px/1.1 "D", "Lucida Grande", verdana, sans-serif;
+  letter-spacing: 0.5em;
+  padding: 0 0 0 0.5em;
+  text-align: center;
+  text-transform: uppercase;
+  -webkit-font-smoothing: antialiased;
+  transition: all 200ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateX(16px);
+}
+.mobile .explorer-stats {
+  display: none;
+}
+.mobile .l1 .content,
+.mobile .column-3.for-section-1,
+.mobile .article-content {
+  margin-top: 70px;
+}
+.loaded .mobile .articles-list {
+  opacity: 1;
+  -webkit-transform: none;
+}
+.mobile .articles-list {
+  background: #fff;
+  text-align: left;
+  text-align: center;
+  padding-bottom: 32px;
+  width: 100%;
+  overflow: hidden;
+  transition: all 320ms ease-out;
+  opacity: 0;
+  -webkit-transform: translateY(12px);
+}
+.mobile .journal-stats {
+  display: none;
+}
+.mobile .uplevel .logo {
+  display: none;
+}
+.mobile .journal-photos {
+  max-height: 520px;
+  overflow: hidden;
+  margin-top: 150px;
+  margin-bottom: 100px;
+}
+.mobile .experience-item {
+  background: #fff;
+}
+.mobile .education-item {
+  padding: 16px 32px 24px 32px;
+  text-align: center;
+}
+.mobile .coding-skills,
+.mobile .bigger.stats,
+.mobile .section-2-header h1,
+.mobile .smaller.icon {
+  display: none;
+}
+.mobile .section-2-header {
+  margin-top: 100px;
+  padding-bottom: 40px;
+  background: #1d242e;
 }
