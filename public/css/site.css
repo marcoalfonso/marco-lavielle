@@ -2833,18 +2833,49 @@ legend {
 .mobile .experience-item {
   background: #fff;
 }
-.mobile .education-item {
+.mobile .education-item,
+.mobile .clients-list {
   padding: 16px 32px 24px 32px;
   text-align: center;
 }
 .mobile .coding-skills,
 .mobile .bigger.stats,
 .mobile .section-2-header h1,
-.mobile .smaller.icon {
+.mobile .smaller.icon,
+.mobile .section-1-stats,
+.mobile .current-location {
   display: none;
 }
 .mobile .section-2-header {
   margin-top: 100px;
   padding-bottom: 40px;
   background: #1d242e;
+}
+.mobile .client-photos img {
+  width: 100%;
+  height: 100%;
+}
+.mobile .clients-list {
+  background: #fff;
+  padding: 0;
+}
+.mobile .client-example {
+  padding: 16px 32px 24px 32px;
+  text-align: center;
+  width: 100%;
+  color: #000;
+  border-bottom: 1px solid #eee;
+}
+.mobile .client-title a {
+  color: #000;
+}
+.mobile .client-screen .content {
+  margin-top: 100px;
+}
+.mobile .client-example .tags {
+  background: transparent;
+  border-radius: 3px;
+  font: 600 9px/13px "D", "Lucida Grande", verdana, sans-serif;
+  padding: 0;
+  text-transform: uppercase;
 }
