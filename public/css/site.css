@@ -2548,7 +2548,7 @@ body.mobile {
   height: 1300px;
   width: 1300px;
 }
-.mobile .loaded .spinner .rings {
+.loaded .mobile .spinner .rings {
   opacity: 0.88;
   transition: -webkit-transform 700ms ease-out 100ms, opacity 400ms ease-out;
   transition: -webkit-transform 600ms ease-in, opacity 300ms ease-out;
@@ -2591,7 +2591,7 @@ body.mobile {
     transform: rotateZ(20deg);
   }
 }
-.mobile .loaded .spinner .rings .ring {
+.loaded .mobile .spinner .rings .ring {
   -webkit-animation-name: slight-spin;
 }
 .mobile .spinner .rings .ring {
@@ -2729,4 +2729,10 @@ body.mobile {
   color: #627895;
   font: 400 14px/1.2 "D", "Lucida Grande", verdana, sans-serif;
   opacity: 0.8;
+}
+.mobile .mobile-only {
+  display: block;
+}
+.mobile-only {
+  display: none;
 }
