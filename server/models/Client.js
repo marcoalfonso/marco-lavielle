@@ -21,6 +21,13 @@ var Client = mongoose.model('Client', clientSchema);
 function createDefaultClients() {
 	Client.find({}).exec(function(err, collection) {
 		if(collection.length === 0) {
+			Client.create({name: 'ING', 
+				featured: true, 
+				published: new Date('30/11/2015'), 
+				tags: ['Polymer'], 
+				url: "https://www.ingdirect.com.au/securebanking/",
+				photo: "../images/thumbnails/ing.png",
+				description: "Developing the front-end for the new banking portal of ING. The portal will be internationalized and exported into other regions."});
 			Client.create({name: 'Service NSW', 
 				featured: true, 
 				published: new Date('18/05/2015'), 
