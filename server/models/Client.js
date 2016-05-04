@@ -60,7 +60,7 @@ function createDefaultClients() {
 		    	featured: false, 
 		    	published: new Date('12/11/2013'), 
 		    	tags: ['Wordpress'], 
-		    	url: "http://www.alift.co",
+		    	url: "",
 		    	photo: "../images/thumbnails/a_lift.png",
 		    	description: "I created the A-lift corporate website using a heavily customized wordpress theme. The website is fully responsive and has many social features integrated."});
 		    Client.create({name: 'Ad-Roller', 
