@@ -21,13 +21,20 @@ var Client = mongoose.model('Client', clientSchema);
 function createDefaultClients() {
 	Client.find({}).exec(function(err, collection) {
 		if(collection.length === 0) {
+			Client.create({name: 'Hacker Firm', 
+				featured: true, 
+				published: new Date('04/05/2016'), 
+				tags: ['NodeJS'], 
+				url: "https://www.hackerfirm.com/",
+				photo: "../images/thumbnails/hacker_firm.png",
+				description: "Designed and developed the website for The Hacker Firm using a NodeJS back end and a AngularJS front end."});
 			Client.create({name: 'ING', 
 				featured: true, 
 				published: new Date('30/11/2015'), 
 				tags: ['Polymer'], 
 				url: "https://www.ingdirect.com.au/securebanking/",
 				photo: "../images/thumbnails/ing.png",
-				description: "Developing the front-end for the new banking portal of ING. The portal will be internationalized and exported into other regions."});
+				description: "Developed the front-end for the new banking portal of ING. The portal will be internationalized and exported into other regions."});
 			Client.create({name: 'Service NSW', 
 				featured: true, 
 				published: new Date('18/05/2015'), 
