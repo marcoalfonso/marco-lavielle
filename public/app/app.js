@@ -40,16 +40,16 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 			controller: 'mvProfileCtrl', resolve: routeRoleChecks.user
 		})
 		.when('/clients', { templateUrl: '/partials/clients/client-list', 
-			controller: 'mvClientListCtrl'
+			controller: 'clientListCtrl'
 		})
 		.when('/clients/:slug', { templateUrl: '/partials/clients/client-details', 
-			controller: 'mvClientDetailCtrl'
+			controller: 'clientDetailCtrl'
 		})
 		.when('/experience', { templateUrl: '/partials/experience/experience-details', 
-			controller: 'mvExperienceCtrl'
+			controller: 'experienceCtrl'
 		})
 		.when('/about', { templateUrl: '/partials/about/about-details', 
-			controller: 'mvAboutCtrl'
+			controller: 'aboutCtrl'
 		})
 		.when('/journal', { templateUrl: '/partials/journal/journal',
 			controller: 'mvJournalCtrl'

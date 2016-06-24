@@ -1,4 +1,4 @@
-angular.module('app').controller('mvClientDetailCtrl', function($scope, mvCachedClients, $routeParams, $rootScope) {
+angular.module('app').controller('clientDetailCtrl', function($scope, mvCachedClients, $routeParams, $rootScope) {
 	mvCachedClients.query().$promise.then(function(collection) {
 		collection.forEach(function(client) {
 			/*if (client._id === $routeParams.id) {

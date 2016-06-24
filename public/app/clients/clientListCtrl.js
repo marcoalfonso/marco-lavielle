@@ -1,4 +1,4 @@
-angular.module('app').controller('mvClientListCtrl', function($scope, mvCachedClients, $rootScope){
+angular.module('app').controller('clientListCtrl', function($scope, mvCachedClients, $rootScope){
 	$scope.clients = mvCachedClients.query();
 	$rootScope.loaded = "loaded";
 	$rootScope.levelUp = "level-0";

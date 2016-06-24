@@ -1,4 +1,4 @@
-angular.module('app').controller('mvAboutCtrl', function($scope, $rootScope){
+angular.module('app').controller('aboutCtrl', function($scope, $rootScope){
 	$rootScope.loaded = "loaded";
 	$rootScope.detected = "detected";
 	$rootScope.levelUp = "level-0";
