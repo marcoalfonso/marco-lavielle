@@ -1,10 +1,14 @@
 angular.module('app').controller('mvPostCreationCtrl', function ($scope, $http, mvNotifier, mvPostsService , $location, mvCachedPosts) {
-	$scope.postsClick = function() {
+	$scope.goToDashboard = function() {
 		$location.path('/admin/dashboard');
 	};
 
-	$scope.createPostsClick = function() {
+	$scope.createPostClick = function() {
 		$location.path('/post-creation');
+	};
+
+	$scope.createClientClick = function() {
+		$location.path('/client-creation');
 	};
 
 	$scope.createPost = function(title, subtitle, author, body) {

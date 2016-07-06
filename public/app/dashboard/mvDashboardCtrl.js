@@ -15,8 +15,12 @@ angular.module('app').controller('mvDashboardCtrl', function ($window, $rootScop
 		$location.path('/admin/dashboard');
 	};
 
-	$scope.createPostsClick = function() {
+	$scope.createPostClick = function() {
 		$location.path('/post-creation');
+	};
+
+	$scope.createClientClick = function() {
+		$location.path('/client-creation');
 	};
 
 	$scope.deletePost = function(postId) {

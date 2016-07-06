@@ -45,6 +45,9 @@ angular.module('app').config(function($routeProvider, $locationProvider){
 		.when('/clients/:slug', { templateUrl: '/partials/clients/client-details', 
 			controller: 'clientDetailCtrl'
 		})
+		.when('/client-creation', { templateUrl: '/partials/clients/client-creation', 
+			controller: 'clientCreationCtrl', resolve: routeRoleChecks.admin
+		})
 		.when('/experience', { templateUrl: '/partials/experience/experience-details', 
 			controller: 'experienceCtrl'
 		})

@@ -17,6 +17,8 @@ module.exports = function(app) {
 
 	app.get('/api/clients', clients.getClients);
 
+	app.post('/api/clients', clients.createClient);
+
 	app.get('/api/clients/:id', clients.getClientById);
 
 	app.get('/api/clients/:slug', clients.getClientBySlug);

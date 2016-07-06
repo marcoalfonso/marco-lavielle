@@ -32,14 +32,21 @@ main#page.page.dashboard
 				span.e2
 					| E
 		dl
-			dt(ng-click="postsClick()") Posts
+			dt(ng-click="postsClick()") Dashboard
 			dd
 				span.value
 				span.low.bar
 					span.fill(style="width: 100%")
 				span.critical.low.alert
 					span.icon
-			dt(ng-click="createPostsClick()") Create A Post
+			dt(ng-click="createPostClick()") Create A Post
+			dd
+				span.value
+				span.low.bar
+					span.fill(style="width: 100%")
+				span.critical.low.alert
+					span.icon
+			dt(ng-click="createClientClick()") Create A Client
 			dd
 				span.value
 				span.low.bar
