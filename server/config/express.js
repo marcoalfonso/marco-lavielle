@@ -5,14 +5,19 @@ var express = require('express'),
 	stylus = require('stylus'),
 	cookieParser = require('cookie-parser'),
 	session = require('express-session'),
-	passport = require('passport');
+	passport = require('passport'),
+  engines = require('consolidate');
 
 module.exports = function(app, config) {
 	function compile(str, path) {
 		return stylus(str).set('filename', path);
 	}
 	app.set('views', config.rootPath + '/server/views');
-	app.set('view engine', 'jade');
+	// app.set('view engine', 'jade');
+  // app.set('view engine', 'ejs');
+  app.engine('jade', engines.jade);
+  app.engine('handlebars', engines.handlebars);
+  app.set('view engine', 'jade');
 	app.use(logger('dev'));
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({
