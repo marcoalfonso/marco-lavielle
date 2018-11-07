@@ -1,0 +1,14 @@
+webpackHotUpdate("main",{
+
+/***/ "./node_modules/css-loader/index.js!./src/index.css":
+/*!*************************************************!*\
+  !*** ./node_modules/css-loader!./src/index.css ***!
+  \*************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+eval("exports = module.exports = __webpack_require__(/*! ../node_modules/css-loader/lib/css-base.js */ \"./node_modules/css-loader/lib/css-base.js\")(false);\n// imports\nexports.i(__webpack_require__(/*! -!../node_modules/css-loader!./css/core/core.css */ \"./node_modules/css-loader/index.js!./src/css/core/core.css\"), \"\");\n\n// module\nexports.push([module.i, \"/* This is global css*/\\n\\n/* Brutalist css */\\n\\n/* Global css */\\nbody {\\n  color: black;\\n  height: 100px;\\n}\\n\\n.window {\\n  border-radius: 3px;\\n  background: #222;\\n  color: #fff;\\n  overflow: hidden;\\n  position: relative;\\n  margin: 0 auto;\\n  width: 70%;\\n\\n  &:before {\\n    content: ' ';\\n    display: block;\\n    height: 48px;\\n    background: #C6C6C6;\\n  }\\n\\n  &:after {\\n    content: '. . .';\\n    position: absolute;\\n    left: 12px;\\n    right: 0;\\n    top: -3px;\\n    font-family: \\\"Times New Roman\\\", Times, serif;\\n    font-size: 96px;\\n    color: #fff;\\n    line-height: 0;\\n    letter-spacing: -12px;\\n  }\\n}\\n\\n.terminal {\\n  margin: 20px;\\n  font-family: monospace;\\n  font-size: 16px;\\n  color: #22da26;\\n\\n  .command {\\n    width: 0%;\\n    white-space: nowrap;\\n    overflow: hidden;\\n    animation: write-command 5s both;\\n\\n    &:before {\\n      content: '$ ';\\n      color: #22da26;\\n    }\\n  }\\n\\n  .log {\\n    white-space: nowrap;\\n    overflow: hidden;\\n    animation: write-log 5s both;\\n  }\\n\\n  p:nth-child(2) {\\n    animation-delay: 2s;\\n  }\\n\\n  p:nth-child(3) {\\n    animation-delay: 8s;\\n  }\\n}\\n\\n@keyframes write-command {\\n  0% {\\n    width: 0%;\\n  }\\n\\n\\n  100% {\\n    width: 100%;\\n  }\\n}\\n\\n@keyframes write-log {\\n  0% {\\n    height: 0;\\n  }\\n\\n  16% {\\n    height: 0;\\n  }\\n\\n  17% {\\n    height: 18px;\\n  }\\n\\n  33% {\\n    height: 18px;\\n  }\\n\\n  34% {\\n    height: 37px;\\n  }\\n\\n  51% {\\n    height: 37px;\\n  }\\n\\n  52% {\\n    height: 55px;\\n  }\\n\\n  69% {\\n    height: 55px;\\n  }\\n\\n  70% {\\n    height: 74px;\\n  }\\n\\n  87% {\\n    height: 74px;\\n  }\\n\\n  88% {\\n    height: 92px;\\n  }\\n\\n  88% {\\n    height: 92px;\\n  }\\n\\n  99% {\\n    height: 92px;\\n  }\\n\\n  100% {\\n    height: 110px;\\n  }\\n}\\n\", \"\"]);\n\n// exports\n\n\n//# sourceURL=webpack:///./src/index.css?./node_modules/css-loader");
+
+/***/ })
+
+})

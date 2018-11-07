@@ -1,0 +1,10 @@
+/* This is global css*/
+
+/* Brutalist css */
+/* @import url('./css/core/core.css'); */
+
+/* Global css */
+body {
+  color: black;
+  height: 100px;
+}

@@ -36,8 +36,12 @@ module.exports = function(app) {
 	app.put('/api/posts', posts.updatePost);
 
   app.get('/art', function(req, res) {
-		res.render('art.ejs');
+		res.render('index-react.ejs');
 	});
+
+app.get('/software', function(req, res) {
+  res.render('index-react.ejs');
+});
 
 	app.get('/partials/*', function(req, res) {
 		res.render('../../public/app/' + req.params[0]);

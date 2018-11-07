@@ -2,22 +2,22 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter, Switch, Route } from 'react-router-dom'
-import Art from '../components/Art/Art'
+import Software from '../components/Software/Software'
 
-class ArtPage extends Component {
+class SoftwarePage extends Component {
 
   render() {
     const { match } = this.props
 
     return (
       <Switch>
-        <Route exact path={match.url} render={() => <Art {...this.props} />} />
+        <Route exact path={match.url} render={() => <Software {...this.props} />} />
       </Switch>
     )
   }
 }
 
-ArtPage.propTypes = {
+SoftwarePage.propTypes = {
   match: PropTypes.object.isRequired
 }
 
@@ -27,4 +27,4 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = dispatch => ({
 })
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ArtPage))
+export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SoftwarePage))
