@@ -1,0 +1,14 @@
+webpackHotUpdate("main",{
+
+/***/ "./src/components/Art/Art.js":
+/*!***********************************!*\
+  !*** ./src/components/Art/Art.js ***!
+  \***********************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+eval("throw new Error(\"Module build failed: SyntaxError: Expected corresponding JSX closing tag for <input> (43:14)\\n\\n\\u001b[0m \\u001b[90m 41 | \\u001b[39m              \\t\\u001b[33m<\\u001b[39m\\u001b[33mlabel\\u001b[39m \\u001b[36mfor\\u001b[39m\\u001b[33m=\\u001b[39m\\u001b[32m\\\"mce-EMAIL\\\"\\u001b[39m\\u001b[33m>\\u001b[39m\\u001b[33m<\\u001b[39m\\u001b[33m/\\u001b[39m\\u001b[33mlabel\\u001b[39m\\u001b[33m>\\u001b[39m\\n \\u001b[90m 42 | \\u001b[39m              \\t\\u001b[33m<\\u001b[39m\\u001b[33minput\\u001b[39m type\\u001b[33m=\\u001b[39m\\u001b[32m\\\"email\\\"\\u001b[39m value\\u001b[33m=\\u001b[39m\\u001b[32m\\\"\\\"\\u001b[39m name\\u001b[33m=\\u001b[39m\\u001b[32m\\\"EMAIL\\\"\\u001b[39m className\\u001b[33m=\\u001b[39m\\u001b[32m\\\"required email\\\"\\u001b[39m id\\u001b[33m=\\u001b[39m\\u001b[32m\\\"mce-EMAIL\\\"\\u001b[39m\\u001b[33m>\\u001b[39m\\n\\u001b[31m\\u001b[1m>\\u001b[22m\\u001b[39m\\u001b[90m 43 | \\u001b[39m              \\u001b[33m<\\u001b[39m\\u001b[33m/\\u001b[39m\\u001b[33mdiv\\u001b[39m\\u001b[33m>\\u001b[39m\\n \\u001b[90m    | \\u001b[39m              \\u001b[31m\\u001b[1m^\\u001b[22m\\u001b[39m\\n \\u001b[90m 44 | \\u001b[39m              \\t\\u001b[33m<\\u001b[39m\\u001b[33mdiv\\u001b[39m id\\u001b[33m=\\u001b[39m\\u001b[32m\\\"mce-responses\\\"\\u001b[39m className\\u001b[33m=\\u001b[39m\\u001b[32m\\\"clear\\\"\\u001b[39m\\u001b[33m>\\u001b[39m\\n \\u001b[90m 45 | \\u001b[39m              \\t\\t\\u001b[33m<\\u001b[39m\\u001b[33mdiv\\u001b[39m className\\u001b[33m=\\u001b[39m\\u001b[32m\\\"response\\\"\\u001b[39m id\\u001b[33m=\\u001b[39m\\u001b[32m\\\"mce-error-response\\\"\\u001b[39m style\\u001b[33m=\\u001b[39m\\u001b[32m\\\"display:none\\\"\\u001b[39m\\u001b[33m>\\u001b[39m\\u001b[33m<\\u001b[39m\\u001b[33m/\\u001b[39m\\u001b[33mdiv\\u001b[39m\\u001b[33m>\\u001b[39m\\n \\u001b[90m 46 | \\u001b[39m              \\t\\t\\u001b[33m<\\u001b[39m\\u001b[33mdiv\\u001b[39m className\\u001b[33m=\\u001b[39m\\u001b[32m\\\"response\\\"\\u001b[39m id\\u001b[33m=\\u001b[39m\\u001b[32m\\\"mce-success-response\\\"\\u001b[39m style\\u001b[33m=\\u001b[39m\\u001b[32m\\\"display:none\\\"\\u001b[39m\\u001b[33m>\\u001b[39m\\u001b[33m<\\u001b[39m\\u001b[33m/\\u001b[39m\\u001b[33mdiv\\u001b[39m\\u001b[33m>\\u001b[39m\\u001b[0m\\n\");\n\n//# sourceURL=webpack:///./src/components/Art/Art.js?");
+
+/***/ })
+
+})

@@ -1,29 +1,45 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import styles from './Art.scss'
-
 export class Art extends Component {
+
+  nextImage() {
+
+  }
+
   render() {
     return (
-      <div className={styles.container}>
-        <div className={styles.window}>
-          <div className={styles.terminal}>
-            <p className={styles.command}>git clone https://github.com/marcoalfonso/art</p>
-            <p className={styles.log}>
-              <span>
-                Cloning into 'art'...<br />
-                remote: Reusing existing pack: 1857, done.<br />
-                remote: Total 1857 (delta 0), reused 0 (delta 0)<br />
-                Receiving objects: 100% (1857/1857), 374.35 KiB | 268.00 KiB/s, done.<br />
-                Resolving deltas: 100% (772/772), done.<br />
-                Checking connectivity... done.
-              </span>
-            </p>
-            <p className={styles.command}>rm -rf art</p>
+      <div>
+        <div id="exp-frame" className="inset-square">
+          <div id="header" className="header">
+
+            <div id="logo" className="logo"><a><img src="../images/artwork/header-logo.svg"/></a></div>
+            <div className="nav-top">
+              <a id="video-link" className="link-video"><img src="images/header-video.svg"/></a>
+              <a className="link-shop" target="_blank" href="https://dreamdiary.greedbag.com/"><img src="images/header-shop.svg"/></a>
+
+              <div className="stream">
+                <a className="stream-ap" target="_blank" href="https://itunes.apple.com/gb/album/soul-to-skin-ep/1372231203"></a>
+                <a className="stream-sp" target="_blank" href="https://open.spotify.com/artist/6Aj8TtYDe1X42BuRrkvIvT?si=IciPpNjhROiJqgoem5crgw"></a>
+                <a className="stream-sc" target="_blank" href="https://soundcloud.com/vtrpage"></a>
+              </div>
+            </div>
+            <div id="title" className="title right"><a><img src="../images/artwork/header-title.svg"/></a></div>
+          </div>
+          <div id="cover" className="">
+            <img className="vtr-cover" width="100%" height="100%" src="../images/artwork/vtr-cover.jpg"/>
+          </div>
+        </div>
+        <div className="footer">
+          <div className="back">
+            <a href="/" target="_self">Home</a>
+          </div>
+          <div className="next">
+            <a href="#" onClick={() => this.nextImage}>Next</a>
           </div>
         </div>
       </div>
-      )
+    )
   }
 }
 

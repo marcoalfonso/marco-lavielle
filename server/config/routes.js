@@ -36,7 +36,7 @@ module.exports = function(app) {
 	app.put('/api/posts', posts.updatePost);
 
   app.get('/art', function(req, res) {
-		res.render('index-react.ejs');
+		res.render('index-art.ejs');
 	});
 
 app.get('/software', function(req, res) {

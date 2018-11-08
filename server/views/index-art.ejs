@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<!--[if lt IE 8]>
+  <html class="js lt-ie8 lt-ie9" lang="en">
+<![endif]-->
+<!--[if IE 8]>
+  <html class="js lt-ie9 ie8" lang="en">
+<![endif]-->
+<!--[if IE 9 ]>
+  <html class="js ie9" lang="en">
+<![endif]-->
+<!--[if !(IE)]><!-->
+  <html class="js" lang="en">
+<!--<![endif]-->
+	<head>
+    <title>Marco Lavielle</title>
+		<meta charSet="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+		<link rel="shortcut icon" href="/static/media/favicon.png" type="image/x-icon" />
+    <noscript>
+     Javascript is disabled. Please enable javascript and refresh the page.
+    </noscript>
+  </head>
+	<body>
+		<div id="app"></div>
+    <script src="/dist/bundle.js"></script>
+    <script>
+      var myFrame = document.getElementById("exp-frame");
+      var myHeader = document.getElementById("header");
+      var myClose = document.getElementById("close");
+      var myCover = document.getElementById("cover");
+      var myExp = document.getElementById("exp");
+      var myVideo = document.getElementById("video");
+      var myLogo = document.getElementById("logo");
+      var myTitle = document.getElementById("title");
+      var myMusic = document.getElementById("music");
+      var rotate = 50;
+      var pageX = document.documentElement.clientWidth;
+      var pageY = document.documentElement.clientHeight;
+      var mouseY=0;
+      var mouseX=0;
+      var isTouchDevice = 'ontouchstart' in document.documentElement;
+    	if( isTouchDevice ) {
+      }else{
+
+       document.body.onmousemove = function(event){
+          mouseX = event.clientX;
+          mouseY = event.clientY;
+          rotateY = -(pageX/2-mouseX)/pageX*rotate;
+          //rotateY = 10;
+          rotateX = (pageY/2-mouseY)/pageY*rotate;
+          //console.log("X: "+ rotateX);
+          //console.log("Y: "+ rotateY);
+
+          myFrame.style.webkitTransform = 'translateX(-50%) translateY(-50%) scale(1) perspective( 1400px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)';
+      //    myFrame.css({ '-webkit-transform' : 'translateX(-50%) translateY(-50%) scale(1) perspective( 1960px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)'});
+        };
+      }
+      var vidLink = document.getElementById("video-link");
+      myCover.addEventListener("click", showExp);
+      vidLink.addEventListener("click", showVideo);
+      myClose.addEventListener("click", closeVideo);
+      function showExp(){
+          myFrame.className = 'fullscreen';
+          document.body.onmousemove = null;
+          myFrame.style.webkitTransform = 'translateX(-50%) translateY(-50%) scale(1) perspective( 0px ) rotateY('+0+'deg) rotateX('+0+'deg)';
+          myCover.removeEventListener("click", showExp);
+          myCover.className = "hidden";
+          setTimeout(showExpTwo, 600);
+      }
+
+      function showExpTwo(){
+          myLogo.addEventListener("click", closeExp);
+          myTitle.addEventListener("click", closeExp);
+          myExp.src = "experience.html";
+          myExp.className = "";
+          myMusic.currentTime = 0;
+          myMusic.play();
+      }
+
+
+    function closeExp(){
+      myFrame.className = 'inset-square';
+      myExp.className = "hidden";
+      myLogo.removeEventListener("click", closeExp);
+      myTitle.removeEventListener("click", closeExp);
+
+      if( isTouchDevice ) {}else{
+       document.body.onmousemove = function(event){
+          mouseX = event.clientX;
+          mouseY = event.clientY;
+          rotateY = -(pageX/2-mouseX)/pageX*rotate;
+          //rotateY = 10;
+          rotateX = (pageY/2-mouseY)/pageY*rotate;
+          //console.log("X: "+ rotateX);
+          //console.log("Y: "+ rotateY);
+
+          myFrame.style.webkitTransform = 'translateX(-50%) translateY(-50%) scale(1) perspective( 1400px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)';
+      //    myFrame.css({ '-webkit-transform' : 'translateX(-50%) translateY(-50%) scale(1) perspective( 1960px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)'});
+        };
+        }
+          myCover.className = "";
+          myExp.src = "";
+          myMusic.pause();
+          myCover.addEventListener("click", showExp);
+
+      }
+
+      function showVideo(){
+        //console.log("expand?");
+          myHeader.className = 'header hidden';
+          myFrame.className = 'inset-video';
+          myCover.className = "hidden";
+          myExp.className = "hidden";
+              myExp.src = "";
+
+                  myClose.className = "";
+              setTimeout(showVideoTwo, 600);
+      }
+      function showVideoTwo(){
+          myVideo.className = "";
+          myVideo.src = "https://www.youtube.com/embed/2FyZMIpI-YM?rel=0&amp;showinfo=0;&autoplay=1;";
+        myMusic.pause();
+      }
+
+      function closeVideo(){
+          myFrame.className = 'fullscreen';
+          myClose.className = "hidden";
+          myExp.className = "";
+          myVideo.className = "hidden";
+          myVideo.src = "";
+            myHeader.className = 'header';
+          setTimeout(closeVideoTwo, 600);
+      }
+      function closeVideoTwo(){
+        myExp.src = "experience.html";
+          myMusic.currentTime = 0;
+          myMusic.play();
+      }
+    </script>
+	</body>
+</html>
