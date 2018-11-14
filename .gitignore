@@ -2,3 +2,4 @@
 node_modules
 newrelic_agent.log
 *.log
+public/dist/hot
