@@ -22,19 +22,19 @@ html, body{
   height: -webkit-calc(100% - 0px);
 }
 
-a, a:hover, a:active, a:visited{
+/* a, a:hover, a:active, a:visited{
 	cursor: pointer !important;
 	color: rgba(255, 255, 255, 1);
   opacity: .5;
 	text-decoration: none;
-  -webkit-transition: opacity .6s; /* Safari */
+  -webkit-transition: opacity .6s;
   transition: opacity .6s;
 }
 
 a:hover{
   	color: rgba(255, 255, 255, 1);
     opacity: 1;
-}
+} */
 
 .hidden{
   display: none;
