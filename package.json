@@ -11,7 +11,7 @@
     "build-prod": "webpack -p --config webpack.prod.config.js"
   },
   "engines": {
-    "node": "0.10.x",
+    "node": "6.12.3",
     "npm": "2.0.x"
   },
   "repository": {
