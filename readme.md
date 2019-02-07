@@ -1,13 +1,9 @@
 This is my personal website.
 
-The tech stack is:
-Node.js
-Express
-Mongoose
-AngularJS
-CSS3
-HTML5
+Node 6.12.3 and mongoDB are required to run the app.
 
-The design is based on April-Zero's super amazing website
+To run:
+1. npm install
+2. npm run start-server
 
 Coded By Marco Lavielle
