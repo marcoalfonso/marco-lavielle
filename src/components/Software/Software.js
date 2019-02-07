@@ -31,7 +31,7 @@ export class Software extends Component {
         		<br/>
         		<span className="grey oneliner sm-off">{'// Introduction --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------'}</span>
         		<span className="sm-off"><br/><br/></span>
-        		<span className="blue"><em>{'function'}</em></span> <span className="green">musicProgramming</span>(<span className="orange"><em>task</em></span>)
+        		<span className="blue"><em>{'function'}</em></span> <span className="green">musicForProgramming</span>(<span className="orange"><em>task</em></span>)
         		<span className="sm-off">
         			<br/>{'{'}<br/>
         			<span className="string-indent">
