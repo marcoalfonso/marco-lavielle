@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { withRouter, Switch, Route } from 'react-router-dom'
-import Art from '../components/Art/Art'
+import Art from './components/Art/Art'
 
 class ArtPage extends Component {
 
