@@ -31,7 +31,7 @@ main#page.page
 	ul.sections-nav
 		span.selection.cursor-only
 		li.section-1(ng-mouseenter="section='preview-section-1'")
-			a(href="/clients" target="_self")
+			a(href="/software" target="_self")
 				strong Software
 				span.alive.icon.section-1-icon
 					span.bar.one
@@ -58,7 +58,7 @@ main#page.page
 				.details
 					h3 Currently Coding At
 					h4 JSON Capital
-					a.pjax.all(href="/clients") See all
+					a.pjax.all(href="/software" target="_self") See all
 		.section-2-spinner-content.content-preview
 			.map-container
 				#map-goes-here.map-goes-here
@@ -101,7 +101,7 @@ main#page.page
 				span.symbol
 					span.text
 						| Work
-			a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1")
+			a(href="/software"  target="_self" class="full-preview section-1 section-1-circles")
 				span.circle-a.circle.backdrop
 				span.circle-b.circle.backdrop
 				//- span.circle-c.circle.backdrop

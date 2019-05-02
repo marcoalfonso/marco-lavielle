@@ -36,9 +36,9 @@ module.exports = {
         ]
       },
       {
-        test: /\.(eot|svg|ttf|woff|woff2)$/,
-        loader: 'file?name=public/fonts/[name].[ext]'
-      }
+        test: /\.(jpg|png|woff|woff2|eot|ttf|svg)$/,
+        loader: 'file-loader?name=[path][name].[ext]?[hash]'
+      },
     ]
   },
   resolve: {

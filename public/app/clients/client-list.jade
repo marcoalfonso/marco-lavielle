@@ -1,5 +1,4 @@
 main#page.page
-  //.column-2.backdrop
   .wide.column-3.backdrop.for-section-1
   .wide.section-header.backdrop
   .column-1
@@ -41,14 +40,6 @@ main#page.page
     dl.stats.section-1-stats
       dt PI
       dd 3.1416
-      //- dt Countries
-      //- dd 2
-      //- dt
-      //-   a(href="/clients" class="full-preview section-1 section-1-circles" data-section="section-1") Software >
-      //- dd
-      //- dt
-      //-   a(href="/experience" class="full-preview section-2" data-section="section-2") Experience >
-      //- dd
   .l1.level-1-container.client-screen
     .wide.column-3
       header.wide.section-header.section-1-header
@@ -75,8 +66,7 @@ main#page.page
         .clients-list
           .client-example(ng-repeat="client in clients | orderBy:'name'")
             h2.client-title
-              //- a(href="/clients/{{client.slug}}") {{client.name}}
-              a {{client.name}}
+              a(href="{{client.url}}" target="_blank" rel="nofollow") {{client.name}}
               ul.tags
                 li.tag {{client.tags}}
             .client-url
