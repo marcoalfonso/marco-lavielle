@@ -7,7 +7,6 @@ import RootContainer from './routes'
 import configureStore from './store'
 
 const store = configureStore()
-import './index.css'
 
 const App = () =>
   <Provider store={store}>
