@@ -42,21 +42,19 @@
       var isTouchDevice = 'ontouchstart' in document.documentElement;
     	if( isTouchDevice ) {
       }else{
+       document.body.onmousemove = function(event){
+          mouseX = event.clientX;
+          mouseY = event.clientY;
+          rotateY = -(pageX/2-mouseX)/pageX*rotate;
+          //rotateY = 10;
+          rotateX = (pageY/2-mouseY)/pageY*rotate;
+          //console.log("X: "+ rotateX);
+          //console.log("Y: "+ rotateY);
 
-
+          myFrame.style.webkitTransform = 'translateX(-50%) translateY(-50%) scale(1) perspective( 1400px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)';
+      //    myFrame.css({ '-webkit-transform' : 'translateX(-50%) translateY(-50%) scale(1) perspective( 1960px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)'});
+        };
       }
-      document.body.onmousemove = function(event){
-         mouseX = event.clientX;
-         mouseY = event.clientY;
-         rotateY = -(pageX/2-mouseX)/pageX*rotate;
-         //rotateY = 10;
-         rotateX = (pageY/2-mouseY)/pageY*rotate;
-         //console.log("X: "+ rotateX);
-         //console.log("Y: "+ rotateY);
-
-         myFrame.style.webkitTransform = 'translateX(-50%) translateY(-50%) scale(1) perspective( 1400px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)';
-     //    myFrame.css({ '-webkit-transform' : 'translateX(-50%) translateY(-50%) scale(1) perspective( 1960px ) rotateY('+rotateY+'deg) rotateX('+rotateX+'deg)'});
-       };
       var vidLink = document.getElementById("video-link");
       // myCover.addEventListener("click", showExp);
       vidLink.addEventListener("click", showVideo);
