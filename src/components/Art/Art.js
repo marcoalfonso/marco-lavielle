@@ -13,9 +13,13 @@ export class Art extends Component {
     const img5 = '../images/paintings/flowers_3.jpg';
     const img6 = '../images/paintings/straya.jpg';
 
+    this.abstractSeries = [img1]
+    this.flowerSeries = [img4, img3]
+    this.acrylicSeries = [img2, img6]
+
     this.state = {
       index: 0,
-      imgList: [img1, img2, img3, img4, img6]
+      imgList: this.abstractSeries
     }
   }
 
@@ -33,6 +37,18 @@ export class Art extends Component {
     } else {
       this.setState({ index: this.state.index - 1 })
     }
+  }
+
+  setFlowerSeries = () => {
+    this.setState({ imgList: this.flowerSeries })
+  }
+
+  setAbstractSeries = () => {
+    this.setState({ imgList: this.abstractSeries })
+  }
+
+  setAcrylicSeries = () => {
+    this.setState({ imgList: this.acrylicSeries })
   }
 
   render() {
@@ -54,16 +70,21 @@ export class Art extends Component {
         					Paintings
         				</a>
         				<ul className="dropdown">
-        					<li className="item">
-        						<a href="#" className="active">
-        							<span className="before">—</span>2017 - 2019
+                  <li className="item">
+        						<a onClick={this.setAbstractSeries} className={this.state.imgList === this.abstractSeries ? 'active' : null}>
+        							<span className="before">—</span>Abstract Series
         						</a>
         					</li>
-        					{/*<li className="item">
-        						<a href="/4428911-2017" className="">
+        					<li className="item">
+        						<a onClick={this.setFlowerSeries}  className={this.state.imgList === this.flowerSeries ? 'active' : null}>
         							<span className="before">—</span>Flower Series
         						</a>
-        					</li>*/}
+        					</li>
+                  <li className="item">
+        						<a onClick={this.setAcrylicSeries} className={this.state.imgList === this.acrylicSeries ? 'active' : null}>
+        							<span className="before">—</span>Acrylic Series
+        						</a>
+        					</li>
         				</ul>
         			</li>
         			<li className="item  top_level">

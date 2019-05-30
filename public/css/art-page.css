@@ -300,7 +300,7 @@ input[type=submit]:hover, input[type=button]:hover, input[type=reset]:hover{
 @media (max-width: 600px) and (orientation: portrait) {
   .inset-square, .inset-square:hover {
     width: 90vw;
-    height: 90vw;
+    height: fit-content;
     margin-top: -40px;
   }
 
