@@ -10,10 +10,10 @@ export class Art extends Component {
     const img2 = '../images/paintings/girl.jpg';
     const img3 = '../images/paintings/flowers_1.jpg';
     const img4 = '../images/paintings/flowers_2.jpg';
-    const img5 = '../images/paintings/flowers_3.jpg';
+    const img5 = '../images/paintings/abstract_1.jpg';
     const img6 = '../images/paintings/straya.jpg';
 
-    this.abstractSeries = [img1]
+    this.abstractSeries = [img1, img5]
     this.flowerSeries = [img4, img3]
     this.acrylicSeries = [img2, img6]
 
@@ -76,7 +76,7 @@ export class Art extends Component {
         						</a>
         					</li>
         					<li className="item">
-        						<a onClick={this.setFlowerSeries}  className={this.state.imgList === this.flowerSeries ? 'active' : null}>
+        						<a onClick={this.setFlowerSeries} className={this.state.imgList === this.flowerSeries ? 'active' : null}>
         							<span className="before">—</span>Flower Series
         						</a>
         					</li>
