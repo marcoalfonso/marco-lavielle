@@ -17,11 +17,19 @@ body {
   color: #ccc;
 }
 .footer {
-  display: none;
+  /* display: none; */
   color: #555;
   font: 400 15px/18px "DINWeb", "Lucida Grande", verdana, sans-serif;
   padding: 36px 42px 24px 50px;
   -webkit-font-smoothing: antialiased;
+}
+.mobile .footer {
+  position: absolute;
+  bottom: 5%;
+  width: 100%;
+  text-align: center;
+  display: block;
+  transition-delay: 325ms;
 }
 .client-screen .footer {
   border-top: 1px solid rgba(0,0,0,0.1);
@@ -1138,6 +1146,10 @@ a.uplevel.pjax {
   opacity: 0;
   -webkit-transform: translateY(15px);
 }
+.mobile .personal-info .text {
+  width: 100%;
+  max-width: 100%;
+}
 .personal-info .text p {
   margin: 0 16px 24px 16px;
   max-width: 25em;
@@ -1147,6 +1159,10 @@ a.uplevel.pjax {
   margin: 24px 0 0 2.5%;
   width: 30%;
   -webkit-font-smoothing: antialiased;
+}
+.mobile .personal-info .stats {
+  width: 100%;
+  margin: 0px;
 }
 .loaded .personal-info .stats dl {
   opacity: 1;
@@ -1160,6 +1176,9 @@ a.uplevel.pjax {
   transition: all 280ms ease-out;
   opacity: 0;
   -webkit-transform: translateY(15px);
+}
+.mobile .personal-info .stats dl {
+  width: 50%;
 }
 .personal-info .stats dt {
   color: #00bff3;
@@ -1271,6 +1290,10 @@ dl dd {
   width: 20%;
   height: 300px;
   transition-delay: 240ms;
+}
+.mobile .personal-info .mri {
+  margin: 0px;
+  width: 100%;
 }
 .loaded .mri {
   opacity: 1;
@@ -2720,6 +2743,9 @@ legend {
   font: 500 24px/1 "D", "Lucida Grande", verdana, sans-serif;
   margin: 12px 0 -4px 0;
 }
+.mobile .home-last-location h1 {
+  margin: 12px 0 10px 0;
+}
 .home-last-location h1 a {
   color: inherit;
   display: block;
@@ -2757,12 +2783,13 @@ legend {
   text-decoration: none;
   -webkit-user-select: none;
   position: relative;
-  position: absolute;
+  /* position: absolute; */
   top: 0;
   left: 0;
   width: 100%;
   min-height: 19px;
 }
+
 .loaded .mobile .uplevel .arrow {
   opacity: 1;
   -webkit-transform: none;
@@ -2828,6 +2855,7 @@ legend {
   display: none;
 }
 .mobile .journal-photos {
+  display: none;
   max-height: 520px;
   overflow: hidden;
   margin-top: 150px;
@@ -2850,7 +2878,6 @@ legend {
   display: none;
 }
 .mobile .section-2-header {
-  margin-top: 100px;
   padding-bottom: 40px;
   background: #1d242e;
 }
