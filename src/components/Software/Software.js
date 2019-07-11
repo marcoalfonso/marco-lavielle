@@ -141,13 +141,7 @@ export class Software extends Component {
                     <p className="copyright">
                       © Marco Lavielle ·
                       <a href="/about" className="about">
-                        About this site ·
-                      </a>
-                      <a href="http://twitter.com/marcolavielle" target="_blank" rel="nofollow" className="twitter">
-                        <span className="logo"> · </span>
-                      </a>
-                      <a href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow" className="instagram">
-                        <span className="logo"></span>
+                        About this site
                       </a>
                     </p>
                   </div>
