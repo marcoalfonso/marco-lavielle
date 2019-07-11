@@ -1,5 +1,4 @@
 main#page.page
-	.column-2.wider.backdrop.for-section-3
 	.column-3.backdrop.for-section-3
 	.column-4.backdrop.for-section-3
 	.column-1.slim.for-level-1.for-section-3
@@ -34,15 +33,6 @@ main#page.page
 				span.e2
 					| E
 			h1.section-title Journal
-		dl.stats.journal-stats
-			.twitter-follow-button-wrapper
-				a.twitter-follow-button(href='https://twitter.com/marcolavielle', data-show-count='false') Follow @marcolavielle
-			dt Instagram
-			dd
-				a(href="http://instagram.com/cuban_papi_chulo" target="_blank" rel="nofollow") cuban_papi_chulo
-	.column-2.scrollable.wider.for-section-3
-		.journal-photos
-			#instafeed
 	.l1.level-1-container
 		.column-3
 			.journal-content
@@ -57,10 +47,3 @@ main#page.page
 						p.copyright
 							© Marco Lavielle ·
 							a.about(href="/about" data-section="about") About this site
-script(type='text/javascript').
-	var userFeed = new Instafeed({
-		get: 'user',
-		userId: 48584866,
-		accessToken: '48584866.ba5d994.f8a489f5ea9b4d6ba9feb4653b05efd6'
-		});
-		userFeed.run();
