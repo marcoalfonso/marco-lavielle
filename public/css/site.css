@@ -1152,7 +1152,7 @@ a.uplevel.pjax {
 }
 .personal-info .text p {
   margin: 0 16px 24px 16px;
-  max-width: 25em;
+  /* max-width: 25em; */
 }
 .personal-info .stats {
   float: left;
@@ -1321,7 +1321,7 @@ dl dd {
   -webkit-animation-iteration-count: 1;
 }
 .mri .layer {
-  background: url("../images/mri/mri-light.jpg") no-repeat 55% 0;
+  background: url("../images/mri/mri-light.jpg") no-repeat 50% 0;
   background-size: 100px 300px;
   display: block;
   position: absolute;
