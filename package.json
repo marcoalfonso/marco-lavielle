@@ -38,7 +38,7 @@
     "file-loader": "^3.0.1",
     "jade": "^1.7.0",
     "lodash": ">=4.17.11",
-    "mongoose": "~4.4",
+    "mongoose": "~5.7",
     "monguurl": "^0.1.0",
     "morgan": "^1.4.1",
     "passport": "^0.2.1",
