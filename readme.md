@@ -7,3 +7,7 @@ To run:
 2. npm run start-server
 
 Coded By Marco Lavielle
+
+To deploy:
+1. npm run build-prod
+2. git push heroku master
