@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
   entry: [
@@ -42,7 +43,8 @@ module.exports = {
     ]
   },
   resolve: {
-    extensions: ['*', '.js', '.jsx']
+    modules: [path.resolve('./src'), 'node_modules'],
+    extensions: ['.js', '.jsx', '.json']
   },
   output: {
     path: __dirname + '/public/dist',

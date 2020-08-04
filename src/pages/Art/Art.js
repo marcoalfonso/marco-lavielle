@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import styles from './Art.scss'
+import styles from './Art.module.css'
 
 export class Art extends Component {
   constructor() {
@@ -40,15 +40,15 @@ export class Art extends Component {
   }
 
   setFlowerSeries = () => {
-    this.setState({ imgList: this.flowerSeries })
+    this.setState({ imgList: this.flowerSeries, index: 0 })
   }
 
   setAbstractSeries = () => {
-    this.setState({ imgList: this.abstractSeries })
+    this.setState({ imgList: this.abstractSeries, index: 0 })
   }
 
   setAcrylicSeries = () => {
-    this.setState({ imgList: this.acrylicSeries })
+    this.setState({ imgList: this.acrylicSeries, index: 0 })
   }
 
   render() {

@@ -4,7 +4,7 @@ var mongoose = require('mongoose'),
 	postModel = require('../models/Post');
 
 module.exports = function(config) {
-	mongoose.connect(config.db);
+	mongoose.connect(config.db), { useNewUrlParser: true };
 	var db = mongoose.connection;
 	db.on('error', console.error.bind(console, 'connection error..'));
 	db.once('open', function callback() {

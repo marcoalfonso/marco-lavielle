@@ -9,3 +9,6 @@
 
 /* App Constants */
 export const SENDING_REQUEST = 'SENDING_REQUEST'
+export const SET_CLIENTS = 'SET_CLIENTS'
+export const SET_POSTS = 'SET_POSTS'
+

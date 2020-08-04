@@ -41,6 +41,10 @@ module.exports = function(app) {
 
   app.get('/software', function(req, res) {
     res.render('index-react.ejs');
+	});
+	
+	app.get('/homepage', function(req, res) {
+    res.render('index-react.ejs');
   });
 
 	app.get('/partials/*', function(req, res) {
@@ -59,7 +63,7 @@ module.exports = function(app) {
 	});
 
 	app.get('*', function(req, res) {
-		res.render('index', {
+		res.render('index-react.ejs', {
 			bootstrappedUser: req.user
 		});
 	});

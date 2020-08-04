@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { CarouselProvider, Slider, Slide, ButtonBack, ButtonNext, DotGroup } from 'pure-react-carousel'
 import axios from 'axios'
 import _ from 'underscore'
-import styles from './Software.scss'
+import styles from './Software.module.css'
 
 export class Software extends Component {
   constructor(props) {

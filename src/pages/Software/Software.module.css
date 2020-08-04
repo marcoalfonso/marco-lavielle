@@ -1,4 +1,4 @@
-.container {
+/* .container {
   position:fixed;
   padding:0;
   margin:0;
@@ -45,31 +45,31 @@
   font-size: 16px;
   color: #22da26;
 
-  .command {
-    width: 0%;
-    white-space: nowrap;
-    overflow: hidden;
-    animation: write-command 5s both;
+}
+.terminal  .command {
+  width: 0%;
+  white-space: nowrap;
+  overflow: hidden;
+  animation: write-command 5s both;
+}
 
-    &:before {
-      content: '$ ';
-      color: #22da26;
-    }
-  }
+.terminal:before {
+  content: '$ ';
+  color: #22da26;
+}
 
-  .log {
-    white-space: nowrap;
-    overflow: hidden;
-    animation: write-log 5s both;
-  }
+.log {
+  white-space: nowrap;
+  overflow: hidden;
+  animation: write-log 5s both;
+}
 
-  p:nth-child(2) {
-    animation-delay: 2s;
-  }
+.terminal p:nth-child(2) {
+  animation-delay: 2s;
+}
 
-  p:nth-child(3) {
-    animation-delay: 8s;
-  }
+.terminal p:nth-child(3) {
+  animation-delay: 8s;
 }
 
 @keyframes write-command {
@@ -140,4 +140,4 @@
     height: 110px;
     display: none;
   }
-}
+} */

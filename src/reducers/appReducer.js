@@ -11,11 +11,16 @@
  */
 
 import {
-  SENDING_REQUEST
+  SENDING_REQUEST,
+  SET_CLIENTS,
+  SET_POSTS
 } from '../constants/constants'
 
 // The initial application state
 const initialState = {
+  loading: false,
+  clients: null,
+  posts: null
 }
 
 const appReducer = (state = initialState, action) => {
@@ -23,7 +28,19 @@ const appReducer = (state = initialState, action) => {
     case SENDING_REQUEST:
       return {
         ...state,
-        currentlySending: action.sending
+        loading: action.loading
+      }
+
+    case SET_CLIENTS:
+      return {
+        ...state,
+        clients: action.clients
+      }
+    
+    case SET_POSTS:
+      return {
+        ...state,
+        posts: action.posts
       }
 
     default:
