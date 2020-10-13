@@ -10,7 +10,7 @@ module.exports = {
 	},
 	production: {
 		rootPath: rootPath,
-		db: process.env.MONGOLAB_URI,
+		db: process.env.DB_URI,
 		port: process.env.PORT || 80
 	}
 };
