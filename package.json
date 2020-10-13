@@ -28,6 +28,7 @@
     ]
   },
   "dependencies": {
+    "antd": "^4.7.0",
     "axios": "^0.18.0",
     "body-parser": "^1.9.1",
     "consolidate": "^0.15.1",

@@ -5,12 +5,16 @@ import Homepage from './pages/Homepage/Homepage'
 import ArtPage from './pages/Art/Art'
 import SoftwarePage from './pages/Software/Software'
 import AboutPage from './pages/About/About'
+import JournalPage from './pages/Journal/Journal'
+import PostPage from './pages/Post/Post'
 
 export const Routes = () =>
   <Switch>
     <Route exact path={`/`} component={Homepage} />
     <Route exact path={`/art`} component={ArtPage} />
     <Route exact path={`/software`} component={SoftwarePage} />
+    <Route exact path={`/journal`} component={JournalPage} />
+    <Route exact path={`/journal/:post`} component={PostPage} />
     <Route exact path={`/about`} component={AboutPage} />
   </Switch>
 

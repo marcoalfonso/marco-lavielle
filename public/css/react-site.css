@@ -49,7 +49,7 @@ body {
   margin: 0;
   position: fixed;
   top: 0;
-  left: 38%;
+  left: 20%;
   right: 0;
   height: 100%;
   transition: opacity 160ms ease-out 120ms, -webkit-transform 160ms ease-out 120ms;
@@ -1037,7 +1037,7 @@ a.uplevel.pjax {
   overflow: hidden;
   position: absolute;
   top: 0;
-  left: 38%;
+  left: 20%;
   right: 0;
 }
 .loaded .desktop .column-3 {
@@ -1058,7 +1058,7 @@ a.uplevel.pjax {
   overflow: hidden;
   position: absolute;
   top: 0;
-  left: 38%;
+  left: 20%;
   right: 0;
 }
 .desktop .column-1,
