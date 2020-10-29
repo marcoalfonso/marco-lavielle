@@ -23,6 +23,8 @@ module.exports = function(app) {
 
 	app.get('/api/clients/:slug', clients.getClientBySlug);
 
+	app.delete('/api/clients/:id', clients.deleteClientById);
+
 	app.post('/api/posts', posts.createPost);
 
 	app.get('/api/posts', posts.getPosts);

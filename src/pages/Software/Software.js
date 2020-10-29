@@ -127,7 +127,7 @@ export class Software extends Component {
                           </div>
                           <div className="client-photos">
                             <div className="photo">
-                              <img src={client.photo}/>
+                              <img src={client.photo} alt="Client Photo" onError={(e)=>{e.target.onerror = null; e.target.src='../images/thumbnails/400x221.png'}}/>
                             </div>
                           </div>
                           {/*<small><div className="client-description">{client.description}</div></small>*/}

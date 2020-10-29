@@ -78,7 +78,7 @@ export class Dashboard extends Component {
                       <tr key={index}>
                         <td><a href={`/journal/${post._id}`}>{post.title}</a></td>
                         <td>{post.published}</td>
-                        <td><a className="btn btn-small btn-primary" onClick={e => this.props.history.push(`/admin/post/${post.slug}`)}>Edit</a></td>
+                        <td><a className="btn btn-small btn-primary" onClick={e => this.props.history.push(`/admin/post/${post._id}`)}>Edit</a></td>
                         <td><a className="btn btn-small btn-danger" onClick={e => this.props.deletePost(post._id)}>Delete</a></td>
                       </tr>
                     )

@@ -15,13 +15,15 @@ import {
   SET_CLIENTS,
   SET_POSTS,
   SET_POST,
-  SET_USER
+  SET_USER,
+  SET_CLIENT
 } from '../constants/constants'
 
 // The initial application state
 const initialState = {
   loading: false,
   clients: null,
+  client: null,
   posts: null,
   post : null,
   user: null
@@ -39,6 +41,12 @@ const appReducer = (state = initialState, action) => {
       return {
         ...state,
         clients: action.clients
+      }
+
+    case SET_CLIENT:
+      return {
+        ...state,
+        client: action.client
       }
     
     case SET_POSTS:

@@ -8,7 +8,7 @@ import {
   Form
 } from 'antd'
 
-import { editClient } from 'actions/appActions'
+import { editClient, getClient } from 'actions/appActions'
 
 import styles from './EditClient.module.css'
 
@@ -20,6 +20,9 @@ export class EditClient extends Component {
     document.body.classList.add('detected')
     document.body.classList.add('desktop')
     document.body.classList.add('level-0')
+    if (this.props.match.params.id) {
+      this.props.getClient(this.props.match.params.id)
+    }
   }
 
   handleOk = (e) => {
@@ -89,55 +92,36 @@ export class EditClient extends Component {
                           required: true,
                           message: 'Name is mandatory',
                         }
-                      ]
+                      ],
+                      initialValue: this.props.client && this.props.client.name
                     })(
                       <Input className="form-control"/>,
                     )}
                   </Form.Item>
                   <Form.Item label="Tags" className="form-group">
                     {getFieldDecorator('tags', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Tags is mandatory',
-                        }
-                      ]
+                      initialValue: this.props.client && this.props.client.tags
                     })(
                       <Input className="form-control"/>,
                     )}
                   </Form.Item>
                   <Form.Item label="URL" className="form-group">
                     {getFieldDecorator('url', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'URL is mandatory',
-                        }
-                      ]
+                      initialValue: this.props.client && this.props.client.url
                     })(
                       <Input className="form-control"/>,
                     )}
                   </Form.Item>
                   <Form.Item label="Photo URL" className="form-group">
                     {getFieldDecorator('photo', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Photo URL is mandatory',
-                        }
-                      ]
+                      initialValue: this.props.client && this.props.client.photo
                     })(
                       <Input className="form-control"/>,
                     )}
                   </Form.Item>
                   <Form.Item label="Description" className="form-group">
-                    {getFieldDecorator('body', {
-                      rules: [
-                        {
-                          required: true,
-                          message: 'Body is mandatory',
-                        }
-                      ]
+                    {getFieldDecorator('description', {
+                      initialValue: this.props.client && this.props.client.description
                     })(
                       <Input.TextArea rows={10} className="form-control"/>,
                     )}
@@ -159,10 +143,12 @@ export class EditClient extends Component {
 }
 
 const mapStateToProps = state => ({
+  client: state.app.client
 })
 
 const mapDispatchToProps = dispatch => ({
-  editClient: (formData, action) => dispatch(editClient(formData, action))
+  editClient: (formData, action) => dispatch(editClient(formData, action)),
+  getClient: id => dispatch(getClient(id))
 })
 
 const WrappedEditClientForm = Form.create({ name: 'edit_client_form' })(EditClient);

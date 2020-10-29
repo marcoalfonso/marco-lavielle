@@ -18,6 +18,12 @@ exports.getClientBySlug = function(req, res) {
 	});
 };
 
+exports.deleteClientById = function(req, res) {
+	Client.findByIdAndRemove(req.params.id, function(err, client) {
+		res.send(client);
+	});
+};
+
 exports.createClient = function(req, res, next) {
 	var clientData = req.body;
 	Client.create(clientData, function(err, client) {
