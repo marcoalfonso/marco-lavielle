@@ -63,20 +63,6 @@ function createDefaultClients() {
 				url: "http://www.lawpath.com.au",
 				photo: "../images/thumbnails/lawpath.png",
 				description: "As the first engineering hire, I built LawPath from the ground up using Ruby on Rails for the back-end and AngularJS for the front-end. Besides that we used a PostgreSQL db and used logarithmic matching for our clients."});
-			Client.create({name: 'A-lift', 
-				featured: false, 
-				published: new Date('12/11/2013'), 
-				tags: '', 
-				url: '',
-				photo: "../images/thumbnails/a_lift.png",
-				description: "I created the A-lift corporate website using a heavily customized wordpress theme. The website is fully responsive and has many social features integrated."});
-			Client.create({name: 'Ad-Roller', 
-				featured: false, 
-				published: new Date('13/01/2014'), 
-				tags: '', 
-				url: "http://www.ad-roller.com.au",
-				photo: "../images/thumbnails/ad_roller.png",
-				description: "The website of Ad-roller was done using wordpress. I started with an empty theme and built the whole UI and UX using several wordpress libraries."});
 		}
 	});
 }

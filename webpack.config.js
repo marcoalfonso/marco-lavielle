@@ -53,6 +53,10 @@ module.exports = {
     hotUpdateChunkFilename: 'hot/hot-update.js',
     hotUpdateMainFilename: 'hot/hot-update.json'
   },
+  devtool: 'source-map',
+  optimization: {
+    minimize: false,
+  },
   plugins: [
     new webpack.HotModuleReplacementPlugin()
   ],

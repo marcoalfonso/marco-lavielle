@@ -27,7 +27,7 @@ module.exports = function(app) {
 
 	app.get('/api/posts', posts.getPosts);
 
-	// app.get('/api/posts/:id', posts.getPostById);
+	app.get('/api/posts/:id', posts.getPostById);
 
 	app.get('/api/posts/:slug', posts.getPostBySlug);
 
@@ -37,26 +37,6 @@ module.exports = function(app) {
 
   app.get('/art', function(req, res) {
 		res.render('index-art.ejs');
-	});
-
-  app.get('/software', function(req, res) {
-    res.render('index-react.ejs');
-	});
-	
-	app.get('/homepage', function(req, res) {
-    res.render('index-react.ejs');
-	});
-	
-	app.get('/journal', function(req, res) {
-    res.render('index-react.ejs');
-	});
-	
-	app.get('/journal/:post', function(req, res) {
-    res.render('index-react.ejs');
-  });
-
-	app.get('/partials/*', function(req, res) {
-		res.render('../../public/app/' + req.params[0]);
 	});
 
 	app.post('/login', auth.authenticate);
@@ -71,7 +51,7 @@ module.exports = function(app) {
 	});
 
 	app.get('*', function(req, res) {
-		res.render('index.jade', {
+		res.render('index-react.ejs', {
 			bootstrappedUser: req.user
 		});
 	});

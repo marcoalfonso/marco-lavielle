@@ -24,8 +24,6 @@ export class Post extends Component {
   }
 
   render() {
-    console.log("this.props", this.props)
-
     return (
       <main className="page loaded desktop detected preview-section-1" id="page">
         <div className="column-2 wider backdrop for-section-3"></div>

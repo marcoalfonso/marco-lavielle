@@ -984,6 +984,7 @@ a.uplevel.pjax {
   opacity: 1;
   -webkit-transform: translateX(0);
   transition-delay: 60ms;
+  width: 100%;
 }
 .loaded .desktop .dashboard .column-2.backdrop {
   width: 100%;
@@ -2906,4 +2907,7 @@ legend {
   font: 500 32px/1.3 "DINWeb", "Lucida Grande", verdana, sans-serif;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+.loaded .desktop .dashboard .column-2.backdrop {
+  width: 100%;
 }

@@ -56,8 +56,8 @@ export class Journal extends Component {
                 {this.props.posts && this.props.posts.map((post, index) => {
                   return (
                     <div key={index} className="article-preview">
-                      <h1><a href={`/journal/${post.slug}`}>{post.title}</a></h1>
-                      <p>{post.subtitle}</p><a className="pjax read-more" href={`/journal/${post.slug}`}>Read More</a>
+                      <h1><a href={`/journal/${post._id}`}>{post.title}</a></h1>
+                      <p>{post.subtitle}</p><a className="pjax read-more" href={`/journal/${post._id}`}>Read More</a>
                     </div>
                   )
                 })}

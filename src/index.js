@@ -2,17 +2,20 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom'
 import { Provider } from 'react-redux'
+import { CookiesProvider } from 'react-cookie'
 
-import RootContainer from './routes'
+import RootContainer from './App.js'
 import configureStore from './store'
 
 const store = configureStore()
 
 const App = () =>
   <Provider store={store}>
-    <BrowserRouter>
-      <RootContainer />
-    </BrowserRouter>
+    <CookiesProvider>
+      <BrowserRouter>
+        <RootContainer />
+      </BrowserRouter>
+    </CookiesProvider>
   </Provider>
 
 ReactDOM.render(<App />, document.getElementById('app'))

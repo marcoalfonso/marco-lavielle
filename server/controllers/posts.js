@@ -37,7 +37,7 @@ exports.createPost = function(req, res, next) {
 			res.status(400);
 			return res.send({reason:err.toString()});
 		} else {
-			medium.createMediumPost(req);
+			// medium.createMediumPost(req);
 			res.send(post);
 		}		
 	});
