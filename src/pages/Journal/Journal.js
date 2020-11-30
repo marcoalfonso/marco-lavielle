@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
+import _ from 'underscore'
 
 import { getPosts } from 'actions/appActions'
 
@@ -23,6 +24,7 @@ export class Journal extends Component {
   }
 
   render() {
+    const posts = this.props.posts && _.sortBy(this.props.posts, 'published').reverse()
     return (
       <main className="page loaded desktop detected preview-section-1" id="page">
         <div className="column-3 backdrop for-section-3"></div>
@@ -53,7 +55,7 @@ export class Journal extends Component {
           <div className="column-3">
             <div className="journal-content">
               <div className="articles-list">
-                {this.props.posts && this.props.posts.map((post, index) => {
+                {posts && posts.map((post, index) => {
                   return (
                     <div key={index} className="article-preview">
                       <h1><a href={`/journal/${post.slug}`}>{post.title}</a></h1>
