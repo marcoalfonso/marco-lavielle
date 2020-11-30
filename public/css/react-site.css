@@ -2911,3 +2911,22 @@ legend {
 .loaded .desktop .dashboard .column-2.backdrop {
   width: 100%;
 }
+.ql-container {
+  border-bottom-left-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+  background: #fefcfc;
+  color: black;
+}
+/* Snow Theme */
+.ql-snow.ql-toolbar {
+  display: block;
+  background: #eaecec;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+}
+.ql-editor {
+  min-height: 18em;
+}
+pre {
+  white-space: pre-wrap;
+}

@@ -116,7 +116,7 @@ export class Homepage extends Component {
           <div className="section-3-spinner-content content-preview">
             <h2>{this.props.posts && this.props.posts[this.props.posts.length - 1].title}</h2>
             <p>{this.props.posts && this.props.posts[this.props.posts.length - 1].subtitle}</p>
-            <a className="all" href="/journal/{{posts[posts.length - 1].slug}}" data-section="journal">Read More</a>
+            <a className="all" href={`/journal/${this.props.posts && this.props.posts[this.props.posts.length - 1].slug}`} data-section="journal">Read More</a>
           </div>
           <div className="section-3 top-circle-contents">
             <strong>{this.props.posts && this.props.posts.length}</strong>

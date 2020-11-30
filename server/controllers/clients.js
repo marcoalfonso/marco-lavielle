@@ -38,3 +38,17 @@ exports.createClient = function(req, res, next) {
 		}		
 	});
 };
+
+exports.updateClient = function(req, res) {
+	var obj = req.body;
+	var id = obj._id;
+	delete obj._id;
+	if (id) {
+		Client.update({_id: id}, obj, {upsert: true}, function(err) {
+			if(err) {
+				res.status(400);
+				return res.send({reason:err.toString()});
+			}
+		});
+	}
+};

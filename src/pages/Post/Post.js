@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-import { getPost } from 'actions/appActions'
+import { getPostBySlug } from 'actions/appActions'
 
 import styles from './Post.module.css'
 
@@ -20,7 +20,7 @@ export class Post extends Component {
     document.body.classList.add('detected')
     document.body.classList.add('desktop')
     document.body.classList.add('level-1')
-    this.props.getPost(this.props.match.params.post)
+    this.props.getPostBySlug(this.props.match.params.post)
   }
 
   render() {
@@ -99,7 +99,7 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  getPost: (slug) => dispatch(getPost(slug)),
+  getPostBySlug: (slug) => dispatch(getPostBySlug(slug)),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Post))

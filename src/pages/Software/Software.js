@@ -21,7 +21,6 @@ export class Software extends Component {
     let self = this
     axios.get('/api/clients')
     .then(function (response) {
-      console.log(response.data);
       self.setState({ clients: response.data })
     })
     .catch(function (error) {

@@ -45,6 +45,16 @@ export const getPost = (id) => dispatch => {
   })
 }
 
+export const getPostBySlug = (slug) => dispatch => {
+  return api({ 
+    method: 'GET',
+    url: `/api/posts/slug/${slug}`
+  })
+  .then(response => {
+    dispatch(setPost(response.data))
+  })
+}
+
 export const setPost = post => ({ type: SET_POST, post: post })
 
 export const getClient = (id) => dispatch => {
@@ -77,7 +87,7 @@ export const signin = (formData, history) => dispatch => {
 
 export const setUser = user => ({ type: SET_USER, user: user })
 
-export const editPost = (formData, action) => dispatch => {
+export const createPost = (formData) => dispatch => {
   return api({ 
     method: 'POST',
     url: `/api/posts`,
@@ -88,9 +98,31 @@ export const editPost = (formData, action) => dispatch => {
   })
 }
 
-export const editClient = (formData, action) => dispatch => {
+export const editPost = (formData) => dispatch => {
+  return api({ 
+    method: 'PUT',
+    url: `/api/posts`,
+    data: JSON.stringify(formData)
+  })
+  .then(response => {
+    return response
+  })
+}
+
+export const createClient = (formData) => dispatch => {
   return api({ 
     method: 'POST',
+    url: `/api/clients`,
+    data: JSON.stringify(formData)
+  })
+  .then(response => {
+    return response
+  })
+}
+
+export const editClient = (formData) => dispatch => {
+  return api({ 
+    method: 'PUT',
     url: `/api/clients`,
     data: JSON.stringify(formData)
   })

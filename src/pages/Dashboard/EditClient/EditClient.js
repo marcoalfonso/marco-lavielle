@@ -8,7 +8,7 @@ import {
   Form
 } from 'antd'
 
-import { editClient, getClient } from 'actions/appActions'
+import { editClient, getClient, createClient, setPost, setClient } from 'actions/appActions'
 
 import styles from './EditClient.module.css'
 
@@ -29,10 +29,20 @@ export class EditClient extends Component {
     e.preventDefault()
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        this.props.editClient(values).then(response => {
-          this.props.history.push(`/admin/dashboard`)
-          toast.success('You have successfully created a post!')
-        })
+        console.log("this.props.match.params.id", this.props.match.params.id)
+        if (this.props.match.params.id) {
+          const valuesWithId = {...values, _id: this.props.match.params.id}
+          this.props.editClient(valuesWithId).then(response => {
+            this.props.history.push(`/admin/dashboard`)
+            toast.success('You have successfully updated a client!')
+          })
+        } else {
+          this.props.createClient(values).then(response => {
+            this.props.history.push(`/admin/dashboard`)
+            toast.success('You have successfully created a client!')
+          })
+        }
+        
       }
     })
   }
@@ -73,9 +83,23 @@ export class EditClient extends Component {
                 <span className="icon"></span>
               </span>
             </dd>
-            <dt onClick={e => this.props.history.push(`/admin/post`)}>Create A Post</dt>
+            <dt 
+              onClick={e => {
+                this.props.setPost(null)
+                this.props.history.push(`/admin/post`)
+              }}
+            >
+              Create A Post
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
-            <dt onClick={e => this.props.history.push(`/admin/client`)}>Create A Client</dt>
+            <dt 
+              onClick={e => {
+                this.props.setClient(null)
+                this.props.history.push(`/admin/client`)
+              }}
+            >
+              Create A Client
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
           </dl>
         </div>
@@ -147,8 +171,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  editClient: (formData, action) => dispatch(editClient(formData, action)),
-  getClient: id => dispatch(getClient(id))
+  editClient: (formData) => dispatch(editClient(formData)),
+  getClient: id => dispatch(getClient(id)),
+  createClient: (formData) => dispatch(createClient(formData)),
+  setPost: post => dispatch(setPost(post)),
+  setClient: client => dispatch(setClient(client))
 })
 
 const WrappedEditClientForm = Form.create({ name: 'edit_client_form' })(EditClient);

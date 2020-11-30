@@ -7,12 +7,14 @@ import {
   Input,
   Form
 } from 'antd'
+import { createPost, editPost, getPost, setPost, setClient } from 'actions/appActions'
+import ReactQuill from 'react-quill'
 
-import { editPost, getPost } from 'actions/appActions'
-
+import 'react-quill/dist/quill.snow.css'
 import styles from './EditPost.module.css'
 
 export class EditPost extends Component {
+
   componentDidMount() {
     document.documentElement.classList.add('desktop')
     document.body.classList.add('loaded')
@@ -29,10 +31,18 @@ export class EditPost extends Component {
     e.preventDefault()
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
-        this.props.editPost(values).then(response => {
-          this.props.history.push(`/admin/dashboard`)
-          toast.success('You have successfully created a post!')
-        })
+        if (this.props.match.params.id) {
+          const valuesWithId = {...values, _id: this.props.match.params.id}
+          this.props.editPost(valuesWithId).then(response => {
+            this.props.history.push(`/admin/dashboard`)
+            toast.success('You have successfully edited a post!')
+          })
+        } else {
+          this.props.createPost(values).then(response => {
+            this.props.history.push(`/admin/dashboard`)
+            toast.success('You have successfully created a post!')
+          })
+        }
       }
     })
   }
@@ -40,6 +50,27 @@ export class EditPost extends Component {
   render() {
     console.log("this.props", this.props)
     const { getFieldDecorator } = this.props.form
+    const formats = [
+      'header', 'font', 'size',
+      'bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block',
+      'list', 'bullet', 'indent',
+      'link', 'image', 'video'
+    ]
+    const modules = {
+      toolbar: [
+        [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
+        [{size: []}],
+        ['bold', 'italic', 'underline', 'strike', 'blockquote', 'code-block'],
+        [{'list': 'ordered'}, {'list': 'bullet'}, 
+         {'indent': '-1'}, {'indent': '+1'}],
+        ['link', 'image', 'video'],
+        ['clean']
+      ],
+      clipboard: {
+        // toggle to add extra line breaks when pasting HTML:
+        matchVisual: false,
+      }
+    }
     return (
       <main className="page loaded desktop dashboard detected preview-section-1" id="page">
         <div className="column-2 backdrop"></div>
@@ -74,9 +105,23 @@ export class EditPost extends Component {
                 <span className="icon"></span>
               </span>
             </dd>
-            <dt onClick={e => this.props.history.push(`/admin/post`)}>Create A Post</dt>
+            <dt 
+              onClick={e => {
+                this.props.setPost(null)
+                this.props.history.push(`/admin/post`)
+              }}
+            >
+              Create A Post
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
-            <dt onClick={e => this.props.history.push(`/admin/client`)}>Create A Client</dt>
+            <dt 
+              onClick={e => {
+                this.props.setClient(null)
+                this.props.history.push(`/admin/client`)
+              }}
+            >
+              Create A Client
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
           </dl>
         </div>
@@ -135,7 +180,11 @@ export class EditPost extends Component {
                       ],
                       initialValue: this.props.post && this.props.post.body
                     })(
-                      <Input.TextArea rows={10} className="form-control"/>,
+                      <ReactQuill 
+                        theme="snow"
+                        formats={formats}
+                        modules={modules}
+                      />,
                     )}
                   </Form.Item>
                   <Button className="btn btn-primary" type="primary" size="large" htmlType="submit" style={{ minWidth: '130px', marginRight: '10px' }}>
@@ -159,8 +208,11 @@ const mapStateToProps = state => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-  editPost: (formData, action) => dispatch(editPost(formData, action)),
-  getPost: id => dispatch(getPost(id))
+  createPost: (formData) => dispatch(createPost(formData)),
+  editPost: (formData) => dispatch(editPost(formData)),
+  getPost: id => dispatch(getPost(id)),
+  setPost: post => dispatch(setPost(post)),
+  setClient: client => dispatch(setClient(client))
 })
 
 const WrappedEditPostForm = Form.create({ name: 'edit_post_form' })(EditPost);

@@ -19,6 +19,8 @@ module.exports = function(app) {
 
 	app.post('/api/clients', clients.createClient);
 
+	app.put('/api/clients', clients.updateClient);
+
 	app.get('/api/clients/:id', clients.getClientById);
 
 	app.get('/api/clients/:slug', clients.getClientBySlug);
@@ -31,7 +33,7 @@ module.exports = function(app) {
 
 	app.get('/api/posts/:id', posts.getPostById);
 
-	app.get('/api/posts/:slug', posts.getPostBySlug);
+	app.get('/api/posts/slug/:slug', posts.getPostBySlug);
 
 	app.delete('/api/posts/:id', posts.deletePostById);
 

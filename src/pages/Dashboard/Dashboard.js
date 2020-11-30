@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
-import { getPosts, getClients, deleteClient, deletePost } from 'actions/appActions'
+import { getPosts, getClients, deleteClient, deletePost, setPost, setClient } from 'actions/appActions'
 
 import styles from './Dashboard.module.css'
 
@@ -53,9 +53,23 @@ export class Dashboard extends Component {
                 <span className="icon"></span>
               </span>
             </dd>
-            <dt onClick={e => this.props.history.push(`/admin/post`)}>Create A Post</dt>
+            <dt 
+              onClick={e => {
+                this.props.setPost(null)
+                this.props.history.push(`/admin/post`)
+              }}
+            >
+              Create A Post
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
-            <dt onClick={e => this.props.history.push(`/admin/client`)}>Create A Client</dt>
+            <dt 
+              onClick={e => {
+                this.props.setClient(null)
+                this.props.history.push(`/admin/client`)
+              }}
+            >
+              Create A Client
+            </dt>
             <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
           </dl>
         </div>
@@ -126,7 +140,9 @@ const mapDispatchToProps = dispatch => ({
   getPosts: () => dispatch(getPosts()),
   getClients: () => dispatch(getClients()),
   deletePost: id => dispatch(deletePost(id)),
-  deleteClient: id => dispatch(deleteClient(id))
+  deleteClient: id => dispatch(deleteClient(id)),
+  setPost: post => dispatch(setPost(post)),
+  setClient: client => dispatch(setClient(client))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Dashboard))

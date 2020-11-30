@@ -5,7 +5,7 @@ var clientSchema = mongoose.Schema({
 	name: {type:String, required:'{PATH} is required!'},
 	slug: { type:String, index: { unique: true } },
 	featured: {type:Boolean},
-	published: {type:Date},
+	published: { type : Date, default: Date.now },
 	tags: {type:String},
 	url: {type:String},
 	photo: {type:String},
