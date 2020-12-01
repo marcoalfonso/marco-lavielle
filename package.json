@@ -8,7 +8,8 @@
     "start-server": "npm run build-dev & nodemon server.js",
     "start-client": "webpack-dev-server --config ./webpack.config.js --mode development",
     "build-dev": "webpack --mode development --watch",
-    "build-prod": "webpack -p --config webpack.config.js"
+    "build-prod": "webpack -p --config webpack.config.js",
+    "heroku-postbuild": "webpack -p"
   },
   "engines": {
     "node": "6.12.3",
