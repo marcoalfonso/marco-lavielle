@@ -8,25 +8,14 @@ import { getPosts } from 'actions/appActions'
 import styles from './Journal.module.css'
 
 export class Journal extends Component {
-  state = {
-    section: 'preview-section-1'
-  }
-
   componentDidMount() {
-    // document.documentElement.classList.add('detected')
-    // document.documentElement.classList.add('cursor')
-    document.documentElement.classList.add('desktop')
-    document.body.classList.add('loaded')
-    document.body.classList.add('home')
-    document.body.classList.add('detected')
-    document.body.classList.add('desktop')
     this.props.getPosts()
   }
 
   render() {
     const posts = this.props.posts && _.sortBy(this.props.posts, 'published').reverse()
     return (
-      <main className="page loaded desktop detected preview-section-1" id="page">
+      <main className={`page loaded ${this.props.device} detected preview-section-1`} id="page">
         <div className="column-3 backdrop for-section-3"></div>
         <div className="column-4 backdrop for-section-3"></div>
         <div className="column-1 slim for-level-1 for-section-3">
@@ -53,7 +42,7 @@ export class Journal extends Component {
         </div>
         <div className="l1 level-1-container">
           <div className="column-3">
-            <div className="journal-content">
+            <div className="article-content">
               <div className="articles-list">
                 {posts && posts.map((post, index) => {
                   return (
@@ -84,7 +73,8 @@ export class Journal extends Component {
 
 const mapStateToProps = state => ({
   loading: state.app.loading,
-  posts: state.app.posts
+  posts: state.app.posts,
+  device: state.app.device
 })
 
 const mapDispatchToProps = dispatch => ({

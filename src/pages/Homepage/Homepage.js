@@ -12,13 +12,6 @@ export class Homepage extends Component {
   }
 
   componentDidMount() {
-    // document.documentElement.classList.add('detected')
-    // document.documentElement.classList.add('cursor')
-    document.documentElement.classList.add('desktop')
-    document.body.classList.add('loaded')
-    document.body.classList.add('home')
-    document.body.classList.add('detected')
-    document.body.classList.add('desktop')
     this.props.getClients()
     this.props.getPosts()
   }
@@ -29,7 +22,7 @@ export class Homepage extends Component {
 
   render() {
     return (
-      <main className={`page loaded desktop detected ${this.state.section}`} id="page">
+      <main className={`page loaded ${this.props.device} detected ${this.state.section}`} id="page">
         <h1 className="logo home-logo">
           <span className="m">M</span>
           <span className="a">A</span>
@@ -222,7 +215,8 @@ export class Homepage extends Component {
 const mapStateToProps = state => ({
   loading: state.app.loading,
   clients: state.app.clients,
-  posts: state.app.posts
+  posts: state.app.posts,
+  device: state.app.device
 })
 
 const mapDispatchToProps = dispatch => ({

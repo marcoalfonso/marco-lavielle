@@ -5,23 +5,9 @@ import { connect } from 'react-redux'
 import styles from './About.module.css'
 
 export class About extends Component {
-  state = {
-  }
-
-  componentDidMount() {
-    // document.documentElement.classList.add('detected')
-    // document.documentElement.classList.add('cursor')
-    // document.documentElement.classList.add('desktop')
-    document.getElementById("app").classList.add('desktop')
-    document.body.classList.add('loaded')
-    document.body.classList.add('home')
-    document.body.classList.add('detected')
-    document.body.classList.add('desktop')
-  }
-
   render() {
     return (
-      <main className="page ng-scope scan-faster" id="page">
+      <main className={`page loaded ${this.props.device} detected`} id="page">
         <div className="column-1">
           <a className="uplevel pjax" href="/" data-section="home">
             <span className="arrow">‹</span>
@@ -104,7 +90,8 @@ export class About extends Component {
 }
 
 const mapStateToProps = state => ({
-  loading: state.app.loading
+  loading: state.app.loading,
+  device: state.app.device
 })
 
 const mapDispatchToProps = dispatch => ({

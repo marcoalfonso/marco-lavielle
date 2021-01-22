@@ -5,7 +5,8 @@ import {
   SET_POSTS,
   SET_POST,
   SET_USER,
-  SET_CLIENT
+  SET_CLIENT,
+  SET_DEVICE
 } from 'constants/constants'
 import { toast } from 'react-toastify'
 
@@ -154,3 +155,5 @@ export const deleteClient = (id) => dispatch => {
     return response
   })
 }
+
+export const setDevice = device => ({ type: SET_DEVICE, device: device })

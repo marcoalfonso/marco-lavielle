@@ -1,48 +1,21 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import { CarouselProvider, Slider, Slide, ButtonBack, ButtonNext, DotGroup } from 'pure-react-carousel'
-import axios from 'axios'
 import _ from 'underscore'
+import { getClients } from 'actions/appActions'
+
 import styles from './Software.module.css'
 
 export class Software extends Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      clients: [],
-      width: 0,
-      height: 0
-    }
-  }
-
   componentDidMount() {
-    this.updateWindowDimensions();
-    window.addEventListener("resize", this.updateWindowDimensions);
-    let self = this
-    axios.get('/api/clients')
-    .then(function (response) {
-      self.setState({ clients: response.data })
-    })
-    .catch(function (error) {
-      console.log(error)
-    });
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener("resize", this.updateWindowDimensions);
-  }
-
-  updateWindowDimensions = () => {
-    this.setState({ width: window.innerWidth, height: window.innerHeight });
+    this.props.getClients()
   }
 
   render() {
-    const sortedClients = _.sortBy(this.state.clients, 'name');
-    const device = this.state.width > 812 ? 'desktop' : 'mobile';
+    const sortedClients = _.sortBy(this.props.clients && this.props.clients, 'name');
     return (
-      <div className={`home ng-scope loaded detected ` + device + ` level-0`}>
+      <div className={`home ng-scope loaded detected ${this.props.device} level-0`}>
         <section className="content">
-          <div id="device-info" className={`ng-scope loaded  ` + device + ` detected preview-section-1`}>
+          <div id="device-info" className={`ng-scope loaded ${this.props.device} detected preview-section-1`}>
             <main id="page" className="page ng-scope">
               <div className="wide column-3 backdrop for-section-1"></div>
               <div className="wide section-header backdrop"></div>
@@ -156,9 +129,12 @@ export class Software extends Component {
 }
 
 const mapStateToProps = state => ({
+  clients: state.app.clients,
+  device: state.app.device
 })
 
 const mapDispatchToProps = dispatch => ({
+  getClients: () => dispatch(getClients()),
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Software)

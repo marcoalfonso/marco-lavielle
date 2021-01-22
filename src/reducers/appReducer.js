@@ -16,7 +16,8 @@ import {
   SET_POSTS,
   SET_POST,
   SET_USER,
-  SET_CLIENT
+  SET_CLIENT,
+  SET_DEVICE
 } from '../constants/constants'
 
 // The initial application state
@@ -26,7 +27,8 @@ const initialState = {
   client: null,
   posts: null,
   post : null,
-  user: null
+  user: null,
+  device: null
 }
 
 const appReducer = (state = initialState, action) => {
@@ -65,6 +67,12 @@ const appReducer = (state = initialState, action) => {
       return {
         ...state,
         user: action.user
+      }
+    
+    case SET_DEVICE:
+      return {
+        ...state,
+        device: action.device
       }
 
     default:
