@@ -5,9 +5,13 @@ import { connect } from 'react-redux'
 import styles from './About.module.css'
 
 export class About extends Component {
+  componentDidMount() {
+    document.body.classList.add('level-0')
+  }
+
   render() {
     return (
-      <main className={`page loaded ${this.props.device} detected`} id="page">
+      <main className={`page loaded level-1 ${this.props.device} detected scan-faster`} id="page">
         <div className="column-1">
           <a className="uplevel pjax" href="/" data-section="home">
             <span className="arrow">‹</span>

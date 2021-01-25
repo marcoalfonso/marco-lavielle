@@ -9,6 +9,7 @@ import styles from './Journal.module.css'
 
 export class Journal extends Component {
   componentDidMount() {
+    document.body.classList.add('level-0')
     this.props.getPosts()
   }
 

@@ -8,6 +8,7 @@ import styles from './Post.module.css'
 
 export class Post extends Component {
   componentDidMount() {
+    document.body.classList.add('level-1')
     this.props.getPostBySlug(this.props.match.params.post)
   }
 
@@ -18,7 +19,7 @@ export class Post extends Component {
         <div className="column-3 backdrop for-section-3"></div>
         <div className="column-4 backdrop for-section-3"></div>
         <div className="column-1 slim for-level-1 for-section-3">
-          <a className="uplevel pjax" href="/journal" data-section="home">
+          <a className="uplevel pjax" href="/" data-section="home">
             <span className="arrow">‹</span>
             <strong className="logo">
               <span className="m">M</span>

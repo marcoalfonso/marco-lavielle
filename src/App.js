@@ -33,7 +33,6 @@ export class App extends Component {
             document.body.classList.remove('mobile')
             document.documentElement.classList.add('desktop')
             document.body.classList.add('desktop')
-            document.body.classList.add('desktop')
             this.props.setDevice('desktop')
           }
         }}
