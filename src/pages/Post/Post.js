@@ -14,12 +14,12 @@ export class Post extends Component {
 
   render() {
     return (
-      <main className={`page loaded ${this.props.device} detected preview-section-1`} id="page">
+      <main className={`loaded ${this.props.device} detected preview-section-1`} id="page">
         <div className="column-2 wider backdrop for-section-3"></div>
         <div className="column-3 backdrop for-section-3"></div>
         <div className="column-4 backdrop for-section-3"></div>
         <div className="column-1 slim for-level-1 for-section-3">
-          <a className="uplevel pjax" href="/" data-section="home">
+          <a className="uplevel pjax" href="/journal" data-section="home">
             <span className="arrow">‹</span>
             <strong className="logo">
               <span className="m">M</span>

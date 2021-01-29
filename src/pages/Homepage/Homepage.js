@@ -22,7 +22,7 @@ export class Homepage extends Component {
 
   render() {
     return (
-      <main className={`page loaded ${this.props.device} detected ${this.state.section}`} id="page">
+      <main className={`page loaded ${this.props.device} detected ${this.state.section} homepage`} id="page">
         <h1 className="logo home-logo">
           <span className="m">M</span>
           <span className="a">A</span>

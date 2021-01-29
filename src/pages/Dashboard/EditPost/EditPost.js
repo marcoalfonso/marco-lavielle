@@ -16,11 +16,6 @@ import styles from './EditPost.module.css'
 export class EditPost extends Component {
 
   componentDidMount() {
-    document.documentElement.classList.add('desktop')
-    document.body.classList.add('loaded')
-    document.body.classList.add('home')
-    document.body.classList.add('detected')
-    document.body.classList.add('desktop')
     document.body.classList.add('level-0')
     if (this.props.match.params.id) {
       this.props.getPost(this.props.match.params.id)

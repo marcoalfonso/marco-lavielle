@@ -14,11 +14,6 @@ import styles from './EditClient.module.css'
 
 export class EditClient extends Component {
   componentDidMount() {
-    document.documentElement.classList.add('desktop')
-    document.body.classList.add('loaded')
-    document.body.classList.add('home')
-    document.body.classList.add('detected')
-    document.body.classList.add('desktop')
     document.body.classList.add('level-0')
     if (this.props.match.params.id) {
       this.props.getClient(this.props.match.params.id)

@@ -22,7 +22,7 @@ export class App extends Component {
         handleWidth
         onResize={width => {
           console.log("width", width)
-          if (width < 812) {
+          if (width < 812 && width !== 0) {
             document.documentElement.classList.remove('desktop')
             document.body.classList.remove('desktop')
             document.documentElement.classList.add('mobile')

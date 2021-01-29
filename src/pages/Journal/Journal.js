@@ -16,7 +16,7 @@ export class Journal extends Component {
   render() {
     const posts = this.props.posts && _.sortBy(this.props.posts, 'published').reverse()
     return (
-      <main className={`page loaded ${this.props.device} detected preview-section-1`} id="page">
+      <main className={`loaded ${this.props.device} detected preview-section-1`} id="page">
         <div className="column-3 backdrop for-section-3"></div>
         <div className="column-4 backdrop for-section-3"></div>
         <div className="column-1 slim for-level-1 for-section-3">

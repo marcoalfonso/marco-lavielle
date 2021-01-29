@@ -28,8 +28,11 @@ body {
   bottom: 5%;
   width: 100%;
   text-align: center;
-  display: block;
+  /* display: block; */
   transition-delay: 325ms;
+}
+.mobile .homepage .footer {
+  display: block;
 }
 .client-screen .footer {
   display: none;
@@ -708,6 +711,8 @@ ul {
   display: block;
   font: 20px/24px "DINWeb", "Lucida Grande", verdana, sans-serif;
   margin: 24px 8px 8px 8px;
+  max-height: 97px;
+  overflow: hidden;
 }
 .content-preview .all {
   background: #00bff3;
@@ -726,6 +731,8 @@ ul {
 }
 .content-preview p {
   color: #aaa;
+  max-height: 40px;
+  overflow: hidden;
 }
 .content-preview .goto {
   display: block;
@@ -988,13 +995,13 @@ a.uplevel.pjax {
   margin: 2px 0 0 0;
   height: 2px;
 }
+.loaded.desktop.dashboard .column-2.backdrop {
+  width: 100%;
+}
 .loaded .desktop .column-2.backdrop {
   opacity: 1;
   -webkit-transform: translateX(0);
   transition-delay: 60ms;
-}
-.loaded .desktop .dashboard .column-2.backdrop {
-  width: 100%;
 }
 .desktop .column-2.backdrop {
   background: #1d242e;
@@ -2834,7 +2841,6 @@ legend {
 .mobile .article-content {
   background: #fff;
   /* margin-top: 100px; */
-  height: 100vh;
 }
 .loaded .mobile .articles-list {
   opacity: 1;
@@ -2922,4 +2928,23 @@ legend {
   font: 500 32px/1.3 "DINWeb", "Lucida Grande", verdana, sans-serif;
   padding: 0;
   -webkit-font-smoothing: antialiased;
+}
+.ql-container {
+  border-bottom-left-radius: 0.5em;
+  border-bottom-right-radius: 0.5em;
+  background: #fefcfc;
+  color: black;
+}
+/* Snow Theme */
+.ql-snow.ql-toolbar {
+  display: block;
+  background: #eaecec;
+  border-top-left-radius: 0.5em;
+  border-top-right-radius: 0.5em;
+}
+.ql-editor {
+  min-height: 18em;
+}
+pre {
+  white-space: pre-wrap;
 }
