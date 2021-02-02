@@ -1191,7 +1191,7 @@ a.uplevel.pjax {
 .personal-info .stats dt {
   color: #00bff3;
   line-height: 21px;
-  margin-left: 24px;
+  margin-left: 16px;
   margin-top: 18px;
 }
 dl dt {
@@ -1208,7 +1208,7 @@ dl dt {
   font-size: 18px;
   font-weight: 600;
   line-height: 24px;
-  margin-left: 24px;
+  margin-left: 16px;
 }
 dl dd {
   color: #c3d7ef;
