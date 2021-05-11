@@ -40,7 +40,7 @@
     "express-session": "^1.17.1",
     "file-loader": "^3.0.1",
     "jade": "^1.7.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "mongoose": ">=5.7.5",
     "monguurl": "^0.1.0",
     "morgan": "^1.10.0",
