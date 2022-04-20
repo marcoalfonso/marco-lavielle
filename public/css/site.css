@@ -2178,7 +2178,7 @@ legend {
   color: #555;
   font: 14px/1.6 "Lucida Grande", verdana, sans-serif;
   margin: 0 0 16px 0;
-  max-width: 40em;
+  /* max-width: 40em; */
   -webkit-font-smoothing: antialiased;
 }
 .articles-list .article-preview .read-more {
@@ -2919,7 +2919,7 @@ legend {
   color: #555;
   font: 14px/1.6 "Lucida Grande", verdana, sans-serif;
   margin: 0 0 16px 0;
-  max-width: 40em;
+  /* max-width: 40em; */
   -webkit-font-smoothing: antialiased;
   padding: 0;
 }
