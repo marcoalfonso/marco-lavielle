@@ -1,17 +1,17 @@
 import React, { Component } from 'react'
+import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 import styles from './Art.module.css'
 
 export class Art extends Component {
-  constructor() {
-    super()
-
-    const img1 = '../images/paintings/abstract_2.jpg';
-    const img2 = '../images/paintings/girl.jpg';
-    const img3 = '../images/paintings/flowers_1.jpg';
-    const img4 = '../images/paintings/flowers_2.jpg';
-    const img5 = '../images/paintings/abstract_1.jpg';
-    const img6 = '../images/paintings/straya.jpg';
+  constructor(props) {
+    super(props)
+    const img1 = props.paintings[0];
+    const img2 = props.paintings[1];
+    const img3 = props.paintings[2];
+    const img4 = props.paintings[3];
+    const img5 = props.paintings[4];
+    const img6 = props.paintings[5];
 
     this.abstractSeries = [img1, img5]
     this.flowerSeries = [img4, img3]
@@ -139,4 +139,11 @@ export class Art extends Component {
   }
 }
 
-export default Art
+const mapStateToProps = state => ({
+  paintings: state.app.paintings,
+})
+
+const mapDispatchToProps = dispatch => ({
+})
+
+export default connect(mapStateToProps, mapDispatchToProps)(Art)

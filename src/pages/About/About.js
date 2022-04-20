@@ -53,7 +53,7 @@ export class About extends Component {
                 </span>
               </div>
               <div className="text">
-                <p>Hi, I'm Marco Lavielle, I design and develop web apps and VR apps. In my free time I do ART projects in paiting and VR.</p>
+                <p>Hi, I'm Marco Lavielle, I design and develop web apps and VR apps. In my free time I work on my paintings and VR art projects.</p>
                 <p>This site is a showcase of my work. Get in touch if you want to explore collaborating on a project.</p>
               </div>
               <div className="stats">
@@ -69,9 +69,9 @@ export class About extends Component {
                   <dt>Telephone</dt>
                   <dd>0423478156</dd>
                   <dt>Email</dt>
-                  <dd>marco@hackerfirm.com</dd>
+                  <dd>marcoalfonso@gmail.com</dd>
                   <dt>Address</dt>
-                  <dd>Clovelly, NSW, Sydney</dd>
+                  <dd>Bondi, NSW, Sydney</dd>
                   <dt><a href="/signin" data-section="about">Login</a></dt>
                 </dl>
               </div>

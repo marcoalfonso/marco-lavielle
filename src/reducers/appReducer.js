@@ -28,7 +28,15 @@ const initialState = {
   posts: null,
   post : null,
   user: null,
-  device: null
+  device: null,
+  paintings: [
+    '../images/paintings/abstract_2.jpg',
+    '../images/paintings/girl.jpg',
+    '../images/paintings/flowers_1.jpg',
+    '../images/paintings/flowers_2.jpg',
+    '../images/paintings/abstract_1.jpg',
+    '../images/paintings/straya.jpg'
+  ]
 }
 
 const appReducer = (state = initialState, action) => {

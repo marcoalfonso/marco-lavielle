@@ -54,8 +54,8 @@ export class Homepage extends Component {
           </li>
           <li className="section-2" onMouseEnter={e => this.toggleHoverSection('preview-section-2')}>
             <a href="/art" target="_self">
-              <strong>Art</strong>
-              <small>Paintings</small>
+              <strong>Paintings</strong>
+              <small>Gallery</small>
             </a>
           </li>
           <li className="section-3" onMouseEnter={e => this.toggleHoverSection('preview-section-3')}>
@@ -70,12 +70,20 @@ export class Homepage extends Component {
             <div className="map-container">
               <div className="map-goes-here" id="map-goes-here">
                 <div className="the-map"></div>
+                <span className="blip location-coordinates positioned showing" style={{left: '220px', top: '136px'}}>
+                  <span className="blip-ring one"></span>
+                  <span className="blip-ring two"></span>
+                  <span className="blip-ring three"></span>
+                  <span className="center">
+                    <span></span>
+                  </span>
+                </span>
               </div>
             </div>
             <div className="run-details run-card">
               <div className="details">
-                <h3>Currently Coding In</h3>
-                <h4>Sydney</h4>
+                <h3>Coding portfolio</h3>
+                <h4>Software and Companies</h4>
                 <a className="pjax all" href="/software" target="_self">See Work</a>
               </div>
             </div>
@@ -94,17 +102,24 @@ export class Homepage extends Component {
                 </span>
               </div>
             </div>
-            <div className="location-details">
+            {/* <div className="location-details">
               <h3 className="location-city">Sydney, NSW</h3>
               <h4 className="location-time-ago">Australia</h4>
+            </div> */}
+            <div className="details">
+              <h3>Painting Portfolio</h3>
+              <h4>Gallery and Shop</h4>
+              <a className="pjax all" href="/art" target="_self">See Gallery</a>
             </div>
           </div>
           <div className="section-2 top-circle-contents">
-            <small>Currently In</small>
+            {/* <small>Currently In</small>
             <span className="location-name">Sydney</span>
             <span className="location-icon">
               <img src="../images/home_32.png"/>
-            </span>
+            </span> */}
+            <strong>{this.props.paintings && this.props.paintings.length}</strong>
+            <small>{this.props.paintings && this.props.paintings.length === 1 ? 'Painting' : 'Paintings'}</small>
           </div>
           <div className="section-3-spinner-content content-preview">
             <h2>{this.props.posts && this.props.posts[this.props.posts.length - 1].title}</h2>
@@ -113,7 +128,7 @@ export class Homepage extends Component {
           </div>
           <div className="section-3 top-circle-contents">
             <strong>{this.props.posts && this.props.posts.length}</strong>
-            <small>Articles</small>
+            <small>{this.props.posts && this.props.posts.length === 1 ? 'Post' : 'Posts'}</small>
           </div>
         </div>
         <div className="spinner spinning desktop-only">
@@ -133,7 +148,7 @@ export class Homepage extends Component {
           <div className="section-1-preview desktop-only">
             <span className="mini-preview">
               <span className="symbol">
-                <span className="text">Work</span>
+                <span className="text">Software</span>
               </span>
             </span>
             <a className="full-preview section-1 section-1-circles" href="/software" target="_self">
@@ -142,19 +157,19 @@ export class Homepage extends Component {
               <span className="circle-a full circle">
                 <span className="the-circle"></span>
                 <strong>{this.props.clients && this.props.clients.length}</strong>
-                <small>Apps</small>
+                <small>{this.props.clients && this.props.clients.length === 1 ? 'App' : 'Apps'}</small>
               </span>
-              <span className="circle-b full circle">
+              {/* <span className="circle-b full circle">
                 <span className="the-circle"></span>
                 <strong>2</strong>
                 <small>Cities</small>
-              </span>
+              </span> */}
             </a>
           </div>
           <div className="section-2-preview desktop-only">
             <span className="mini-preview">
               <span className="symbol">
-                <span className="text">Tech</span>
+                <span className="text">Paintings</span>
               </span>
             </span>
             <a className="full-preview section-2" href="/art" data-section="section-2">
@@ -190,16 +205,16 @@ export class Homepage extends Component {
           </span>
         </div>
         <div className="home-last-location mobile-only">
-          <h3>Last Seen At</h3>
+          <h3>Coder/Painter</h3>
           <section className="location-details">
             <h1 className="location-name long">
               <a className="transitioned">
-                <span className="name">JSON Capital</span>
+                <span className="name">Location</span>
                 <span className="location-icon"></span>
               </a>
             </h1>
             <small>
-              <span className="location-city">Sydney, NSW</span>
+              <span className="location-city">Sydney, Australia</span>
             </small>
           </section>
         </div>
@@ -216,7 +231,8 @@ const mapStateToProps = state => ({
   loading: state.app.loading,
   clients: state.app.clients,
   posts: state.app.posts,
-  device: state.app.device
+  device: state.app.device,
+  paintings: state.app.paintings,
 })
 
 const mapDispatchToProps = dispatch => ({
