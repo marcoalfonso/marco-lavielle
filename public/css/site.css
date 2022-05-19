@@ -598,7 +598,7 @@ ul {
 } */
 .spinner.desktop-only .full-preview {
   display: block;
-  margin: -60px 0 0 -60px;
+  margin: -59px 0 0 -64px;
   position: absolute;
   top: 0;
   left: 0;

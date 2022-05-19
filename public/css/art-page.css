@@ -159,6 +159,12 @@ iframe{
   letter-spacing: 1px;
 }
 
+.next .status {
+  color: rgba(255, 255, 255, 1);
+  opacity: .5;
+  margin-bottom: 5px;
+}
+
 .social a{
   width: 18px;
   height: 18px;
@@ -467,7 +473,7 @@ input[type=submit]:hover, input[type=button]:hover, input[type=reset]:hover{
 }
 
 .menu-nav a.active {
-  color: #81bbaa;
+  color: #ffffff;
   text-decoration: none;
 }
 

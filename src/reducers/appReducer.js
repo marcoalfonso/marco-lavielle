@@ -30,12 +30,30 @@ const initialState = {
   user: null,
   device: null,
   paintings: [
-    '../images/paintings/abstract_2.jpg',
-    '../images/paintings/girl.jpg',
-    '../images/paintings/flowers_1.jpg',
-    '../images/paintings/flowers_2.jpg',
-    '../images/paintings/abstract_1.jpg',
-    '../images/paintings/straya.jpg'
+    {
+      link: '../images/paintings/abstract_2.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/girl.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/swimmer.png',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/abstract_1.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/straya.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/flowers_2.jpg',
+      status: 'For Sale',
+    },
   ]
 }
 
