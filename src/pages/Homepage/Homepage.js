@@ -157,7 +157,7 @@ export class Homepage extends Component {
               <span className="circle-a full circle">
                 <span className="the-circle"></span>
                 <strong>{this.props.clients && this.props.clients.length}</strong>
-                <small>{this.props.clients && this.props.clients.length === 1 ? 'App' : 'Apps'}</small>
+                <small>{this.props.clients && this.props.clients.length === 1 ? 'Client' : 'Clients'}</small>
               </span>
               {/* <span className="circle-b full circle">
                 <span className="the-circle"></span>

@@ -2,9 +2,10 @@ This is my personal website.
 
 Node 6.12.3 and mongoDB are required to run the app.
 
-To run:
+To run locally:
 1. npm install
-2. npm run start-server
+2. mongod --dbpath=/Users/$(whoami)/data/db 
+3. npm run start-server
 
 Coded By Marco Lavielle
 
