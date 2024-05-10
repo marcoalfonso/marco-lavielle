@@ -30,6 +30,10 @@ const initialState = {
   user: null,
   device: null,
   paintings: [
+    { 
+      link: '../images/paintings/clovelly_beach.jpg',
+      status: 'For Sale',
+    },
     {
       link: '../images/paintings/abstract_2.jpg',
       status: 'Sold',

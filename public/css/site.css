@@ -1187,7 +1187,7 @@ a.uplevel.pjax {
   -webkit-transform: translateY(15px);
 }
 .mobile .personal-info .stats dl {
-  width: 50%;
+  width: 100%;
 }
 .personal-info .stats dt {
   color: #00bff3;
