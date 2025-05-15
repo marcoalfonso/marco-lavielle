@@ -1,4 +1,7 @@
 var express = require('express');
+const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
 
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 

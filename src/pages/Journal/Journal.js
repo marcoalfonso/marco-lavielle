@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 
 import { getPosts } from 'actions/appActions'
 
@@ -14,7 +13,7 @@ export class Journal extends Component {
   }
 
   render() {
-    const posts = this.props.posts && _.sortBy(this.props.posts, 'published').reverse()
+    const posts = this.props.posts && [...this.props.posts].sort((a, b) => a.published.localeCompare(b.published)).reverse()
     return (
       <main className={`loaded ${this.props.device} detected preview-section-1`} id="page">
         <div className="column-3 backdrop for-section-3"></div>

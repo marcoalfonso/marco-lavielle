@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
-import _ from 'underscore'
 import { getClients } from 'actions/appActions'
 
 import styles from './Software.module.css'
@@ -11,7 +10,7 @@ export class Software extends Component {
   }
 
   render() {
-    const sortedClients = _.sortBy(this.props.clients && this.props.clients, 'name');
+    const sortedClients = this.props.clients ? [...this.props.clients].sort((a, b) => a.name.localeCompare(b.name)) : [];
     return (
       <div className={`home ng-scope loaded detected ${this.props.device} level-0`}>
         <section className="content">

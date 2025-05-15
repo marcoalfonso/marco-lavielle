@@ -4,3 +4,4 @@ newrelic_agent.log
 *.log
 public/dist/hot
 .DS_Store
+.env.local
