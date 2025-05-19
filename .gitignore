@@ -2,6 +2,7 @@
 node_modules
 newrelic_agent.log
 *.log
+public/dist
 public/dist/hot
 .DS_Store
 .env.local
