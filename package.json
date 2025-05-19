@@ -58,7 +58,7 @@
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-loader": "^8.2.5",
     "css-loader": "^1.0.1",
-    "mocha": "^2.0.1",
+    "mocha": "^10.2.0",
     "postcss-loader": "^3.0.0",
     "react-hot-loader": "^4.0.1",
     "redux-logger": "^3.0.6",
