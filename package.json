@@ -32,7 +32,7 @@
     "ejs": "^2.5.8",
     "express": "^4.17.3",
     "express-session": "^1.17.1",
-    "file-loader": "^3.0.1",
+    "file-loader": "^6.2.0",
     "mongoose": "^6.10.0",
     "monguurl": "^0.1.0",
     "morgan": "^1.10.0",
@@ -57,14 +57,14 @@
     "@babel/preset-react": "^7.5.5",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-loader": "^8.2.5",
-    "css-loader": "^1.0.1",
+    "css-loader": "^7.1.2",
     "mocha": "^10.2.0",
     "postcss-loader": "^3.0.0",
     "react-hot-loader": "^4.0.1",
     "redux-logger": "^3.0.6",
     "style-loader": "^0.23.1",
-    "webpack": "^4.46.0",
+    "webpack": "^5.99.8",
     "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^3.11.3"
+    "webpack-dev-server": "^5.2.1"
   }
 }
