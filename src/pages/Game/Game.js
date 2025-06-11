@@ -167,9 +167,15 @@ const CarGame = () => {
     building1.position.set(-30, 10, -20);
     building1.castShadow = true;
     building1.receiveShadow = true;
+    // Create custom bounding box for building collision (not shadows)
+    const building1BoundingBox = new THREE.Box3().setFromCenterAndSize(
+      new THREE.Vector3(-30, 1, -20), // center at ground level
+      new THREE.Vector3(15, 2, 15) // building base dimensions only
+    );
+    
     building1.userData = {
       type: "building",
-      boundingBox: new THREE.Box3().setFromObject(building1),
+      boundingBox: building1BoundingBox,
     };
     scene.add(building1);
     collisionObjects.push(building1);
@@ -182,9 +188,15 @@ const CarGame = () => {
     building2.position.set(40, 15, 20);
     building2.castShadow = true;
     building2.receiveShadow = true;
+    // Create custom bounding box for building collision (not shadows)
+    const building2BoundingBox = new THREE.Box3().setFromCenterAndSize(
+      new THREE.Vector3(40, 1, 20), // center at ground level
+      new THREE.Vector3(20, 2, 20) // building base dimensions only
+    );
+    
     building2.userData = {
       type: "building",
-      boundingBox: new THREE.Box3().setFromObject(building2),
+      boundingBox: building2BoundingBox,
     };
     scene.add(building2);
     collisionObjects.push(building2);
@@ -197,21 +209,27 @@ const CarGame = () => {
     building3.position.set(-40, 7.5, 30);
     building3.castShadow = true;
     building3.receiveShadow = true;
+    // Create custom bounding box for building collision (not shadows)
+    const building3BoundingBox = new THREE.Box3().setFromCenterAndSize(
+      new THREE.Vector3(-40, 1, 30), // center at ground level
+      new THREE.Vector3(25, 2, 25) // building base dimensions only
+    );
+    
     building3.userData = {
       type: "building",
-      boundingBox: new THREE.Box3().setFromObject(building3),
+      boundingBox: building3BoundingBox,
     };
     scene.add(building3);
     collisionObjects.push(building3);
 
-    // Create trees
+    // Create trees (moved away from buildings)
     const treePositions = [
-      { x: -20, z: 10 },
+      { x: -15, z: 15 }, // moved away from building1
       { x: 30, z: -15 },
       { x: -50, z: -40 },
       { x: 60, z: 40 },
-      { x: 10, z: 35 },
-      { x: -35, z: -10 },
+      { x: 15, z: 45 }, // moved away from building3
+      { x: -25, z: -5 }, // moved away from building1
     ];
 
     treePositions.forEach((pos) => {
@@ -234,9 +252,16 @@ const CarGame = () => {
       treeGroup.add(leaves);
 
       treeGroup.position.set(pos.x, 0, pos.z);
+      
+      // Create custom bounding box for just the trunk (not the full tree with leaves shadow)
+      const trunkBoundingBox = new THREE.Box3().setFromCenterAndSize(
+        new THREE.Vector3(pos.x, 2, pos.z), // center at trunk base
+        new THREE.Vector3(3, 4, 3) // smaller collision box around trunk only
+      );
+      
       treeGroup.userData = {
         type: "tree",
-        boundingBox: new THREE.Box3().setFromObject(treeGroup),
+        boundingBox: trunkBoundingBox,
       };
       scene.add(treeGroup);
       collisionObjects.push(treeGroup);
@@ -359,7 +384,7 @@ const CarGame = () => {
           carVelocity.current.z *= 0.1;
         }
 
-        carRef.current.rotation.y = carRotation.current;
+        carRef.current.rotation.y = carRotation.current + Math.PI / 2; // Base rotation + dynamic rotation
 
         // Keep car in bounds
         const boundary = 90;
