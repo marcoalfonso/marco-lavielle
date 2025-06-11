@@ -8,8 +8,8 @@
     "start-server": "npm run build-dev & nodemon server.js",
     "start-client": "webpack-dev-server --config ./webpack.config.js --mode development",
     "build-dev": "webpack --mode development --watch",
-    "build-prod": "webpack -p --config webpack.config.js",
-    "heroku-postbuild": "webpack -p"
+    "build-prod": "webpack --mode production --config webpack.config.js",
+    "heroku-postbuild": "webpack --mode production"
   },
   "engines": {
     "node": "16.x",
@@ -23,6 +23,8 @@
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.5.5",
+    "@react-three/drei": "^9.49.0",
+    "@react-three/fiber": "^8.9.1",
     "antd": "^3.23.3",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
@@ -50,12 +52,13 @@
     "react-toastify": "^6.0.9",
     "redux": "^4.0.0",
     "redux-thunk": "^2.2.0",
-    "request": "^2.65.0"
+    "request": "^2.65.0",
+    "three": "^0.139.2"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/preset-env": "^7.5.5",
     "@babel/preset-react": "^7.5.5",
-    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "babel-loader": "^8.2.5",
     "css-loader": "^1.0.1",
     "mocha": "^10.2.0",

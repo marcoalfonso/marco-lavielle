@@ -12,6 +12,7 @@ import SigninPage from './pages/Signin/Signin'
 import Dashboard from './pages/Dashboard/Dashboard'
 import EditPost from './pages/Dashboard/EditPost/EditPost'
 import EditClient from './pages/Dashboard/EditClient/EditClient'
+import GamePage from './pages/Game/Game'
 
 export const RoutesContainer = () => (
   <Switch>
@@ -21,6 +22,7 @@ export const RoutesContainer = () => (
     <Route exact path={`/journal`} component={JournalPage} />
     <Route exact path={`/journal/:post`} component={PostPage} />
     <Route exact path={`/about`} component={AboutPage} />
+    <Route exact path={`/game`} component={GamePage} />
     <Route exact path={`/signin`} component={SigninPage} />
     <PrivateRoute exact path="/admin/dashboard" component={Dashboard} />
     <PrivateRoute exact path="/admin/post" component={EditPost} />
