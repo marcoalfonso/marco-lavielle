@@ -63,7 +63,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "bc5e960c512e85183e5a";
+/******/ 	var hotCurrentHash = "70c7bbfa499181f7e56f";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -263444,21 +263444,25 @@ var CarGame = function CarGame() {
       left: "50%",
       transform: "translate(-50%, -50%)",
       color: "white",
-      fontSize: "48px",
+      fontSize: isMobileDevice ? "28px" : "48px",
       fontFamily: "Arial, sans-serif",
       textAlign: "center",
       textShadow: "4px 4px 8px rgba(0,0,0,0.8)",
       backgroundColor: "rgba(0,0,0,0.7)",
-      padding: "30px",
+      padding: isMobileDevice ? "20px 15px" : "30px",
       borderRadius: "20px",
       border: "3px solid gold",
       zIndex: 1000,
-      animation: "pulse 1s infinite"
+      animation: "pulse 1s infinite",
+      maxWidth: isMobileDevice ? "90vw" : "auto",
+      boxSizing: "border-box",
+      whiteSpace: isMobileDevice ? "nowrap" : "normal"
     }
   }, "\uD83C\uDF89 YOU WIN! \uD83C\uDF89", /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
-      fontSize: "24px",
-      marginTop: "20px"
+      fontSize: isMobileDevice ? "16px" : "24px",
+      marginTop: isMobileDevice ? "10px" : "20px",
+      whiteSpace: "normal"
     }
   }, "Returning to homepage...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("style", null, "\n        @keyframes pulse {\n          0% { transform: translate(-50%, -50%) scale(1); }\n          50% { transform: translate(-50%, -50%) scale(1.05); }\n          100% { transform: translate(-50%, -50%) scale(1); }\n        }\n      "), isMobileDevice && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {

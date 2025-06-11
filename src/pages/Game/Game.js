@@ -673,20 +673,29 @@ const CarGame = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             color: "white",
-            fontSize: "48px",
+            fontSize: isMobileDevice ? "28px" : "48px",
             fontFamily: "Arial, sans-serif",
             textAlign: "center",
             textShadow: "4px 4px 8px rgba(0,0,0,0.8)",
             backgroundColor: "rgba(0,0,0,0.7)",
-            padding: "30px",
+            padding: isMobileDevice ? "20px 15px" : "30px",
             borderRadius: "20px",
             border: "3px solid gold",
             zIndex: 1000,
             animation: "pulse 1s infinite",
+            maxWidth: isMobileDevice ? "90vw" : "auto",
+            boxSizing: "border-box",
+            whiteSpace: isMobileDevice ? "nowrap" : "normal",
           }}
         >
           🎉 YOU WIN! 🎉
-          <div style={{ fontSize: "24px", marginTop: "20px" }}>
+          <div 
+            style={{ 
+              fontSize: isMobileDevice ? "16px" : "24px", 
+              marginTop: isMobileDevice ? "10px" : "20px",
+              whiteSpace: "normal",
+            }}
+          >
             Returning to homepage...
           </div>
         </div>
