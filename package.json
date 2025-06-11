@@ -23,8 +23,6 @@
   "license": "ISC",
   "dependencies": {
     "@babel/core": "^7.5.5",
-    "@react-three/drei": "^9.49.0",
-    "@react-three/fiber": "^8.9.1",
     "antd": "^3.23.3",
     "axios": "^0.21.1",
     "body-parser": "^1.19.0",
