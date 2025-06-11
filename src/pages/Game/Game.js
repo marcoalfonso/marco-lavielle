@@ -2,7 +2,11 @@ import React, { useRef, useEffect, useState, useMemo } from "react";
 import * as THREE from "three";
 
 const isMobile = () => {
-  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+  return (
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    ) || window.innerWidth <= 768
+  );
 };
 
 const CarGame = () => {
@@ -592,6 +596,7 @@ const CarGame = () => {
     touchAction: "manipulation",
     cursor: "pointer",
     zIndex: 1000,
+    color: "grey",
   };
 
   const handleTouchStart = (key) => {
@@ -651,7 +656,11 @@ const CarGame = () => {
         }}
       >
         <h3 style={{ margin: "0 0 10px 0" }}>🚗 Drive Around!</h3>
-        <p style={{ margin: "5px 0" }}>Use Arrow Keys or WASD to move</p>
+        <p style={{ margin: "5px 0" }}>
+          {isMobileDevice
+            ? "Use Screen Buttons to move"
+            : "Use Arrow Keys or WASD to move"}
+        </p>
         <p style={{ margin: "5px 0" }}>Collect the golden crystals!</p>
         <p style={{ margin: "5px 0", fontWeight: "bold" }}>Score: {score}/5</p>
       </div>
@@ -744,7 +753,7 @@ const CarGame = () => {
             style={{
               ...mobileControlStyle,
               right: "50%",
-              transform: "translateX(calc(50% + 100px))",
+              transform: "translateX(calc(50% - 100px))",
               bottom: "100px",
             }}
             onTouchStart={(e) => {
@@ -767,7 +776,7 @@ const CarGame = () => {
             style={{
               ...mobileControlStyle,
               right: "50%",
-              transform: "translateX(calc(50% - 100px))",
+              transform: "translateX(calc(50% + 100px))",
               bottom: "100px",
             }}
             onTouchStart={(e) => {
