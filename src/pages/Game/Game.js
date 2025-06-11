@@ -130,20 +130,20 @@ const CarGame = () => {
     });
 
     // Headlights
-    const headlightGeometry = new THREE.SphereGeometry(0.3, 8, 8);
-    const headlightMaterial = new THREE.MeshPhongMaterial({
-      color: 0xffffaa,
-      emissive: 0xffffaa,
-      emissiveIntensity: 0.5,
-    });
+    // const headlightGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+    // const headlightMaterial = new THREE.MeshPhongMaterial({
+    //   color: 0xffffaa,
+    //   emissive: 0xffffaa,
+    //   emissiveIntensity: 0.5,
+    // });
 
-    const leftHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
-    leftHeadlight.position.set(2, 1, 0.7);
-    carGroup.add(leftHeadlight);
+    // const leftHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
+    // leftHeadlight.position.set(2, 1, 0.7);
+    // carGroup.add(leftHeadlight);
 
-    const rightHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
-    rightHeadlight.position.set(2, 1, -0.7);
-    carGroup.add(rightHeadlight);
+    // const rightHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
+    // rightHeadlight.position.set(2, 1, -0.7);
+    // carGroup.add(rightHeadlight);
 
     carGroup.position.set(0, 0, 0);
     // Initial car rotation to point forward (up direction in viewport)
@@ -172,7 +172,7 @@ const CarGame = () => {
       new THREE.Vector3(-30, 1, -20), // center at ground level
       new THREE.Vector3(15, 2, 15) // building base dimensions only
     );
-    
+
     building1.userData = {
       type: "building",
       boundingBox: building1BoundingBox,
@@ -193,7 +193,7 @@ const CarGame = () => {
       new THREE.Vector3(40, 1, 20), // center at ground level
       new THREE.Vector3(20, 2, 20) // building base dimensions only
     );
-    
+
     building2.userData = {
       type: "building",
       boundingBox: building2BoundingBox,
@@ -214,7 +214,7 @@ const CarGame = () => {
       new THREE.Vector3(-40, 1, 30), // center at ground level
       new THREE.Vector3(25, 2, 25) // building base dimensions only
     );
-    
+
     building3.userData = {
       type: "building",
       boundingBox: building3BoundingBox,
@@ -252,13 +252,13 @@ const CarGame = () => {
       treeGroup.add(leaves);
 
       treeGroup.position.set(pos.x, 0, pos.z);
-      
+
       // Create custom bounding box for just the trunk (not the full tree with leaves shadow)
       const trunkBoundingBox = new THREE.Box3().setFromCenterAndSize(
         new THREE.Vector3(pos.x, 2, pos.z), // center at trunk base
         new THREE.Vector3(3, 4, 3) // smaller collision box around trunk only
       );
-      
+
       treeGroup.userData = {
         type: "tree",
         boundingBox: trunkBoundingBox,
