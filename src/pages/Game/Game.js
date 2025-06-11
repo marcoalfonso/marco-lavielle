@@ -1,6 +1,10 @@
 import React, { useRef, useEffect, useState, useMemo } from "react";
 import * as THREE from "three";
 
+const isMobile = () => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+};
+
 const CarGame = () => {
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -14,10 +18,12 @@ const CarGame = () => {
   const [score, setScore] = useState(0);
   const [gameWon, setGameWon] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   const animationIdRef = useRef(null);
   const fireworksRef = useRef([]);
 
   useEffect(() => {
+    setIsMobileDevice(isMobile());
     if (!mountRef.current) return;
 
     // Scene setup
@@ -308,6 +314,14 @@ const CarGame = () => {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
+    // Touch controls for mobile
+    const simulateKeyPress = (key, pressed) => {
+      keysPressed.current[key] = pressed;
+    };
+
+    // Expose the simulateKeyPress function to the component
+    window.simulateKeyPress = simulateKeyPress;
+
     // Animation loop
     const animate = () => {
       animationIdRef.current = requestAnimationFrame(animate);
@@ -550,6 +564,7 @@ const CarGame = () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
+      delete window.simulateKeyPress;
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
       }
@@ -560,13 +575,47 @@ const CarGame = () => {
     };
   }, []);
 
+  const mobileControlStyle = {
+    position: "absolute",
+    bottom: "20px",
+    width: "80px",
+    height: "80px",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    border: "3px solid #333",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "24px",
+    fontWeight: "bold",
+    userSelect: "none",
+    touchAction: "manipulation",
+    cursor: "pointer",
+    zIndex: 1000,
+  };
+
+  const handleTouchStart = (key) => {
+    if (window.simulateKeyPress) {
+      window.simulateKeyPress(key, true);
+    }
+  };
+
+  const handleTouchEnd = (key) => {
+    if (window.simulateKeyPress) {
+      window.simulateKeyPress(key, false);
+    }
+  };
+
   return (
     <div
       style={{
-        position: "relative",
+        position: isMobileDevice ? "fixed" : "relative",
+        top: isMobileDevice ? "0" : "auto",
+        left: isMobileDevice ? "0" : "auto",
         width: "100vw",
         height: "100vh",
         overflow: "hidden",
+        zIndex: isMobileDevice ? 999 : "auto",
       }}
     >
       <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
@@ -641,6 +690,102 @@ const CarGame = () => {
           100% { transform: translate(-50%, -50%) scale(1); }
         }
       `}</style>
+
+      {isMobileDevice && (
+        <>
+          {/* Up Arrow */}
+          <div
+            style={{
+              ...mobileControlStyle,
+              right: "50%",
+              transform: "translateX(50%)",
+              bottom: "180px",
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleTouchStart("arrowup");
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleTouchEnd("arrowup");
+            }}
+            onMouseDown={() => handleTouchStart("arrowup")}
+            onMouseUp={() => handleTouchEnd("arrowup")}
+            onMouseLeave={() => handleTouchEnd("arrowup")}
+          >
+            ↑
+          </div>
+
+          {/* Down Arrow */}
+          <div
+            style={{
+              ...mobileControlStyle,
+              right: "50%",
+              transform: "translateX(50%)",
+              bottom: "20px",
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleTouchStart("arrowdown");
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleTouchEnd("arrowdown");
+            }}
+            onMouseDown={() => handleTouchStart("arrowdown")}
+            onMouseUp={() => handleTouchEnd("arrowdown")}
+            onMouseLeave={() => handleTouchEnd("arrowdown")}
+          >
+            ↓
+          </div>
+
+          {/* Left Arrow */}
+          <div
+            style={{
+              ...mobileControlStyle,
+              right: "50%",
+              transform: "translateX(calc(50% + 100px))",
+              bottom: "100px",
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleTouchStart("arrowleft");
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleTouchEnd("arrowleft");
+            }}
+            onMouseDown={() => handleTouchStart("arrowleft")}
+            onMouseUp={() => handleTouchEnd("arrowleft")}
+            onMouseLeave={() => handleTouchEnd("arrowleft")}
+          >
+            ←
+          </div>
+
+          {/* Right Arrow */}
+          <div
+            style={{
+              ...mobileControlStyle,
+              right: "50%",
+              transform: "translateX(calc(50% - 100px))",
+              bottom: "100px",
+            }}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleTouchStart("arrowright");
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              handleTouchEnd("arrowright");
+            }}
+            onMouseDown={() => handleTouchStart("arrowright")}
+            onMouseUp={() => handleTouchEnd("arrowright")}
+            onMouseLeave={() => handleTouchEnd("arrowright")}
+          >
+            →
+          </div>
+        </>
+      )}
     </div>
   );
 };

@@ -63,7 +63,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "b8de639402d77c18828a";
+/******/ 	var hotCurrentHash = "c4be8ad490ce5ba9446a";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -262767,6 +262767,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
@@ -262775,6 +262781,9 @@ function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" !=
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 
 
+var isMobile = function isMobile() {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+};
 var CarGame = function CarGame() {
   var mountRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
   var sceneRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
@@ -262803,9 +262812,14 @@ var CarGame = function CarGame() {
     _useState8 = _slicedToArray(_useState7, 2),
     showFireworks = _useState8[0],
     setShowFireworks = _useState8[1];
+  var _useState9 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(false),
+    _useState0 = _slicedToArray(_useState9, 2),
+    isMobileDevice = _useState0[0],
+    setIsMobileDevice = _useState0[1];
   var animationIdRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
   var fireworksRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])([]);
   Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    setIsMobileDevice(isMobile());
     if (!mountRef.current) return;
 
     // Scene setup
@@ -263121,6 +263135,14 @@ var CarGame = function CarGame() {
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
 
+    // Touch controls for mobile
+    var simulateKeyPress = function simulateKeyPress(key, pressed) {
+      keysPressed.current[key] = pressed;
+    };
+
+    // Expose the simulateKeyPress function to the component
+    window.simulateKeyPress = simulateKeyPress;
+
     // Animation loop
     var _animate = function animate() {
       animationIdRef.current = requestAnimationFrame(_animate);
@@ -263320,6 +263342,7 @@ var CarGame = function CarGame() {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
+      delete window.simulateKeyPress;
       if (animationIdRef.current) {
         cancelAnimationFrame(animationIdRef.current);
       }
@@ -263329,12 +263352,43 @@ var CarGame = function CarGame() {
       renderer.dispose();
     };
   }, []);
+  var mobileControlStyle = {
+    position: "absolute",
+    bottom: "20px",
+    width: "80px",
+    height: "80px",
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    border: "3px solid #333",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "24px",
+    fontWeight: "bold",
+    userSelect: "none",
+    touchAction: "manipulation",
+    cursor: "pointer",
+    zIndex: 1000
+  };
+  var handleTouchStart = function handleTouchStart(key) {
+    if (window.simulateKeyPress) {
+      window.simulateKeyPress(key, true);
+    }
+  };
+  var handleTouchEnd = function handleTouchEnd(key) {
+    if (window.simulateKeyPress) {
+      window.simulateKeyPress(key, false);
+    }
+  };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
-      position: "relative",
+      position: isMobileDevice ? "fixed" : "relative",
+      top: isMobileDevice ? "0" : "auto",
+      left: isMobileDevice ? "0" : "auto",
       width: "100vw",
       height: "100vh",
-      overflow: "hidden"
+      overflow: "hidden",
+      zIndex: isMobileDevice ? 999 : "auto"
     }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     ref: mountRef,
@@ -263405,7 +263459,99 @@ var CarGame = function CarGame() {
       fontSize: "24px",
       marginTop: "20px"
     }
-  }, "Returning to homepage...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("style", null, "\n        @keyframes pulse {\n          0% { transform: translate(-50%, -50%) scale(1); }\n          50% { transform: translate(-50%, -50%) scale(1.05); }\n          100% { transform: translate(-50%, -50%) scale(1); }\n        }\n      "));
+  }, "Returning to homepage...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("style", null, "\n        @keyframes pulse {\n          0% { transform: translate(-50%, -50%) scale(1); }\n          50% { transform: translate(-50%, -50%) scale(1.05); }\n          100% { transform: translate(-50%, -50%) scale(1); }\n        }\n      "), isMobileDevice && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
+      right: "50%",
+      transform: "translateX(50%)",
+      bottom: "180px"
+    }),
+    onTouchStart: function onTouchStart(e) {
+      e.preventDefault();
+      handleTouchStart("arrowup");
+    },
+    onTouchEnd: function onTouchEnd(e) {
+      e.preventDefault();
+      handleTouchEnd("arrowup");
+    },
+    onMouseDown: function onMouseDown() {
+      return handleTouchStart("arrowup");
+    },
+    onMouseUp: function onMouseUp() {
+      return handleTouchEnd("arrowup");
+    },
+    onMouseLeave: function onMouseLeave() {
+      return handleTouchEnd("arrowup");
+    }
+  }, "\u2191"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
+      right: "50%",
+      transform: "translateX(50%)",
+      bottom: "20px"
+    }),
+    onTouchStart: function onTouchStart(e) {
+      e.preventDefault();
+      handleTouchStart("arrowdown");
+    },
+    onTouchEnd: function onTouchEnd(e) {
+      e.preventDefault();
+      handleTouchEnd("arrowdown");
+    },
+    onMouseDown: function onMouseDown() {
+      return handleTouchStart("arrowdown");
+    },
+    onMouseUp: function onMouseUp() {
+      return handleTouchEnd("arrowdown");
+    },
+    onMouseLeave: function onMouseLeave() {
+      return handleTouchEnd("arrowdown");
+    }
+  }, "\u2193"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
+      right: "50%",
+      transform: "translateX(calc(50% + 100px))",
+      bottom: "100px"
+    }),
+    onTouchStart: function onTouchStart(e) {
+      e.preventDefault();
+      handleTouchStart("arrowleft");
+    },
+    onTouchEnd: function onTouchEnd(e) {
+      e.preventDefault();
+      handleTouchEnd("arrowleft");
+    },
+    onMouseDown: function onMouseDown() {
+      return handleTouchStart("arrowleft");
+    },
+    onMouseUp: function onMouseUp() {
+      return handleTouchEnd("arrowleft");
+    },
+    onMouseLeave: function onMouseLeave() {
+      return handleTouchEnd("arrowleft");
+    }
+  }, "\u2190"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
+      right: "50%",
+      transform: "translateX(calc(50% - 100px))",
+      bottom: "100px"
+    }),
+    onTouchStart: function onTouchStart(e) {
+      e.preventDefault();
+      handleTouchStart("arrowright");
+    },
+    onTouchEnd: function onTouchEnd(e) {
+      e.preventDefault();
+      handleTouchEnd("arrowright");
+    },
+    onMouseDown: function onMouseDown() {
+      return handleTouchStart("arrowright");
+    },
+    onMouseUp: function onMouseUp() {
+      return handleTouchEnd("arrowright");
+    },
+    onMouseLeave: function onMouseLeave() {
+      return handleTouchEnd("arrowright");
+    }
+  }, "\u2192")));
 };
 /* harmony default export */ __webpack_exports__["default"] = (CarGame);
 
