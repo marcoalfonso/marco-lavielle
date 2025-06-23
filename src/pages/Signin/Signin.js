@@ -18,13 +18,9 @@ export class Signin extends Component {
     this.props.form.validateFieldsAndScroll((err, values) => {
       if (!err) {
         this.props.signin(values, this.props.history).then((response) => {
-          if (response.data.success) {
-            this.props.cookies.set("loggedIn", true);
-            this.props.history.push(`/admin/dashboard`);
-            toast.success("You have successfully signed in!");
-          } else {
-            toast.error("Username/Password combination incorrect");
-          }
+          this.props.cookies.set("loggedIn", true);
+          this.props.history.push(`/admin/dashboard`);
+          toast.success("You have successfully signed in!");
         });
       }
     });
