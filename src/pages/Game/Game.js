@@ -274,7 +274,13 @@ const CarGame = () => {
     ctx.font = "900 110px Arial, sans-serif";
     ctx.fillText("MARCO LAVIELLE", 512, 110);
     ctx.font = "600 44px Arial, sans-serif";
-    ctx.fillText("WASD / arrows to drive  —  R to reset", 512, 195);
+    ctx.fillText(
+      isMobile()
+        ? "Use the on-screen buttons to drive"
+        : "WASD / arrows to drive  —  R to reset",
+      512,
+      195,
+    );
     const textTexture = new THREE.CanvasTexture(textCanvas);
     const groundText = new THREE.Mesh(
       new THREE.PlaneGeometry(34, 8.5),

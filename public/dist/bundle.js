@@ -63,7 +63,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "a8e8fddb259ef37153c0";
+/******/ 	var hotCurrentHash = "f20a3e92777f1cef2bbd";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -263083,7 +263083,7 @@ var CarGame = function CarGame() {
     ctx.font = "900 110px Arial, sans-serif";
     ctx.fillText("MARCO LAVIELLE", 512, 110);
     ctx.font = "600 44px Arial, sans-serif";
-    ctx.fillText("WASD / arrows to drive  —  R to reset", 512, 195);
+    ctx.fillText(isMobile() ? "Use the on-screen buttons to drive" : "WASD / arrows to drive  —  R to reset", 512, 195);
     var textTexture = new three__WEBPACK_IMPORTED_MODULE_1__["CanvasTexture"](textCanvas);
     var groundText = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](34, 8.5), new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
       map: textTexture,
