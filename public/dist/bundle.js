@@ -63,7 +63,7 @@
 /******/
 /******/ 	var hotApplyOnUpdate = true;
 /******/ 	// eslint-disable-next-line no-unused-vars
-/******/ 	var hotCurrentHash = "70c7bbfa499181f7e56f";
+/******/ 	var hotCurrentHash = "a8e8fddb259ef37153c0";
 /******/ 	var hotRequestTimeout = 10000;
 /******/ 	var hotCurrentModuleData = {};
 /******/ 	var hotCurrentChildModule;
@@ -262768,6 +262768,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(react__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var three__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! three */ "./node_modules/three/build/three.module.js");
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
+function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
+function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
@@ -262784,18 +262788,80 @@ function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
 var isMobile = function isMobile() {
   return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 };
+var TOTAL_CRYSTALS = 8;
+var ArrowButton = function ArrowButton(_ref) {
+  var label = _ref.label,
+    keyName = _ref.keyName,
+    glyph = _ref.glyph,
+    pressed = _ref.pressed,
+    onStart = _ref.onStart,
+    onEnd = _ref.onEnd;
+  return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "mobile-ctrl-btn",
+    "aria-label": label,
+    style: {
+      transform: pressed ? "scale(0.9)" : "scale(1)",
+      background: pressed ? "linear-gradient(180deg, #e2c14d 0%, #d1a934 100%)" : "linear-gradient(180deg, #fffdf7 0%, #ece5d4 100%)",
+      boxShadow: pressed ? "0 2px 6px rgba(70,66,58,0.35), inset 0 2px 4px rgba(0,0,0,0.15)" : "0 6px 14px rgba(70,66,58,0.3), inset 0 1px 0 rgba(255,255,255,0.6)"
+    },
+    onTouchStart: function onTouchStart(e) {
+      e.preventDefault();
+      onStart(keyName);
+    },
+    onTouchEnd: function onTouchEnd(e) {
+      e.preventDefault();
+      onEnd(keyName);
+    },
+    onTouchCancel: function onTouchCancel(e) {
+      e.preventDefault();
+      onEnd(keyName);
+    },
+    onMouseDown: function onMouseDown() {
+      return onStart(keyName);
+    },
+    onMouseUp: function onMouseUp() {
+      return onEnd(keyName);
+    },
+    onMouseLeave: function onMouseLeave() {
+      return onEnd(keyName);
+    }
+  }, glyph);
+};
+
+// ---------------------------------------------------------------------------
+// Palette — soft, matte, low-poly look. The background, fog and
+// ground share one colour so the world has no visible horizon.
+// ---------------------------------------------------------------------------
+var COLORS = {
+  world: 0xdcd8cf,
+  road: 0xc7c2b6,
+  sidewalk: 0xcfcabf,
+  line: 0xefebe0,
+  carBody: 0xe8581c,
+  carDark: 0xb6430f,
+  tire: 0x33312e,
+  hub: 0xe5e0d6,
+  glass: 0xaccfdd,
+  buildings: [0xc9856a, 0x9db08a, 0x8a9bb0, 0xd3b98a, 0xc08a8a, 0x9fa68f],
+  roofs: [0xa86a52, 0x7e9070, 0x6f8094, 0xb09a6e, 0xa17070, 0x848a76],
+  window: 0x6e7b8a,
+  trunk: 0x8a6a4c,
+  leaf: 0x6fa06b,
+  leafDark: 0x5d8d5c,
+  pine: 0x5b8a66,
+  bush: 0x7fae74,
+  rock: 0xaaa49a,
+  pole: 0x6b675f,
+  wood: 0xb08a5a,
+  ramp: 0xc9a36a,
+  brick: 0xc96f4a,
+  pin: 0xf5f2ea,
+  pinStripe: 0xd14b3a,
+  dust: 0xbfb8aa
+};
 var CarGame = function CarGame() {
   var mountRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  var sceneRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  var rendererRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  var carRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
-  var cameraRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
   var keysPressed = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])({});
-  var carVelocity = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])({
-    x: 0,
-    z: 0
-  });
-  var carRotation = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(0);
   var _useState = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(true),
     _useState2 = _slicedToArray(_useState, 2),
     loading = _useState2[0],
@@ -262810,311 +262876,911 @@ var CarGame = function CarGame() {
     setGameWon = _useState6[1];
   var _useState7 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(false),
     _useState8 = _slicedToArray(_useState7, 2),
-    showFireworks = _useState8[0],
-    setShowFireworks = _useState8[1];
-  var _useState9 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(false),
+    isMobileDevice = _useState8[0],
+    setIsMobileDevice = _useState8[1];
+  var _useState9 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(true),
     _useState0 = _slicedToArray(_useState9, 2),
-    isMobileDevice = _useState0[0],
-    setIsMobileDevice = _useState0[1];
+    instructionsVisible = _useState0[0],
+    setInstructionsVisible = _useState0[1];
+  var _useState1 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])(true),
+    _useState10 = _slicedToArray(_useState1, 2),
+    showInstructions = _useState10[0],
+    setShowInstructions = _useState10[1];
+  var _useState11 = Object(react__WEBPACK_IMPORTED_MODULE_0__["useState"])({}),
+    _useState12 = _slicedToArray(_useState11, 2),
+    pressedButtons = _useState12[0],
+    setPressedButtons = _useState12[1];
   var animationIdRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])(null);
   var fireworksRef = Object(react__WEBPACK_IMPORTED_MODULE_0__["useRef"])([]);
+  Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
+    var fadeTimer = setTimeout(function () {
+      return setInstructionsVisible(false);
+    }, 4500);
+    var removeTimer = setTimeout(function () {
+      return setShowInstructions(false);
+    }, 5200);
+    return function () {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
   Object(react__WEBPACK_IMPORTED_MODULE_0__["useEffect"])(function () {
     setIsMobileDevice(isMobile());
     if (!mountRef.current) return;
 
-    // Scene setup
+    // ------------------------------------------------------------------
+    // Scene / camera / renderer
+    // ------------------------------------------------------------------
     var scene = new three__WEBPACK_IMPORTED_MODULE_1__["Scene"]();
-    scene.background = new three__WEBPACK_IMPORTED_MODULE_1__["Color"](0x87ceeb);
-    scene.fog = new three__WEBPACK_IMPORTED_MODULE_1__["Fog"](0x87ceeb, 50, 200);
-    sceneRef.current = scene;
-
-    // Camera setup
-    var camera = new three__WEBPACK_IMPORTED_MODULE_1__["PerspectiveCamera"](75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 10, 20);
-    cameraRef.current = camera;
-
-    // Renderer setup
+    scene.background = new three__WEBPACK_IMPORTED_MODULE_1__["Color"](COLORS.world);
+    scene.fog = new three__WEBPACK_IMPORTED_MODULE_1__["Fog"](COLORS.world, 70, 190);
+    var camera = new three__WEBPACK_IMPORTED_MODULE_1__["PerspectiveCamera"](45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(18, 21, 18);
     var renderer = new three__WEBPACK_IMPORTED_MODULE_1__["WebGLRenderer"]({
       antialias: true
     });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = three__WEBPACK_IMPORTED_MODULE_1__["PCFSoftShadowMap"];
-    rendererRef.current = renderer;
     mountRef.current.appendChild(renderer.domElement);
 
-    // Lighting
-    var ambientLight = new three__WEBPACK_IMPORTED_MODULE_1__["AmbientLight"](0xffffff, 0.6);
-    scene.add(ambientLight);
-    var directionalLight = new three__WEBPACK_IMPORTED_MODULE_1__["DirectionalLight"](0xffffff, 0.8);
-    directionalLight.position.set(50, 100, 50);
-    directionalLight.castShadow = true;
-    directionalLight.shadow.camera.left = -100;
-    directionalLight.shadow.camera.right = 100;
-    directionalLight.shadow.camera.top = 100;
-    directionalLight.shadow.camera.bottom = -100;
-    directionalLight.shadow.camera.near = 0.1;
-    directionalLight.shadow.camera.far = 200;
-    scene.add(directionalLight);
+    // ------------------------------------------------------------------
+    // Lighting — bright, soft, matte
+    // ------------------------------------------------------------------
+    scene.add(new three__WEBPACK_IMPORTED_MODULE_1__["HemisphereLight"](0xffffff, 0xc8c2b4, 0.75));
+    var sun = new three__WEBPACK_IMPORTED_MODULE_1__["DirectionalLight"](0xfff6e0, 0.85);
+    sun.position.set(60, 110, 40);
+    sun.castShadow = true;
+    sun.shadow.camera.left = -120;
+    sun.shadow.camera.right = 120;
+    sun.shadow.camera.top = 120;
+    sun.shadow.camera.bottom = -120;
+    sun.shadow.camera.near = 0.1;
+    sun.shadow.camera.far = 300;
+    sun.shadow.mapSize.width = 2048;
+    sun.shadow.mapSize.height = 2048;
+    scene.add(sun);
+    var matte = function matte(color) {
+      var extra = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      return new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"](_objectSpread({
+        color: color,
+        shininess: 8,
+        flatShading: true
+      }, extra));
+    };
 
-    // Ground
-    var groundGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](200, 200);
-    var groundMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshLambertMaterial"]({
-      color: 0x7cfc00
-    });
-    var ground = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](groundGeometry, groundMaterial);
+    // ------------------------------------------------------------------
+    // COLLISION SYSTEM — explicit 2D footprints, independent of visuals
+    // ------------------------------------------------------------------
+    var colliders = []; // {x, z, hw, hd} = AABB footprint | {x, z, r} = circle
+
+    var addBoxCollider = function addBoxCollider(x, z, width, depth) {
+      return colliders.push({
+        x: x,
+        z: z,
+        hw: width / 2,
+        hd: depth / 2
+      });
+    };
+    var addCircleCollider = function addCircleCollider(x, z, r) {
+      return colliders.push({
+        x: x,
+        z: z,
+        r: r
+      });
+    };
+    var CAR_RADIUS = 2.1;
+    var collidesAt = function collidesAt(x, z) {
+      var radius = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : CAR_RADIUS;
+      for (var i = 0; i < colliders.length; i++) {
+        var c = colliders[i];
+        if (c.r !== undefined) {
+          var dx = x - c.x;
+          var dz = z - c.z;
+          var rr = radius + c.r;
+          if (dx * dx + dz * dz < rr * rr) return true;
+        } else {
+          var px = Math.max(c.x - c.hw, Math.min(x, c.x + c.hw));
+          var pz = Math.max(c.z - c.hd, Math.min(z, c.z + c.hd));
+          var _dx = x - px;
+          var _dz = z - pz;
+          if (_dx * _dx + _dz * _dz < radius * radius) return true;
+        }
+      }
+      return false;
+    };
+
+    // ------------------------------------------------------------------
+    // Ground, road grid, sidewalks, markings
+    // ------------------------------------------------------------------
+    var ground = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](600, 600), new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
+      color: COLORS.world,
+      shininess: 0
+    }));
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
     scene.add(ground);
-
-    // Create roads
-    var roadMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshLambertMaterial"]({
-      color: 0x333333
+    var roadMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
+      color: COLORS.road,
+      shininess: 0
+    });
+    var sidewalkMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
+      color: COLORS.sidewalk,
+      shininess: 0
+    });
+    var lineMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
+      color: COLORS.line
+    });
+    var addFlat = function addFlat(geometry, material, x, z) {
+      var y = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 0.02;
+      var mesh = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](geometry, material);
+      mesh.rotation.x = -Math.PI / 2;
+      mesh.position.set(x, y, z);
+      mesh.receiveShadow = true;
+      scene.add(mesh);
+      return mesh;
+    };
+    var AVENUES = [0, -50, 50]; // z positions (east-west roads)
+    var STREETS = [-45, 20, 75]; // x positions (north-south roads)
+    var ROAD_HALF = 6;
+    AVENUES.forEach(function (z) {
+      addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](190, 12), roadMaterial, 0, z);
+    });
+    STREETS.forEach(function (x) {
+      addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](12, 112), roadMaterial, x, 0);
+    });
+    var xEdges = [-95];
+    STREETS.forEach(function (sx) {
+      xEdges.push(sx - ROAD_HALF - 0.5, sx + ROAD_HALF + 0.5);
+    });
+    xEdges.push(95);
+    var _loop = function _loop() {
+      var x0 = xEdges[i];
+      var x1 = xEdges[i + 1];
+      var segLength = x1 - x0;
+      var segCenter = (x0 + x1) / 2;
+      AVENUES.forEach(function (z) {
+        addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](segLength, 2.5), sidewalkMaterial, segCenter, z + 7.5, 0.03);
+        addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](segLength, 2.5), sidewalkMaterial, segCenter, z - 7.5, 0.03);
+      });
+    };
+    for (var i = 0; i < xEdges.length; i += 2) {
+      _loop();
+    }
+    AVENUES.forEach(function (z) {
+      var _loop2 = function _loop2(x) {
+        if (STREETS.some(function (sx) {
+          return Math.abs(x - sx) < 8;
+        })) return 1; // continue
+        addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](3.5, 0.35), lineMaterial, x, z, 0.04);
+      };
+      for (var x = -90; x <= 90; x += 8) {
+        if (_loop2(x)) continue;
+      }
+    });
+    STREETS.forEach(function (x) {
+      var _loop3 = function _loop3(z) {
+        if (AVENUES.some(function (az) {
+          return Math.abs(z - az) < 8;
+        })) return 1; // continue
+        addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](0.35, 3.5), lineMaterial, x, z, 0.04);
+      };
+      for (var z = -54; z <= 54; z += 8) {
+        if (_loop3(z)) continue;
+      }
     });
 
-    // Main road
-    var mainRoad = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](100, 10), roadMaterial);
-    mainRoad.rotation.x = -Math.PI / 2;
-    mainRoad.position.y = 0.01;
-    mainRoad.receiveShadow = true;
-    scene.add(mainRoad);
+    // ------------------------------------------------------------------
+    // Instructions painted on the ground at spawn
+    // ------------------------------------------------------------------
+    var textCanvas = document.createElement("canvas");
+    textCanvas.width = 1024;
+    textCanvas.height = 256;
+    var ctx = textCanvas.getContext("2d");
+    ctx.fillStyle = "rgba(70, 66, 58, 0.85)";
+    ctx.textAlign = "center";
+    ctx.font = "900 110px Arial, sans-serif";
+    ctx.fillText("MARCO LAVIELLE", 512, 110);
+    ctx.font = "600 44px Arial, sans-serif";
+    ctx.fillText("WASD / arrows to drive  —  R to reset", 512, 195);
+    var textTexture = new three__WEBPACK_IMPORTED_MODULE_1__["CanvasTexture"](textCanvas);
+    var groundText = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](34, 8.5), new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
+      map: textTexture,
+      transparent: true
+    }));
+    groundText.rotation.x = -Math.PI / 2;
+    groundText.position.set(0, 0.05, 0);
+    scene.add(groundText);
 
-    // Cross road
-    var crossRoad = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](10, 60), roadMaterial);
-    crossRoad.rotation.x = -Math.PI / 2;
-    crossRoad.position.y = 0.01;
-    crossRoad.position.x = 20;
-    crossRoad.receiveShadow = true;
-    scene.add(crossRoad);
-
-    // Create car
-    var carGroup = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
-
-    // Car body
-    var bodyGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](4, 1.5, 2);
-    var bodyMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0xff0000
+    // ------------------------------------------------------------------
+    // The car — boxy low-poly jeep, built so physics can tilt it
+    // ------------------------------------------------------------------
+    var carGroup = new three__WEBPACK_IMPORTED_MODULE_1__["Group"](); // moves + yaws
+    var carBodyGroup = new three__WEBPACK_IMPORTED_MODULE_1__["Group"](); // pitches + rolls (cosmetic)
+    carGroup.add(carBodyGroup);
+    var paint = matte(COLORS.carBody, {
+      shininess: 30
     });
-    var carBody = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](bodyGeometry, bodyMaterial);
-    carBody.position.y = 1;
-    carBody.castShadow = true;
-    carGroup.add(carBody);
-
-    // Car roof
-    var roofGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](2.5, 1, 1.8);
-    var roofMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0xcc0000
+    var darkPaint = matte(COLORS.carDark, {
+      shininess: 30
     });
-    var carRoof = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](roofGeometry, roofMaterial);
-    carRoof.position.set(0, 2, 0);
-    carRoof.castShadow = true;
-    carGroup.add(carRoof);
-
-    // Wheels
-    var wheelGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.5, 0.5, 0.3, 16);
-    var wheelMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0x333333
+    var glass = matte(COLORS.glass, {
+      transparent: true,
+      opacity: 0.75,
+      shininess: 60
     });
-    var wheelPositions = [{
-      x: -1.5,
-      y: 0.5,
-      z: 1
+    var tireMat = matte(COLORS.tire);
+    var hubMat = matte(COLORS.hub);
+    var chassis = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](4.6, 0.9, 2.3), paint);
+    chassis.position.y = 1.0;
+    chassis.castShadow = true;
+    carBodyGroup.add(chassis);
+    var hood = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](1.5, 0.35, 2.1), darkPaint);
+    hood.position.set(1.5, 1.6, 0);
+    hood.castShadow = true;
+    carBodyGroup.add(hood);
+
+    // Open jeep cabin: windshield frame + seats + roll bar
+    var windshield = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.12, 1.0, 2.0), glass);
+    windshield.position.set(0.7, 2.0, 0);
+    windshield.rotation.z = -0.25;
+    carBodyGroup.add(windshield);
+    var seatMat = matte(0x4a443c);
+    [-0.55, 0.55].forEach(function (z) {
+      var seat = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.8, 0.8, 0.8), seatMat);
+      seat.position.set(-0.7, 1.8, z);
+      seat.castShadow = true;
+      carBodyGroup.add(seat);
+    });
+    var rollBar = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.25, 1.1, 2.2), darkPaint);
+    rollBar.position.set(-1.6, 2.0, 0);
+    rollBar.castShadow = true;
+    carBodyGroup.add(rollBar);
+
+    // Spare tire on the back
+    var spareGeo = new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.55, 0.55, 0.35, 12);
+    spareGeo.rotateZ(Math.PI / 2);
+    var spare = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](spareGeo, tireMat);
+    spare.position.set(-2.5, 1.4, 0);
+    spare.castShadow = true;
+    carBodyGroup.add(spare);
+
+    // Bumpers + lights
+    var bumperMat = matte(0x5a564e);
+    [2.4, -2.4].forEach(function (x) {
+      var bumper = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.3, 0.4, 2.35), bumperMat);
+      bumper.position.set(x, 0.8, 0);
+      bumper.castShadow = true;
+      carBodyGroup.add(bumper);
+    });
+    var headMat = matte(0xfff3c0, {
+      emissive: 0xddc878,
+      emissiveIntensity: 0.5
+    });
+    var tailMat = matte(0xd14b3a, {
+      emissive: 0x8a2418,
+      emissiveIntensity: 0.5
+    });
+    [0.8, -0.8].forEach(function (z) {
+      var head = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.15, 0.3, 0.4), headMat);
+      head.position.set(2.32, 1.35, z);
+      carBodyGroup.add(head);
+      var tail = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.12, 0.25, 0.4), tailMat);
+      tail.position.set(-2.32, 1.35, z);
+      carBodyGroup.add(tail);
+    });
+
+    // Wheels: outer group steers (front only), inner group spins
+    var wheelGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.62, 0.62, 0.45, 12);
+    wheelGeometry.rotateX(Math.PI / 2);
+    var hubGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.32, 0.32, 0.47, 8);
+    hubGeometry.rotateX(Math.PI / 2);
+    var spokeGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](1.0, 0.14, 0.49);
+    var wheels = [];
+    [{
+      x: 1.55,
+      z: 1.15,
+      front: true
     }, {
-      x: -1.5,
-      y: 0.5,
-      z: -1
+      x: 1.55,
+      z: -1.15,
+      front: true
     }, {
-      x: 1.5,
-      y: 0.5,
-      z: 1
+      x: -1.55,
+      z: 1.15,
+      front: false
     }, {
-      x: 1.5,
-      y: 0.5,
-      z: -1
-    }];
-    wheelPositions.forEach(function (pos) {
-      var wheel = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](wheelGeometry, wheelMaterial);
-      wheel.rotation.x = Math.PI / 2; // Rotate around X-axis to make wheels horizontal
-      wheel.position.set(pos.x, pos.y, pos.z);
-      wheel.castShadow = true;
-      carGroup.add(wheel);
+      x: -1.55,
+      z: -1.15,
+      front: false
+    }].forEach(function (pos) {
+      var outer = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var spin = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var tire = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](wheelGeometry, tireMat);
+      tire.castShadow = true;
+      spin.add(tire);
+      spin.add(new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](hubGeometry, hubMat));
+      spin.add(new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](spokeGeometry, hubMat));
+      outer.add(spin);
+      outer.position.set(pos.x, 0.62, pos.z);
+      carGroup.add(outer);
+      wheels.push({
+        outer: outer,
+        spin: spin,
+        front: pos.front
+      });
     });
-
-    // Headlights
-    // const headlightGeometry = new THREE.SphereGeometry(0.3, 8, 8);
-    // const headlightMaterial = new THREE.MeshPhongMaterial({
-    //   color: 0xffffaa,
-    //   emissive: 0xffffaa,
-    //   emissiveIntensity: 0.5,
-    // });
-
-    // const leftHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
-    // leftHeadlight.position.set(2, 1, 0.7);
-    // carGroup.add(leftHeadlight);
-
-    // const rightHeadlight = new THREE.Mesh(headlightGeometry, headlightMaterial);
-    // rightHeadlight.position.set(2, 1, -0.7);
-    // carGroup.add(rightHeadlight);
-
-    carGroup.position.set(0, 0, 0);
-    // Initial car rotation to point forward (up direction in viewport)
-    carGroup.rotation.y = Math.PI / 2; // Rotate 90 degrees to point up
     scene.add(carGroup);
-    carRef.current = carGroup;
 
-    // Store collision objects for reference
-    var collisionObjects = [];
-
-    // Create buildings
-    var buildingMaterial1 = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0x8b4513
-    });
-    var buildingMaterial2 = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0x696969
-    });
-    var buildingMaterial3 = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-      color: 0x4169e1
-    });
-
-    // Building 1
-    var building1 = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](15, 20, 15), buildingMaterial1);
-    building1.position.set(-30, 10, -20);
-    building1.castShadow = true;
-    building1.receiveShadow = true;
-    // Create custom bounding box for building collision (not shadows)
-    var building1BoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromCenterAndSize(new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](-30, 1, -20),
-    // center at ground level
-    new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](15, 2, 15) // building base dimensions only
-    );
-    building1.userData = {
-      type: "building",
-      boundingBox: building1BoundingBox
+    // ------------------------------------------------------------------
+    // Car physics state
+    // ------------------------------------------------------------------
+    var car = {
+      x: 0,
+      z: 0,
+      y: 0,
+      vy: 0,
+      heading: -Math.PI / 2,
+      // forward = (sin(heading), cos(heading)); -X = up-screen for the fixed camera
+      speed: 0,
+      // signed: + forward, - reverse
+      onGround: true,
+      pitch: 0,
+      roll: 0
     };
-    scene.add(building1);
-    collisionObjects.push(building1);
-
-    // Building 2
-    var building2 = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](20, 30, 20), buildingMaterial2);
-    building2.position.set(40, 15, 20);
-    building2.castShadow = true;
-    building2.receiveShadow = true;
-    // Create custom bounding box for building collision (not shadows)
-    var building2BoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromCenterAndSize(new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](40, 1, 20),
-    // center at ground level
-    new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](20, 2, 20) // building base dimensions only
-    );
-    building2.userData = {
-      type: "building",
-      boundingBox: building2BoundingBox
+    var PHYSICS = {
+      accel: 0.024,
+      revAccel: 0.014,
+      maxSpeed: 1.05,
+      maxReverse: 0.45,
+      drag: 0.982,
+      steer: 0.052,
+      gravity: 0.016
     };
-    scene.add(building2);
-    collisionObjects.push(building2);
-
-    // Building 3
-    var building3 = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](25, 15, 25), buildingMaterial3);
-    building3.position.set(-40, 7.5, 30);
-    building3.castShadow = true;
-    building3.receiveShadow = true;
-    // Create custom bounding box for building collision (not shadows)
-    var building3BoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromCenterAndSize(new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](-40, 1, 30),
-    // center at ground level
-    new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](25, 2, 25) // building base dimensions only
-    );
-    building3.userData = {
-      type: "building",
-      boundingBox: building3BoundingBox
+    var resetCar = function resetCar() {
+      car.x = 0;
+      car.z = 0;
+      car.y = 0;
+      car.vy = 0;
+      car.heading = -Math.PI / 2;
+      car.speed = 0;
+      car.onGround = true;
     };
-    scene.add(building3);
-    collisionObjects.push(building3);
 
-    // Create trees (moved away from buildings)
-    var treePositions = [{
-      x: -15,
-      z: 15
-    },
-    // moved away from building1
-    {
-      x: 30,
-      z: -15
+    // ------------------------------------------------------------------
+    // Ramps — drive up, fly off the end. Physics uses a ground-height
+    // function; meshes are just wedges drawn to match it.
+    // ------------------------------------------------------------------
+    // dir = +1: you climb while moving toward +X; dir = -1: toward -X
+    var ramps = [{
+      x: 48,
+      z: -14,
+      len: 16,
+      width: 9,
+      h: 3.6,
+      dir: 1
     }, {
-      x: -50,
-      z: -40
+      x: 0,
+      z: 25,
+      len: 18,
+      width: 10,
+      h: 4.4,
+      dir: -1
+    }];
+    var groundHeightAt = function groundHeightAt(x, z) {
+      var h = 0;
+      for (var _i = 0; _i < ramps.length; _i++) {
+        var r = ramps[_i];
+        var dx = (x - r.x) * r.dir;
+        var dz = z - r.z;
+        if (Math.abs(dz) < r.width / 2 && dx > -r.len / 2 && dx < r.len / 2) {
+          h = Math.max(h, r.h * (dx + r.len / 2) / r.len);
+        }
+      }
+      return h;
+    };
+    var rampMat = matte(COLORS.ramp);
+    ramps.forEach(function (r) {
+      var shape = new three__WEBPACK_IMPORTED_MODULE_1__["Shape"]();
+      shape.moveTo(-r.len / 2, 0);
+      shape.lineTo(r.len / 2, 0);
+      shape.lineTo(r.len / 2, r.h);
+      shape.lineTo(-r.len / 2, 0);
+      var geo = new three__WEBPACK_IMPORTED_MODULE_1__["ExtrudeGeometry"](shape, {
+        depth: r.width,
+        bevelEnabled: false
+      });
+      geo.translate(0, 0, -r.width / 2);
+      var wedge = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](geo, rampMat);
+      if (r.dir === -1) wedge.rotation.y = Math.PI;
+      wedge.position.set(r.x, 0, r.z);
+      wedge.castShadow = true;
+      wedge.receiveShadow = true;
+      scene.add(wedge);
+    });
+
+    // ------------------------------------------------------------------
+    // Buildings — flat-shaded pastel blocks
+    // ------------------------------------------------------------------
+    var windowMat = matte(COLORS.window);
+    var createBuilding = function createBuilding(x, z, w, h, d, colorIndex) {
+      var group = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var walls = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](w, h, d), matte(COLORS.buildings[colorIndex % COLORS.buildings.length]));
+      walls.position.y = h / 2;
+      walls.castShadow = true;
+      walls.receiveShadow = true;
+      group.add(walls);
+      var roof = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](w + 0.6, 0.6, d + 0.6), matte(COLORS.roofs[colorIndex % COLORS.roofs.length]));
+      roof.position.y = h + 0.3;
+      roof.castShadow = true;
+      group.add(roof);
+      var floors = Math.max(2, Math.floor(h / 4.5));
+      var cols = Math.max(2, Math.floor(w / 4.5));
+      var winGeo = new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](1.5, 1.9);
+      for (var f = 0; f < floors; f++) {
+        for (var c = 0; c < cols; c++) {
+          var wx = -w / 2 + (c + 0.5) * (w / cols);
+          var wy = 2.4 + f * (h - 3.5) / floors;
+          var front = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](winGeo, windowMat);
+          front.position.set(wx, wy, d / 2 + 0.02);
+          group.add(front);
+          var back = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](winGeo, windowMat);
+          back.position.set(wx, wy, -d / 2 - 0.02);
+          back.rotation.y = Math.PI;
+          group.add(back);
+        }
+      }
+      group.position.set(x, 0, z);
+      scene.add(group);
+      addBoxCollider(x, z, w, d);
+    };
+    createBuilding(-30, -25, 15, 22, 15, 0);
+    createBuilding(45, 25, 18, 30, 16, 1);
+    createBuilding(-68, 30, 20, 16, 20, 2);
+    createBuilding(62, -30, 14, 26, 14, 3);
+    createBuilding(-20, 30, 12, 18, 12, 4);
+    createBuilding(38, -28, 12, 20, 12, 5);
+
+    // ------------------------------------------------------------------
+    // Trees, bushes, rocks (muted low-poly)
+    // ------------------------------------------------------------------
+    var trunkMat = matte(COLORS.trunk);
+    var leafMat = matte(COLORS.leaf);
+    var leafMatDark = matte(COLORS.leafDark);
+    var pineMat = matte(COLORS.pine);
+    var createLeafyTree = function createLeafyTree(x, z) {
+      var scale = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+      var tree = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var trunk = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.5 * scale, 0.8 * scale, 6 * scale, 7), trunkMat);
+      trunk.position.y = 3 * scale;
+      trunk.castShadow = true;
+      tree.add(trunk);
+      [{
+        x: 0,
+        y: 7.5,
+        z: 0,
+        r: 3.2,
+        mat: leafMat
+      }, {
+        x: 1.8,
+        y: 6.3,
+        z: 0.8,
+        r: 2.2,
+        mat: leafMatDark
+      }, {
+        x: -1.6,
+        y: 6.5,
+        z: -0.9,
+        r: 2.4,
+        mat: leafMatDark
+      }].forEach(function (b) {
+        var leaves = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](b.r * scale, 7, 6), b.mat);
+        leaves.position.set(b.x * scale, b.y * scale, b.z * scale);
+        leaves.castShadow = true;
+        tree.add(leaves);
+      });
+      tree.position.set(x, 0, z);
+      scene.add(tree);
+      addCircleCollider(x, z, 1.0 * scale);
+    };
+    var createPineTree = function createPineTree(x, z) {
+      var scale = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+      var tree = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var trunk = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.4 * scale, 0.6 * scale, 3 * scale, 7), trunkMat);
+      trunk.position.y = 1.5 * scale;
+      trunk.castShadow = true;
+      tree.add(trunk);
+      [{
+        y: 4,
+        r: 3.0
+      }, {
+        y: 6.2,
+        r: 2.3
+      }, {
+        y: 8.1,
+        r: 1.5
+      }].forEach(function (tier) {
+        var cone = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["ConeGeometry"](tier.r * scale, 3 * scale, 8), pineMat);
+        cone.position.y = tier.y * scale;
+        cone.castShadow = true;
+        tree.add(cone);
+      });
+      tree.position.set(x, 0, z);
+      scene.add(tree);
+      addCircleCollider(x, z, 0.9 * scale);
+    };
+    createLeafyTree(-15, 15, 1.1);
+    createLeafyTree(30, -15, 1.0);
+    createLeafyTree(88, 40, 1.3);
+    createLeafyTree(8, 38, 0.9);
+    createLeafyTree(-25, -12, 1.0);
+    createLeafyTree(-60, -15, 1.2);
+    createPineTree(-55, -40, 1.2);
+    createPineTree(55, 12, 1.0);
+    createPineTree(-12, -40, 1.1);
+    createPineTree(33, 36, 1.0);
+    createPineTree(88, -14, 1.3);
+    createPineTree(-80, 12, 1.1);
+    var bushMat = matte(COLORS.bush);
+    [{
+      x: -10,
+      z: 12
     }, {
-      x: 60,
+      x: 12,
+      z: -12
+    }, {
+      x: 40,
+      z: 12
+    }, {
+      x: -35,
+      z: 12
+    }, {
+      x: 28,
+      z: 35
+    }, {
+      x: -58,
       z: 40
     }, {
-      x: 15,
-      z: 45
-    },
-    // moved away from building3
-    {
-      x: -25,
-      z: -5
-    } // moved away from building1
-    ];
-    treePositions.forEach(function (pos) {
-      var treeGroup = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
-
-      // Tree trunk
-      var trunkGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](1, 1.5, 8);
-      var trunkMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-        color: 0x8b4513
-      });
-      var trunk = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](trunkGeometry, trunkMaterial);
-      trunk.position.y = 4;
-      trunk.castShadow = true;
-      treeGroup.add(trunk);
-
-      // Tree leaves
-      var leavesGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](5, 8, 6);
-      var leavesMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
-        color: 0x228b22
-      });
-      var leaves = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](leavesGeometry, leavesMaterial);
-      leaves.position.y = 10;
-      leaves.castShadow = true;
-      treeGroup.add(leaves);
-      treeGroup.position.set(pos.x, 0, pos.z);
-
-      // Create custom bounding box for just the trunk (not the full tree with leaves shadow)
-      var trunkBoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromCenterAndSize(new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](pos.x, 2, pos.z),
-      // center at trunk base
-      new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](3, 4, 3) // smaller collision box around trunk only
-      );
-      treeGroup.userData = {
-        type: "tree",
-        boundingBox: trunkBoundingBox
-      };
-      scene.add(treeGroup);
-      collisionObjects.push(treeGroup);
+      x: 50,
+      z: -14
+    }, {
+      x: -70,
+      z: -30
+    }].forEach(function (p, i) {
+      var r = 1 + i % 3 * 0.4;
+      var bush = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](r, 7, 5), bushMat);
+      bush.position.set(p.x, r * 0.6, p.z);
+      bush.scale.y = 0.7;
+      bush.castShadow = true;
+      scene.add(bush);
+      addCircleCollider(p.x, p.z, r * 0.8);
+    });
+    var rockMat = matte(COLORS.rock);
+    [{
+      x: -18,
+      z: -63,
+      s: 1.6
+    }, {
+      x: 52,
+      z: 63,
+      s: 2.2
+    }, {
+      x: 88,
+      z: 18,
+      s: 1.3
+    }, {
+      x: -75,
+      z: 63,
+      s: 1.8
+    }, {
+      x: 5,
+      z: -66,
+      s: 1.5
+    }].forEach(function (p) {
+      var rock = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["DodecahedronGeometry"](p.s, 0), rockMat);
+      rock.position.set(p.x, p.s * 0.5, p.z);
+      rock.rotation.set(Math.random(), Math.random(), Math.random());
+      rock.castShadow = true;
+      scene.add(rock);
+      addCircleCollider(p.x, p.z, p.s);
     });
 
-    // Create interactive objects (collectibles)
+    // ------------------------------------------------------------------
+    // Lamps + benches
+    // ------------------------------------------------------------------
+    var poleMat = matte(COLORS.pole);
+    var lampMat = matte(0xf3e9c8, {
+      emissive: 0xc9b878,
+      emissiveIntensity: 0.4
+    });
+    [-75, -30, 0, 40, 85].forEach(function (x, i) {
+      var side = i % 2 === 0 ? 8.8 : -8.8;
+      var lamp = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var pole = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.15, 0.2, 7, 7), poleMat);
+      pole.position.y = 3.5;
+      pole.castShadow = true;
+      lamp.add(pole);
+      var arm = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.15, 0.15, 2), poleMat);
+      arm.position.set(0, 6.9, side > 0 ? -1 : 1);
+      lamp.add(arm);
+      var bulb = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](0.35, 8, 6), lampMat);
+      bulb.position.set(0, 6.8, side > 0 ? -2 : 2);
+      lamp.add(bulb);
+      lamp.position.set(x, 0, side);
+      scene.add(lamp);
+      addCircleCollider(x, side, 0.5);
+    });
+    var woodMat = matte(COLORS.wood);
+    [-60, 0, 50].forEach(function (x) {
+      var bench = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var seat = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](3, 0.2, 1), woodMat);
+      seat.position.y = 0.8;
+      seat.castShadow = true;
+      bench.add(seat);
+      var back = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](3, 0.9, 0.15), woodMat);
+      back.position.set(0, 1.4, -0.45);
+      back.castShadow = true;
+      bench.add(back);
+      [-1.3, 1.3].forEach(function (lx) {
+        var leg = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](0.2, 0.8, 0.9), poleMat);
+        leg.position.set(lx, 0.4, 0);
+        bench.add(leg);
+      });
+      bench.position.set(x, 0, 9.2);
+      scene.add(bench);
+      addBoxCollider(x, 9.2, 3, 1.2);
+    });
+
+    // ------------------------------------------------------------------
+    // Fountain plaza
+    // ------------------------------------------------------------------
+    var fountain = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+    var basin = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](6, 6.5, 1, 14), matte(0xb5afa3));
+    basin.position.y = 0.5;
+    basin.castShadow = true;
+    basin.receiveShadow = true;
+    fountain.add(basin);
+    var water = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](5.4, 5.4, 0.2, 14), matte(0x7db4c9, {
+      transparent: true,
+      opacity: 0.85,
+      shininess: 60
+    }));
+    water.position.y = 1.0;
+    fountain.add(water);
+    var column = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.8, 1.2, 3.2, 9), matte(0xc4beb2));
+    column.position.y = 2.2;
+    column.castShadow = true;
+    fountain.add(column);
+    var topBowl = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](2.2, 1.6, 0.6, 11), matte(0xb5afa3));
+    topBowl.position.y = 3.9;
+    topBowl.castShadow = true;
+    fountain.add(topBowl);
+    fountain.position.set(-12, 0, -32);
+    scene.add(fountain);
+    addCircleCollider(-12, -32, 6.8);
+
+    // ------------------------------------------------------------------
+    // KNOCKABLES: bowling pins + a brick wall to smash through
+    // ------------------------------------------------------------------
+    var knockables = []; // shared car-contact handling
+
+    // --- Bowling pins (triangle formation, pivot at base so they tip over)
+    var pinMat = matte(COLORS.pin);
+    var stripeMat = matte(COLORS.pinStripe);
+    var pins = [];
+    var PIN_BASE = {
+      x: 2,
+      z: -32
+    };
+    var pinRows = [[{
+      dx: 0,
+      dz: 0
+    }], [{
+      dx: -1.1,
+      dz: -1.8
+    }, {
+      dx: 1.1,
+      dz: -1.8
+    }], [{
+      dx: -2.2,
+      dz: -3.6
+    }, {
+      dx: 0,
+      dz: -3.6
+    }, {
+      dx: 2.2,
+      dz: -3.6
+    }], [{
+      dx: -3.3,
+      dz: -5.4
+    }, {
+      dx: -1.1,
+      dz: -5.4
+    }, {
+      dx: 1.1,
+      dz: -5.4
+    }, {
+      dx: 3.3,
+      dz: -5.4
+    }]];
+    pinRows.flat().forEach(function (offset) {
+      var group = new three__WEBPACK_IMPORTED_MODULE_1__["Group"]();
+      var body = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.28, 0.42, 1.7, 8), pinMat);
+      body.position.y = 0.85;
+      body.castShadow = true;
+      group.add(body);
+      var neck = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](0.3, 8, 6), pinMat);
+      neck.position.y = 1.85;
+      neck.castShadow = true;
+      group.add(neck);
+      var stripe = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["CylinderGeometry"](0.3, 0.33, 0.2, 8), stripeMat);
+      stripe.position.y = 1.45;
+      group.add(stripe);
+      var x = PIN_BASE.x + offset.dx;
+      var z = PIN_BASE.z + offset.dz;
+      group.position.set(x, 0, z);
+      scene.add(group);
+      var pin = {
+        kind: "pin",
+        group: group,
+        homeX: x,
+        homeZ: z,
+        x: x,
+        z: z,
+        vx: 0,
+        vz: 0,
+        r: 0.55,
+        tilt: 0,
+        tiltVel: 0,
+        axis: new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](1, 0, 0)
+      };
+      pins.push(pin);
+      knockables.push(pin);
+    });
+
+    // Bowling "lane" hint on the ground leading from the road to the pins
+    addFlat(new three__WEBPACK_IMPORTED_MODULE_1__["PlaneGeometry"](5, 18), sidewalkMaterial, 2, -19, 0.025);
+
+    // --- Brick wall (frozen stack; wakes up and tumbles when rammed)
+    var brickMat = matte(COLORS.brick);
+    var brickGeo = new three__WEBPACK_IMPORTED_MODULE_1__["BoxGeometry"](1.9, 0.95, 0.95);
+    var bricks = [];
+    var WALL = {
+      x: 50,
+      z: 38
+    };
+    for (var row = 0; row < 4; row++) {
+      for (var col = 0; col < 5; col++) {
+        var stagger = row % 2 === 0 ? 0 : 1.0;
+        var bx = WALL.x - 4 + col * 2.0 + stagger;
+        var by = 0.5 + row * 0.97;
+        var mesh = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](brickGeo, brickMat);
+        mesh.position.set(bx, by, WALL.z);
+        mesh.castShadow = true;
+        scene.add(mesh);
+        var brick = {
+          kind: "brick",
+          mesh: mesh,
+          x: bx,
+          z: WALL.z,
+          y: by,
+          vx: 0,
+          vy: 0,
+          vz: 0,
+          avx: 0,
+          avy: 0,
+          avz: 0,
+          r: 1.0,
+          awake: false
+        };
+        bricks.push(brick);
+        knockables.push(brick);
+      }
+    }
+    var wakeBrick = function wakeBrick(brick, dirX, dirZ, power) {
+      if (brick.awake) return;
+      brick.awake = true;
+      brick.vx = dirX * power * (0.8 + Math.random() * 0.5);
+      brick.vz = dirZ * power * (0.8 + Math.random() * 0.5);
+      brick.vy = 0.12 + Math.random() * 0.12 * power;
+      brick.avx = (Math.random() - 0.5) * 0.25;
+      brick.avy = (Math.random() - 0.5) * 0.25;
+      brick.avz = (Math.random() - 0.5) * 0.25;
+    };
+
+    // ------------------------------------------------------------------
+    // Dust particles behind the wheels
+    // ------------------------------------------------------------------
+    var dustPool = [];
+    var dustGeo = new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](0.28, 5, 4);
+    for (var _i2 = 0; _i2 < 36; _i2++) {
+      var _mesh = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](dustGeo, new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
+        color: COLORS.dust,
+        transparent: true,
+        opacity: 0
+      }));
+      _mesh.visible = false;
+      scene.add(_mesh);
+      dustPool.push({
+        mesh: _mesh,
+        life: 0
+      });
+    }
+    var dustIndex = 0;
+    var emitDust = function emitDust(x, y, z) {
+      var d = dustPool[dustIndex];
+      dustIndex = (dustIndex + 1) % dustPool.length;
+      d.life = 1;
+      d.mesh.visible = true;
+      d.mesh.position.set(x + (Math.random() - 0.5) * 0.8, y + 0.2, z + (Math.random() - 0.5) * 0.8);
+      d.mesh.scale.setScalar(0.6 + Math.random() * 0.5);
+    };
+
+    // ------------------------------------------------------------------
+    // Crystals — random spawn, validated against colliders + playground
+    // ------------------------------------------------------------------
+    var crystalExclusions = [{
+      x: PIN_BASE.x,
+      z: PIN_BASE.z - 3,
+      r: 10
+    }, {
+      x: WALL.x,
+      z: WALL.z,
+      r: 10
+    }].concat(_toConsumableArray(ramps.map(function (r) {
+      return {
+        x: r.x,
+        z: r.z,
+        r: Math.max(r.len, r.width)
+      };
+    })));
     var collectibles = [];
     var collectibleGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["OctahedronGeometry"](1, 0);
     var collectibleMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshPhongMaterial"]({
       color: 0xffd700,
-      emissive: 0xffd700,
-      emissiveIntensity: 0.3
+      emissive: 0xc9a227,
+      emissiveIntensity: 0.4,
+      shininess: 80,
+      flatShading: true
     });
-    var collectiblePositions = [{
-      x: 0,
-      z: -20
-    }, {
-      x: 25,
-      z: 0
-    }, {
-      x: -25,
-      z: 25
-    }, {
-      x: 45,
-      z: -30
-    }, {
-      x: -45,
-      z: -30
-    }];
+    var ringMat = new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
+      color: 0xe2c14d,
+      transparent: true,
+      opacity: 0.4,
+      side: three__WEBPACK_IMPORTED_MODULE_1__["DoubleSide"]
+    });
+    var collectiblePositions = [];
+    var minSpacing = 30;
+    var attempts = 0;
+    var _loop4 = function _loop4() {
+        attempts++;
+        if (attempts > 300) {
+          attempts = 0;
+          minSpacing = Math.max(8, minSpacing - 6);
+        }
+        var x = (Math.random() - 0.5) * 175;
+        var z = (Math.random() - 0.5) * 175;
+        if (Math.sqrt(x * x + z * z) < 18) return 0; // continue
+        if (collidesAt(x, z, 3.5)) return 0; // continue
+        if (crystalExclusions.some(function (e) {
+          return Math.sqrt(Math.pow(e.x - x, 2) + Math.pow(e.z - z, 2)) < e.r;
+        })) return 0; // continue
+        if (collectiblePositions.some(function (p) {
+          return Math.sqrt(Math.pow(p.x - x, 2) + Math.pow(p.z - z, 2)) < minSpacing;
+        })) return 0; // continue
+        collectiblePositions.push({
+          x: x,
+          z: z
+        });
+      },
+      _ret;
+    while (collectiblePositions.length < TOTAL_CRYSTALS) {
+      _ret = _loop4();
+      if (_ret === 0) continue;
+    }
     collectiblePositions.forEach(function (pos, index) {
-      var collectible = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](collectibleGeometry, collectibleMaterial);
+      var collectible = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](collectibleGeometry, collectibleMaterial.clone());
       collectible.position.set(pos.x, 3, pos.z);
       collectible.castShadow = true;
       collectible.userData = {
@@ -263123,9 +263789,16 @@ var CarGame = function CarGame() {
       };
       collectibles.push(collectible);
       scene.add(collectible);
+      var ring = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["RingGeometry"](1.6, 2.4, 22), ringMat);
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.set(pos.x, 0.05, pos.z);
+      collectible.userData.ring = ring;
+      scene.add(ring);
     });
 
-    // Keyboard controls
+    // ------------------------------------------------------------------
+    // Controls
+    // ------------------------------------------------------------------
     var handleKeyDown = function handleKeyDown(event) {
       keysPressed.current[event.key.toLowerCase()] = true;
     };
@@ -263134,260 +263807,363 @@ var CarGame = function CarGame() {
     };
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keyup", handleKeyUp);
-
-    // Touch controls for mobile
-    var simulateKeyPress = function simulateKeyPress(key, pressed) {
+    window.simulateKeyPress = function (key, pressed) {
       keysPressed.current[key] = pressed;
     };
 
-    // Expose the simulateKeyPress function to the component
-    window.simulateKeyPress = simulateKeyPress;
-
-    // Animation loop
-    var _animate = function animate() {
-      animationIdRef.current = requestAnimationFrame(_animate);
-
-      // Update car physics
-      var acceleration = 0.5;
-      var maxSpeed = 1.0;
-      var friction = 0.95;
-      var turnSpeed = 0.05;
-      if (keysPressed.current["arrowup"] || keysPressed.current["w"]) {
-        carVelocity.current.x += Math.sin(carRotation.current) * acceleration;
-        carVelocity.current.z += Math.cos(carRotation.current) * acceleration;
-      }
-      if (keysPressed.current["arrowdown"] || keysPressed.current["s"]) {
-        carVelocity.current.x -= Math.sin(carRotation.current) * acceleration * 0.5;
-        carVelocity.current.z -= Math.cos(carRotation.current) * acceleration * 0.5;
-      }
-      if (keysPressed.current["arrowleft"] || keysPressed.current["a"]) {
-        carRotation.current += turnSpeed;
-      }
-      if (keysPressed.current["arrowright"] || keysPressed.current["d"]) {
-        carRotation.current -= turnSpeed;
-      }
-
-      // Apply friction
-      carVelocity.current.x *= friction;
-      carVelocity.current.z *= friction;
-
-      // Limit speed
-      var speed = Math.sqrt(Math.pow(carVelocity.current.x, 2) + Math.pow(carVelocity.current.z, 2));
-      if (speed > maxSpeed) {
-        carVelocity.current.x = carVelocity.current.x / speed * maxSpeed;
-        carVelocity.current.z = carVelocity.current.z / speed * maxSpeed;
-      }
-
-      // Update car position with collision detection
-      if (carRef.current) {
-        var newX = carRef.current.position.x + carVelocity.current.x;
-        var newZ = carRef.current.position.z + carVelocity.current.z;
-
-        // Create temporary position for collision testing
-        var tempPosition = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](newX, carRef.current.position.y, newZ);
-        var carBoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromCenterAndSize(tempPosition, new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](4, 1.5, 2) // Car dimensions
-        );
-
-        // Check for collisions
-        var collision = false;
-        for (var _i = 0, _collisionObjects = collisionObjects; _i < _collisionObjects.length; _i++) {
-          var obj = _collisionObjects[_i];
-          var objBoundingBox = new three__WEBPACK_IMPORTED_MODULE_1__["Box3"]().setFromObject(obj);
-          if (carBoundingBox.intersectsBox(objBoundingBox)) {
-            collision = true;
-            break;
-          }
-        }
-
-        // Only update position if no collision
-        if (!collision) {
-          carRef.current.position.x = newX;
-          carRef.current.position.z = newZ;
-        } else {
-          // Stop the car on collision
-          carVelocity.current.x *= 0.1;
-          carVelocity.current.z *= 0.1;
-        }
-        carRef.current.rotation.y = carRotation.current + Math.PI / 2; // Base rotation + dynamic rotation
-
-        // Keep car in bounds
-        var boundary = 90;
-        carRef.current.position.x = Math.max(-boundary, Math.min(boundary, carRef.current.position.x));
-        carRef.current.position.z = Math.max(-boundary, Math.min(boundary, carRef.current.position.z));
-      }
-
-      // Update camera to follow car
-      if (cameraRef.current && carRef.current) {
-        var cameraOffset = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](-Math.sin(carRotation.current) * 20, 10, -Math.cos(carRotation.current) * 20);
-        cameraRef.current.position.lerp(carRef.current.position.clone().add(cameraOffset), 0.1);
-        cameraRef.current.lookAt(carRef.current.position);
-      }
-
-      // Rotate collectibles and check for collection
-      collectibles.forEach(function (collectible, index) {
-        if (!collectible.userData.collected && collectible.parent) {
-          collectible.rotation.y += 0.02;
-          collectible.position.y = 3 + Math.sin(Date.now() * 0.001 + index) * 0.5;
-
-          // Check collision with car
-          if (carRef.current) {
-            var distance = collectible.position.distanceTo(carRef.current.position);
-            if (distance < 4) {
-              collectible.userData.collected = true;
-              // Add collection effect
-              collectible.material.emissiveIntensity = 1;
-
-              // Update score
-              setScore(function (prevScore) {
-                var newScore = prevScore + 1;
-                console.log("Crystal collected! Score: ".concat(newScore, "/5"));
-                if (newScore === 5) {
-                  console.log("All crystals collected! You win!");
-                  setGameWon(true);
-                  setShowFireworks(true);
-                  // Create fireworks
-                  setTimeout(function () {
-                    createFireworks();
-                  }, 100);
-                  // Redirect after 5 seconds
-                  setTimeout(function () {
-                    window.location.href = "/";
-                  }, 5000);
-                }
-                return newScore;
-              });
-
-              // Remove after a brief flash
-              setTimeout(function () {
-                if (collectible.parent) {
-                  scene.remove(collectible);
-                }
-              }, 100);
-            }
-          }
-        }
-      });
-
-      // Update fireworks
-      if (showFireworks) {
-        updateFireworks();
-      }
-      renderer.render(scene, camera);
-    };
-
-    // Fireworks functions
+    // ------------------------------------------------------------------
+    // Fireworks
+    // ------------------------------------------------------------------
     var createFireworks = function createFireworks() {
-      console.log("Creating fireworks!");
-      var _loop = function _loop(i) {
+      for (var _i3 = 0; _i3 < 10; _i3++) {
         setTimeout(function () {
           var firework = {
             particles: [],
-            position: new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"]((Math.random() - 0.5) * 60, Math.random() * 20 + 10, (Math.random() - 0.5) * 60),
             life: 60
           };
-
-          // Create particles for this firework
-          for (var j = 0; j < 20; j++) {
-            var particleGeometry = new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](0.2, 4, 4);
-            var particleMaterial = new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
-              color: new three__WEBPACK_IMPORTED_MODULE_1__["Color"]().setHSL(Math.random(), 1, 0.7)
-            });
-            var particle = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](particleGeometry, particleMaterial);
-            particle.position.copy(firework.position);
-            particle.velocity = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"]((Math.random() - 0.5) * 2, Math.random() * 2, (Math.random() - 0.5) * 2);
+          var origin = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](car.x + (Math.random() - 0.5) * 50, Math.random() * 18 + 14, car.z + (Math.random() - 0.5) * 50);
+          for (var j = 0; j < 24; j++) {
+            var particle = new three__WEBPACK_IMPORTED_MODULE_1__["Mesh"](new three__WEBPACK_IMPORTED_MODULE_1__["SphereGeometry"](0.25, 5, 5), new three__WEBPACK_IMPORTED_MODULE_1__["MeshBasicMaterial"]({
+              color: new three__WEBPACK_IMPORTED_MODULE_1__["Color"]().setHSL(Math.random(), 0.9, 0.6),
+              transparent: true
+            }));
+            particle.position.copy(origin);
+            particle.userData.velocity = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"]((Math.random() - 0.5) * 2, Math.random() * 2, (Math.random() - 0.5) * 2);
             scene.add(particle);
             firework.particles.push(particle);
           }
           fireworksRef.current.push(firework);
-          console.log("Firework ".concat(i + 1, " created with ").concat(firework.particles.length, " particles"));
-        }, i * 300);
-      };
-      for (var i = 0; i < 10; i++) {
-        _loop(i);
+        }, _i3 * 300);
       }
     };
     var updateFireworks = function updateFireworks() {
-      if (fireworksRef.current.length > 0) {
-        fireworksRef.current.forEach(function (firework, fireworkIndex) {
-          firework.life--;
-          firework.particles.forEach(function (particle, particleIndex) {
-            particle.position.add(particle.velocity);
-            particle.velocity.y -= 0.02; // gravity
-            particle.material.opacity = firework.life / 60;
-          });
-          if (firework.life <= 0) {
-            firework.particles.forEach(function (particle) {
-              scene.remove(particle);
-            });
-            fireworksRef.current.splice(fireworkIndex, 1);
-          }
+      var _loop5 = function _loop5() {
+        var firework = fireworksRef.current[_i4];
+        firework.life--;
+        firework.particles.forEach(function (particle) {
+          particle.position.add(particle.userData.velocity);
+          particle.userData.velocity.y -= 0.02;
+          particle.material.opacity = Math.max(0, firework.life / 60);
         });
+        if (firework.life <= 0) {
+          firework.particles.forEach(function (particle) {
+            scene.remove(particle);
+            particle.geometry.dispose();
+            particle.material.dispose();
+          });
+          fireworksRef.current.splice(_i4, 1);
+        }
+      };
+      for (var _i4 = fireworksRef.current.length - 1; _i4 >= 0; _i4--) {
+        _loop5();
       }
     };
 
-    // Start animation
+    // ------------------------------------------------------------------
+    // Animation loop
+    // ------------------------------------------------------------------
+    var frame = 0;
+    var _animate = function animate() {
+      animationIdRef.current = requestAnimationFrame(_animate);
+      frame++;
+      var k = keysPressed.current;
+      var throttle = k["arrowup"] || k["w"] ? 1 : k["arrowdown"] || k["s"] ? -1 : 0;
+      var steer = (k["arrowleft"] || k["a"] ? 1 : 0) - (k["arrowright"] || k["d"] ? 1 : 0);
+      if (k["r"]) resetCar();
+
+      // --- longitudinal physics
+      if (throttle > 0) car.speed += PHYSICS.accel;else if (throttle < 0) car.speed -= PHYSICS.revAccel;
+      car.speed *= PHYSICS.drag;
+      car.speed = Math.max(-PHYSICS.maxReverse, Math.min(PHYSICS.maxSpeed, car.speed));
+      if (Math.abs(car.speed) < 0.002 && throttle === 0) car.speed = 0;
+
+      // --- steering scales with speed (no turning on the spot), flips in reverse
+      var speedFactor = Math.max(-1, Math.min(1, car.speed / 0.45));
+      if (car.onGround) car.heading += steer * PHYSICS.steer * speedFactor;
+      var fwdX = Math.sin(car.heading);
+      var fwdZ = Math.cos(car.heading);
+      var moveX = fwdX * car.speed;
+      var moveZ = fwdZ * car.speed;
+
+      // --- horizontal collision (axis-separated so the car slides on walls)
+      var newX = car.x + moveX;
+      var newZ = car.z + moveZ;
+      if (collidesAt(newX, newZ)) {
+        if (!collidesAt(newX, car.z)) {
+          newZ = car.z;
+        } else if (!collidesAt(car.x, newZ)) {
+          newX = car.x;
+        } else {
+          newX = car.x;
+          newZ = car.z;
+        }
+        car.speed *= 0.4;
+      }
+
+      // --- ramps & vertical physics
+      var newGround = groundHeightAt(newX, newZ);
+      if (car.onGround && newGround - car.y > 0.9) {
+        // Too tall to step onto (e.g. the cliff side of a ramp): treat as wall
+        newX = car.x;
+        newZ = car.z;
+        car.speed *= 0.3;
+      } else {
+        var boundary = 95;
+        newX = Math.max(-boundary, Math.min(boundary, newX));
+        newZ = Math.max(-boundary, Math.min(boundary, newZ));
+      }
+      var groundH = groundHeightAt(newX, newZ);
+      if (car.onGround) {
+        if (groundH >= car.y - 0.3) {
+          car.vy = groundH - car.y; // vertical speed from following the slope
+          car.y = groundH;
+        } else {
+          car.onGround = false; // launched off a ramp edge, keep climbing vy
+        }
+      } else {
+        car.vy -= PHYSICS.gravity;
+        car.y += car.vy;
+        if (car.y <= groundH) {
+          car.y = groundH;
+          car.vy = 0;
+          car.onGround = true;
+        }
+      }
+      car.x = newX;
+      car.z = newZ;
+
+      // --- cosmetic body tilt: pitch follows the slope/air, roll follows steering
+      var hAhead = groundHeightAt(car.x + fwdX * 1.6, car.z + fwdZ * 1.6);
+      var hBehind = groundHeightAt(car.x - fwdX * 1.6, car.z - fwdZ * 1.6);
+      var targetPitch = car.onGround ? Math.atan2(hAhead - hBehind, 3.2) : Math.max(-0.35, car.vy * 0.6);
+      var targetRoll = steer * speedFactor * 0.1;
+      car.pitch += (targetPitch - car.pitch) * 0.15;
+      car.roll += (targetRoll - car.roll) * 0.15;
+      carGroup.position.set(car.x, car.y, car.z);
+      // -PI/2 (not +PI/2): the model's nose is its local +X axis, and this
+      // yaw maps local +X onto the physics forward vector (sin h, cos h),
+      // so W drives nose-first and S reverses.
+      carGroup.rotation.y = car.heading - Math.PI / 2;
+      carBodyGroup.rotation.z = car.pitch;
+      carBodyGroup.rotation.x = car.roll;
+
+      // --- wheels: spin with speed, front pair steers
+      wheels.forEach(function (wheel) {
+        wheel.spin.rotation.z -= car.speed * 1.7;
+        if (wheel.front) {
+          wheel.outer.rotation.y += (steer * 0.45 - wheel.outer.rotation.y) * 0.25;
+        }
+      });
+
+      // --- dust from the rear wheels
+      if (car.onGround && Math.abs(car.speed) > 0.35 && frame % 3 === 0) {
+        emitDust(car.x - fwdX * 2.2, car.y, car.z - fwdZ * 2.2);
+      }
+      dustPool.forEach(function (d) {
+        if (d.life > 0) {
+          d.life -= 0.04;
+          d.mesh.position.y += 0.03;
+          d.mesh.scale.multiplyScalar(1.04);
+          d.mesh.material.opacity = Math.max(0, d.life) * 0.5;
+          if (d.life <= 0) d.mesh.visible = false;
+        }
+      });
+
+      // --- knockables: car impacts
+      var carSpeedMag = Math.abs(car.speed);
+      knockables.forEach(function (obj) {
+        var dx = obj.x - car.x;
+        var dz = obj.z - car.z;
+        var dist = Math.sqrt(dx * dx + dz * dz);
+        if (dist < CAR_RADIUS + obj.r && carSpeedMag > 0.12) {
+          var nx = dx / (dist || 1);
+          var nz = dz / (dist || 1);
+          var power = Math.max(carSpeedMag, 0.25);
+          if (obj.kind === "pin") {
+            obj.vx = nx * power * 1.1;
+            obj.vz = nz * power * 1.1;
+            if (obj.tiltVel === 0 && obj.tilt < 1.4) {
+              obj.tiltVel = 0.1 + power * 0.1;
+              obj.axis.set(nz, 0, -nx).normalize(); // tips away from the car
+            }
+          } else if (obj.kind === "brick") {
+            wakeBrick(obj, nx, nz, power);
+            // bricks resting above/near this one come down too
+            bricks.forEach(function (other) {
+              if (!other.awake && Math.abs(other.x - obj.x) < 2.2 && other.y > obj.y) {
+                wakeBrick(other, nx, nz, power * 0.7);
+              }
+            });
+          }
+          car.speed *= 0.85; // ramming costs a little momentum
+        }
+      });
+
+      // --- pins: slide, tip over, knock each other
+      pins.forEach(function (pin) {
+        pin.x += pin.vx;
+        pin.z += pin.vz;
+        pin.vx *= 0.92;
+        pin.vz *= 0.92;
+        if (pin.tiltVel > 0) {
+          pin.tilt += pin.tiltVel;
+          if (pin.tilt >= 1.45) {
+            pin.tilt = 1.45;
+            pin.tiltVel = 0;
+          }
+        }
+        pin.group.position.set(pin.x, 0, pin.z);
+        pin.group.setRotationFromAxisAngle(pin.axis, pin.tilt);
+      });
+      for (var _i5 = 0; _i5 < pins.length; _i5++) {
+        for (var j = _i5 + 1; j < pins.length; j++) {
+          var a = pins[_i5];
+          var b = pins[j];
+          var dx = b.x - a.x;
+          var dz = b.z - a.z;
+          var d2 = dx * dx + dz * dz;
+          if (d2 < 1.21 && d2 > 0.0001) {
+            var d = Math.sqrt(d2);
+            var nx = dx / d;
+            var nz = dz / d;
+            var overlap = (1.1 - d) / 2;
+            a.x -= nx * overlap;
+            a.z -= nz * overlap;
+            b.x += nx * overlap;
+            b.z += nz * overlap;
+            var aSpeed = Math.sqrt(a.vx * a.vx + a.vz * a.vz);
+            var bSpeed = Math.sqrt(b.vx * b.vx + b.vz * b.vz);
+            if (aSpeed > 0.08 && b.tiltVel === 0 && b.tilt < 1.4) {
+              b.vx += nx * aSpeed * 0.6;
+              b.vz += nz * aSpeed * 0.6;
+              b.tiltVel = 0.08;
+              b.axis.set(nz, 0, -nx).normalize();
+            }
+            if (bSpeed > 0.08 && a.tiltVel === 0 && a.tilt < 1.4) {
+              a.vx -= nx * bSpeed * 0.6;
+              a.vz -= nz * bSpeed * 0.6;
+              a.tiltVel = 0.08;
+              a.axis.set(-nz, 0, nx).normalize();
+            }
+          }
+        }
+      }
+
+      // --- bricks: tumble, fall, settle
+      bricks.forEach(function (brick) {
+        if (!brick.awake) return;
+        brick.vy -= 0.02;
+        brick.x += brick.vx;
+        brick.z += brick.vz;
+        brick.y += brick.vy;
+        if (brick.y < 0.5) {
+          brick.y = 0.5;
+          brick.vy *= -0.2;
+          brick.vx *= 0.7;
+          brick.vz *= 0.7;
+          brick.avx *= 0.6;
+          brick.avy *= 0.6;
+          brick.avz *= 0.6;
+        }
+        brick.mesh.position.set(brick.x, brick.y, brick.z);
+        brick.mesh.rotation.x += brick.avx;
+        brick.mesh.rotation.y += brick.avy;
+        brick.mesh.rotation.z += brick.avz;
+      });
+
+      // --- fixed-angle camera (doesn't rotate with the car), zooms with speed
+      var zoom = 1 + Math.min(carSpeedMag / PHYSICS.maxSpeed, 1) * 0.35;
+      var camTarget = new three__WEBPACK_IMPORTED_MODULE_1__["Vector3"](car.x + 18 * zoom, car.y + 21 * zoom, car.z + 18 * zoom);
+      camera.position.lerp(camTarget, 0.08);
+      camera.lookAt(car.x, car.y + 1.5, car.z);
+
+      // --- crystals: spin, bob, collect
+      collectibles.forEach(function (collectible, index) {
+        if (!collectible.userData.collected && collectible.parent) {
+          collectible.rotation.y += 0.02;
+          collectible.position.y = 3 + Math.sin(Date.now() * 0.001 + index) * 0.5;
+          if (collectible.userData.ring) {
+            var pulse = 1 + Math.sin(Date.now() * 0.003 + index) * 0.12;
+            collectible.userData.ring.scale.set(pulse, pulse, 1);
+          }
+          var _dx2 = collectible.position.x - car.x;
+          var _dz2 = collectible.position.z - car.z;
+          if (Math.sqrt(_dx2 * _dx2 + _dz2 * _dz2) < 3.2) {
+            collectible.userData.collected = true;
+            collectible.material.emissiveIntensity = 1;
+            setScore(function (prevScore) {
+              var newScore = prevScore + 1;
+              if (newScore === TOTAL_CRYSTALS) {
+                setGameWon(true);
+                setTimeout(function () {
+                  createFireworks();
+                }, 100);
+                setTimeout(function () {
+                  window.location.href = "/";
+                }, 6000);
+              }
+              return newScore;
+            });
+            setTimeout(function () {
+              if (collectible.parent) scene.remove(collectible);
+              if (collectible.userData.ring && collectible.userData.ring.parent) {
+                scene.remove(collectible.userData.ring);
+              }
+            }, 100);
+          }
+        }
+      });
+      updateFireworks();
+      renderer.render(scene, camera);
+    };
     setLoading(false);
     _animate();
-
-    // Handle window resize
     var handleResize = function handleResize() {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener("resize", handleResize);
-
-    // Cleanup
     return function () {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       window.removeEventListener("resize", handleResize);
       delete window.simulateKeyPress;
-      if (animationIdRef.current) {
-        cancelAnimationFrame(animationIdRef.current);
-      }
+      if (animationIdRef.current) cancelAnimationFrame(animationIdRef.current);
       if (mountRef.current && renderer.domElement) {
         mountRef.current.removeChild(renderer.domElement);
       }
+      textTexture.dispose();
+      scene.traverse(function (obj) {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) {
+          if (Array.isArray(obj.material)) obj.material.forEach(function (m) {
+            return m.dispose();
+          });else obj.material.dispose();
+        }
+      });
       renderer.dispose();
     };
   }, []);
-  var mobileControlStyle = {
-    position: "absolute",
-    bottom: "20px",
-    width: "80px",
-    height: "80px",
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    border: "3px solid #333",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    userSelect: "none",
-    touchAction: "manipulation",
-    cursor: "pointer",
-    zIndex: 1000,
-    color: "grey"
-  };
   var handleTouchStart = function handleTouchStart(key) {
-    if (window.simulateKeyPress) {
-      window.simulateKeyPress(key, true);
-    }
+    if (window.simulateKeyPress) window.simulateKeyPress(key, true);
+    setPressedButtons(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, key, true));
+    });
   };
   var handleTouchEnd = function handleTouchEnd(key) {
-    if (window.simulateKeyPress) {
-      window.simulateKeyPress(key, false);
-    }
+    if (window.simulateKeyPress) window.simulateKeyPress(key, false);
+    setPressedButtons(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), {}, _defineProperty({}, key, false));
+    });
   };
   return /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "cargame-root",
     style: {
       position: isMobileDevice ? "fixed" : "relative",
       top: isMobileDevice ? "0" : "auto",
       left: isMobileDevice ? "0" : "auto",
       width: "100vw",
-      height: "100vh",
       overflow: "hidden",
       zIndex: isMobileDevice ? 999 : "auto"
     }
@@ -263403,55 +264179,85 @@ var CarGame = function CarGame() {
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
-      color: "white",
+      color: "#55514a",
       fontSize: "24px",
       fontFamily: "Arial, sans-serif"
     }
-  }, "Loading..."), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+  }, "Loading..."), showInstructions && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       position: "absolute",
-      top: "20px",
-      left: "20px",
-      color: "white",
+      top: isMobileDevice ? "16px" : "24px",
+      left: "50%",
+      transform: "translateX(-50%) translateY(".concat(instructionsVisible ? "0" : "-14px", ")"),
+      opacity: instructionsVisible ? 1 : 0,
+      transition: "opacity 0.6s ease, transform 0.6s ease",
+      pointerEvents: "none",
+      color: "#46423a",
       fontFamily: "Arial, sans-serif",
-      fontSize: "16px",
-      textShadow: "2px 2px 4px rgba(0,0,0,0.5)",
-      backgroundColor: "rgba(0,0,0,0.5)",
-      padding: "15px",
-      borderRadius: "10px"
+      fontSize: isMobileDevice ? "13px" : "15px",
+      background: "rgba(255,253,247,0.92)",
+      backdropFilter: "blur(6px)",
+      padding: isMobileDevice ? "14px 18px" : "18px 26px",
+      borderRadius: "18px",
+      border: "1px solid rgba(70,66,58,0.12)",
+      boxShadow: "0 10px 30px rgba(70,66,58,0.22)",
+      lineHeight: 1.5,
+      textAlign: "center",
+      maxWidth: isMobileDevice ? "88vw" : "480px"
     }
   }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("h3", {
     style: {
-      margin: "0 0 10px 0"
+      margin: "0 0 8px 0",
+      fontSize: isMobileDevice ? "17px" : "20px"
     }
-  }, "\uD83D\uDE97 Drive Around!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+  }, "\uD83D\uDE99 Drive Around!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
     style: {
-      margin: "5px 0"
+      margin: "4px 0"
     }
-  }, isMobileDevice ? "Use Screen Buttons to move" : "Use Arrow Keys or WASD to move"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+  }, isMobileDevice ? "Use the on-screen buttons to drive" : "WASD / arrows to drive · R to reset"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
     style: {
-      margin: "5px 0"
+      margin: "4px 0"
     }
-  }, "Collect the golden crystals!"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("p", {
+  }, "Collect crystals \u2014 and feel free to smash the pins, the brick wall, and hit the ramps!")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
-      margin: "5px 0",
-      fontWeight: "bold"
+      position: "absolute",
+      top: isMobileDevice ? "16px" : "20px",
+      left: isMobileDevice ? "16px" : "20px",
+      opacity: showInstructions && instructionsVisible ? 0 : 1,
+      transform: "translateY(".concat(showInstructions && instructionsVisible ? "-8px" : "0", ")"),
+      transition: "opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s",
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      color: "#46423a",
+      fontFamily: "Arial, sans-serif",
+      fontWeight: "bold",
+      fontSize: isMobileDevice ? "15px" : "17px",
+      background: "rgba(255,253,247,0.92)",
+      padding: isMobileDevice ? "8px 14px" : "10px 18px",
+      borderRadius: "999px",
+      border: "1px solid rgba(70,66,58,0.12)",
+      boxShadow: "0 4px 14px rgba(70,66,58,0.18)"
     }
-  }, "Score: ", score, "/5")), gameWon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("span", {
+    style: {
+      fontSize: isMobileDevice ? "18px" : "20px"
+    }
+  }, "\uD83D\uDC8E"), score, "/", TOTAL_CRYSTALS), gameWon && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
     style: {
       position: "absolute",
       top: "50%",
       left: "50%",
       transform: "translate(-50%, -50%)",
-      color: "white",
+      color: "#46423a",
       fontSize: isMobileDevice ? "28px" : "48px",
       fontFamily: "Arial, sans-serif",
       textAlign: "center",
-      textShadow: "4px 4px 8px rgba(0,0,0,0.8)",
-      backgroundColor: "rgba(0,0,0,0.7)",
-      padding: isMobileDevice ? "20px 15px" : "30px",
+      backgroundColor: "rgba(255,255,255,0.92)",
+      padding: isMobileDevice ? "20px 15px" : "30px 40px",
       borderRadius: "20px",
-      border: "3px solid gold",
+      border: "3px solid #e2c14d",
+      boxShadow: "0 8px 30px rgba(70,66,58,0.25)",
       zIndex: 1000,
       animation: "pulse 1s infinite",
       maxWidth: isMobileDevice ? "90vw" : "auto",
@@ -263464,99 +264270,39 @@ var CarGame = function CarGame() {
       marginTop: isMobileDevice ? "10px" : "20px",
       whiteSpace: "normal"
     }
-  }, "Returning to homepage...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("style", null, "\n        @keyframes pulse {\n          0% { transform: translate(-50%, -50%) scale(1); }\n          50% { transform: translate(-50%, -50%) scale(1.05); }\n          100% { transform: translate(-50%, -50%) scale(1); }\n        }\n      "), isMobileDevice && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
-      right: "50%",
-      transform: "translateX(50%)",
-      bottom: "180px"
-    }),
-    onTouchStart: function onTouchStart(e) {
-      e.preventDefault();
-      handleTouchStart("arrowup");
-    },
-    onTouchEnd: function onTouchEnd(e) {
-      e.preventDefault();
-      handleTouchEnd("arrowup");
-    },
-    onMouseDown: function onMouseDown() {
-      return handleTouchStart("arrowup");
-    },
-    onMouseUp: function onMouseUp() {
-      return handleTouchEnd("arrowup");
-    },
-    onMouseLeave: function onMouseLeave() {
-      return handleTouchEnd("arrowup");
-    }
-  }, "\u2191"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
-      right: "50%",
-      transform: "translateX(50%)",
-      bottom: "20px"
-    }),
-    onTouchStart: function onTouchStart(e) {
-      e.preventDefault();
-      handleTouchStart("arrowdown");
-    },
-    onTouchEnd: function onTouchEnd(e) {
-      e.preventDefault();
-      handleTouchEnd("arrowdown");
-    },
-    onMouseDown: function onMouseDown() {
-      return handleTouchStart("arrowdown");
-    },
-    onMouseUp: function onMouseUp() {
-      return handleTouchEnd("arrowdown");
-    },
-    onMouseLeave: function onMouseLeave() {
-      return handleTouchEnd("arrowdown");
-    }
-  }, "\u2193"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
-      right: "50%",
-      transform: "translateX(calc(50% - 100px))",
-      bottom: "100px"
-    }),
-    onTouchStart: function onTouchStart(e) {
-      e.preventDefault();
-      handleTouchStart("arrowleft");
-    },
-    onTouchEnd: function onTouchEnd(e) {
-      e.preventDefault();
-      handleTouchEnd("arrowleft");
-    },
-    onMouseDown: function onMouseDown() {
-      return handleTouchStart("arrowleft");
-    },
-    onMouseUp: function onMouseUp() {
-      return handleTouchEnd("arrowleft");
-    },
-    onMouseLeave: function onMouseLeave() {
-      return handleTouchEnd("arrowleft");
-    }
-  }, "\u2190"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
-    style: _objectSpread(_objectSpread({}, mobileControlStyle), {}, {
-      right: "50%",
-      transform: "translateX(calc(50% + 100px))",
-      bottom: "100px"
-    }),
-    onTouchStart: function onTouchStart(e) {
-      e.preventDefault();
-      handleTouchStart("arrowright");
-    },
-    onTouchEnd: function onTouchEnd(e) {
-      e.preventDefault();
-      handleTouchEnd("arrowright");
-    },
-    onMouseDown: function onMouseDown() {
-      return handleTouchStart("arrowright");
-    },
-    onMouseUp: function onMouseUp() {
-      return handleTouchEnd("arrowright");
-    },
-    onMouseLeave: function onMouseLeave() {
-      return handleTouchEnd("arrowright");
-    }
-  }, "\u2192")));
+  }, "Returning to homepage...")), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("style", null, "\n        .cargame-root {\n          height: 100vh;\n          height: 100dvh;\n        }\n        @keyframes pulse {\n          0% { transform: translate(-50%, -50%) scale(1); }\n          50% { transform: translate(-50%, -50%) scale(1.05); }\n          100% { transform: translate(-50%, -50%) scale(1); }\n        }\n        .mobile-ctrl-btn {\n          width: 66px;\n          height: 66px;\n          border-radius: 18px;\n          border: 1px solid rgba(70,66,58,0.35);\n          display: flex;\n          align-items: center;\n          justify-content: center;\n          font-size: 30px;\n          font-weight: 900;\n          color: #55514a;\n          user-select: none;\n          -webkit-user-select: none;\n          touch-action: none;\n          cursor: pointer;\n          transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;\n        }\n        .mobile-ctrl-cluster {\n          position: fixed;\n          display: flex;\n          gap: 12px;\n          z-index: 1000;\n        }\n        .mobile-ctrl-cluster.steer {\n          left: calc(env(safe-area-inset-left, 0px) + 16px);\n          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);\n          flex-direction: row;\n        }\n        .mobile-ctrl-cluster.throttle {\n          right: calc(env(safe-area-inset-right, 0px) + 16px);\n          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);\n          flex-direction: column;\n        }\n      "), isMobileDevice && /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(react__WEBPACK_IMPORTED_MODULE_0___default.a.Fragment, null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "mobile-ctrl-cluster steer"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(ArrowButton, {
+    label: "Steer left",
+    keyName: "arrowleft",
+    glyph: "\u2190",
+    pressed: !!pressedButtons.arrowleft,
+    onStart: handleTouchStart,
+    onEnd: handleTouchEnd
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(ArrowButton, {
+    label: "Steer right",
+    keyName: "arrowright",
+    glyph: "\u2192",
+    pressed: !!pressedButtons.arrowright,
+    onStart: handleTouchStart,
+    onEnd: handleTouchEnd
+  })), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("div", {
+    className: "mobile-ctrl-cluster throttle"
+  }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(ArrowButton, {
+    label: "Accelerate",
+    keyName: "arrowup",
+    glyph: "\u2191",
+    pressed: !!pressedButtons.arrowup,
+    onStart: handleTouchStart,
+    onEnd: handleTouchEnd
+  }), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(ArrowButton, {
+    label: "Reverse",
+    keyName: "arrowdown",
+    glyph: "\u2193",
+    pressed: !!pressedButtons.arrowdown,
+    onStart: handleTouchStart,
+    onEnd: handleTouchEnd
+  }))));
 };
 /* harmony default export */ __webpack_exports__["default"] = (CarGame);
 
@@ -264454,16 +265200,20 @@ var Signin = /*#__PURE__*/function (_Component) {
     }
     _this = _callSuper(this, Signin, [].concat(args));
     _defineProperty(_this, "state", {
-      section: 'preview-section-1'
+      section: "preview-section-1"
     });
     _defineProperty(_this, "handleOk", function (e) {
       e.preventDefault();
       _this.props.form.validateFieldsAndScroll(function (err, values) {
         if (!err) {
           _this.props.signin(values, _this.props.history).then(function (response) {
-            _this.props.cookies.set('loggedIn', true);
-            _this.props.history.push("/admin/dashboard");
-            react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].success('You have successfully signed in!');
+            if (response.data.success) {
+              _this.props.cookies.set("loggedIn", true);
+              _this.props.history.push("/admin/dashboard");
+              react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].success("You have successfully signed in!");
+            } else {
+              react_toastify__WEBPACK_IMPORTED_MODULE_5__["toast"].error("Username/Password combination incorrect");
+            }
           });
         }
       });
@@ -264489,20 +265239,20 @@ var Signin = /*#__PURE__*/function (_Component) {
       }, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("fieldset", null, /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("legend", null, "Only The Best Make It This Far"), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(antd__WEBPACK_IMPORTED_MODULE_3__["Form"].Item, {
         label: "Username",
         className: "form-group"
-      }, getFieldDecorator('username', {
+      }, getFieldDecorator("username", {
         rules: [{
           required: true,
-          message: 'Username is mandatory'
+          message: "Username is mandatory"
         }]
       })(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(antd__WEBPACK_IMPORTED_MODULE_3__["Input"], {
         className: "form-control"
       }))), /*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(antd__WEBPACK_IMPORTED_MODULE_3__["Form"].Item, {
         label: "Password",
         className: "form-group"
-      }, getFieldDecorator('password', {
+      }, getFieldDecorator("password", {
         rules: [{
           required: true,
-          message: 'Password is mandatory'
+          message: "Password is mandatory"
         }]
       })(/*#__PURE__*/react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement(antd__WEBPACK_IMPORTED_MODULE_3__["Input"], {
         type: "password",
@@ -264527,7 +265277,7 @@ var mapDispatchToProps = function mapDispatchToProps(dispatch) {
   };
 };
 var WrappedSigninForm = antd__WEBPACK_IMPORTED_MODULE_3__["Form"].create({
-  name: 'signin_form'
+  name: "signin_form"
 })(Signin);
 /* harmony default export */ __webpack_exports__["default"] = (Object(react_redux__WEBPACK_IMPORTED_MODULE_2__["connect"])(mapStateToProps, mapDispatchToProps)(Object(react_router_dom__WEBPACK_IMPORTED_MODULE_1__["withRouter"])(Object(react_cookie__WEBPACK_IMPORTED_MODULE_4__["withCookies"])(WrappedSigninForm))));
 

@@ -11,6 +11,39 @@ const isMobile = () => {
 
 const TOTAL_CRYSTALS = 8;
 
+const ArrowButton = ({ label, keyName, glyph, pressed, onStart, onEnd }) => (
+  <div
+    className="mobile-ctrl-btn"
+    aria-label={label}
+    style={{
+      transform: pressed ? "scale(0.9)" : "scale(1)",
+      background: pressed
+        ? "linear-gradient(180deg, #e2c14d 0%, #d1a934 100%)"
+        : "linear-gradient(180deg, #fffdf7 0%, #ece5d4 100%)",
+      boxShadow: pressed
+        ? "0 2px 6px rgba(70,66,58,0.35), inset 0 2px 4px rgba(0,0,0,0.15)"
+        : "0 6px 14px rgba(70,66,58,0.3), inset 0 1px 0 rgba(255,255,255,0.6)",
+    }}
+    onTouchStart={(e) => {
+      e.preventDefault();
+      onStart(keyName);
+    }}
+    onTouchEnd={(e) => {
+      e.preventDefault();
+      onEnd(keyName);
+    }}
+    onTouchCancel={(e) => {
+      e.preventDefault();
+      onEnd(keyName);
+    }}
+    onMouseDown={() => onStart(keyName)}
+    onMouseUp={() => onEnd(keyName)}
+    onMouseLeave={() => onEnd(keyName)}
+  >
+    {glyph}
+  </div>
+);
+
 // ---------------------------------------------------------------------------
 // Palette — soft, matte, low-poly look. The background, fog and
 // ground share one colour so the world has no visible horizon.
@@ -50,8 +83,20 @@ const CarGame = () => {
   const [score, setScore] = useState(0);
   const [gameWon, setGameWon] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [instructionsVisible, setInstructionsVisible] = useState(true);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [pressedButtons, setPressedButtons] = useState({});
   const animationIdRef = useRef(null);
   const fireworksRef = useRef([]);
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setInstructionsVisible(false), 4500);
+    const removeTimer = setTimeout(() => setShowInstructions(false), 5200);
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(removeTimer);
+    };
+  }, []);
 
   useEffect(() => {
     setIsMobileDevice(isMobile());
@@ -1321,41 +1366,23 @@ const CarGame = () => {
     };
   }, []);
 
-  const mobileControlStyle = {
-    position: "absolute",
-    bottom: "20px",
-    width: "80px",
-    height: "80px",
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    border: "3px solid #6b675f",
-    borderRadius: "50%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontSize: "24px",
-    fontWeight: "bold",
-    userSelect: "none",
-    touchAction: "manipulation",
-    cursor: "pointer",
-    zIndex: 1000,
-    color: "#55514a",
-  };
-
   const handleTouchStart = (key) => {
     if (window.simulateKeyPress) window.simulateKeyPress(key, true);
+    setPressedButtons((prev) => ({ ...prev, [key]: true }));
   };
   const handleTouchEnd = (key) => {
     if (window.simulateKeyPress) window.simulateKeyPress(key, false);
+    setPressedButtons((prev) => ({ ...prev, [key]: false }));
   };
 
   return (
     <div
+      className="cargame-root"
       style={{
         position: isMobileDevice ? "fixed" : "relative",
         top: isMobileDevice ? "0" : "auto",
         left: isMobileDevice ? "0" : "auto",
         width: "100vw",
-        height: "100vh",
         overflow: "hidden",
         zIndex: isMobileDevice ? 999 : "auto",
       }}
@@ -1378,34 +1405,73 @@ const CarGame = () => {
         </div>
       )}
 
+      {showInstructions && (
+        <div
+          style={{
+            position: "absolute",
+            top: isMobileDevice ? "16px" : "24px",
+            left: "50%",
+            transform: `translateX(-50%) translateY(${
+              instructionsVisible ? "0" : "-14px"
+            })`,
+            opacity: instructionsVisible ? 1 : 0,
+            transition: "opacity 0.6s ease, transform 0.6s ease",
+            pointerEvents: "none",
+            color: "#46423a",
+            fontFamily: "Arial, sans-serif",
+            fontSize: isMobileDevice ? "13px" : "15px",
+            background: "rgba(255,253,247,0.92)",
+            backdropFilter: "blur(6px)",
+            padding: isMobileDevice ? "14px 18px" : "18px 26px",
+            borderRadius: "18px",
+            border: "1px solid rgba(70,66,58,0.12)",
+            boxShadow: "0 10px 30px rgba(70,66,58,0.22)",
+            lineHeight: 1.5,
+            textAlign: "center",
+            maxWidth: isMobileDevice ? "88vw" : "480px",
+          }}
+        >
+          <h3 style={{ margin: "0 0 8px 0", fontSize: isMobileDevice ? "17px" : "20px" }}>
+            🚙 Drive Around!
+          </h3>
+          <p style={{ margin: "4px 0" }}>
+            {isMobileDevice
+              ? "Use the on-screen buttons to drive"
+              : "WASD / arrows to drive · R to reset"}
+          </p>
+          <p style={{ margin: "4px 0" }}>
+            Collect crystals — and feel free to smash the pins, the brick
+            wall, and hit the ramps!
+          </p>
+        </div>
+      )}
+
       <div
         style={{
           position: "absolute",
-          top: "20px",
-          left: "20px",
+          top: isMobileDevice ? "16px" : "20px",
+          left: isMobileDevice ? "16px" : "20px",
+          opacity: showInstructions && instructionsVisible ? 0 : 1,
+          transform: `translateY(${
+            showInstructions && instructionsVisible ? "-8px" : "0"
+          })`,
+          transition: "opacity 0.6s ease 0.15s, transform 0.6s ease 0.15s",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
           color: "#46423a",
           fontFamily: "Arial, sans-serif",
-          fontSize: "15px",
-          backgroundColor: "rgba(255,255,255,0.85)",
-          padding: "14px 18px",
-          borderRadius: "14px",
+          fontWeight: "bold",
+          fontSize: isMobileDevice ? "15px" : "17px",
+          background: "rgba(255,253,247,0.92)",
+          padding: isMobileDevice ? "8px 14px" : "10px 18px",
+          borderRadius: "999px",
+          border: "1px solid rgba(70,66,58,0.12)",
           boxShadow: "0 4px 14px rgba(70,66,58,0.18)",
-          lineHeight: 1.5,
         }}
       >
-        <h3 style={{ margin: "0 0 8px 0" }}>🚙 Drive Around!</h3>
-        <p style={{ margin: "4px 0" }}>
-          {isMobileDevice
-            ? "Use the screen buttons to drive"
-            : "WASD / arrows to drive · R to reset"}
-        </p>
-        <p style={{ margin: "4px 0" }}>
-          Collect crystals — and feel free to smash the pins, the brick wall,
-          and hit the ramps!
-        </p>
-        <p style={{ margin: "4px 0", fontWeight: "bold" }}>
-          Crystals: {score}/{TOTAL_CRYSTALS}
-        </p>
+        <span style={{ fontSize: isMobileDevice ? "18px" : "20px" }}>💎</span>
+        {score}/{TOTAL_CRYSTALS}
       </div>
 
       {gameWon && (
@@ -1445,105 +1511,88 @@ const CarGame = () => {
       )}
 
       <style>{`
+        .cargame-root {
+          height: 100vh;
+          height: 100dvh;
+        }
         @keyframes pulse {
           0% { transform: translate(-50%, -50%) scale(1); }
           50% { transform: translate(-50%, -50%) scale(1.05); }
           100% { transform: translate(-50%, -50%) scale(1); }
         }
+        .mobile-ctrl-btn {
+          width: 66px;
+          height: 66px;
+          border-radius: 18px;
+          border: 1px solid rgba(70,66,58,0.35);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 30px;
+          font-weight: 900;
+          color: #55514a;
+          user-select: none;
+          -webkit-user-select: none;
+          touch-action: none;
+          cursor: pointer;
+          transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
+        }
+        .mobile-ctrl-cluster {
+          position: fixed;
+          display: flex;
+          gap: 12px;
+          z-index: 1000;
+        }
+        .mobile-ctrl-cluster.steer {
+          left: calc(env(safe-area-inset-left, 0px) + 16px);
+          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+          flex-direction: row;
+        }
+        .mobile-ctrl-cluster.throttle {
+          right: calc(env(safe-area-inset-right, 0px) + 16px);
+          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
+          flex-direction: column;
+        }
       `}</style>
 
       {isMobileDevice && (
         <>
-          {/* Up Arrow */}
-          <div
-            style={{
-              ...mobileControlStyle,
-              right: "50%",
-              transform: "translateX(50%)",
-              bottom: "180px",
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              handleTouchStart("arrowup");
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              handleTouchEnd("arrowup");
-            }}
-            onMouseDown={() => handleTouchStart("arrowup")}
-            onMouseUp={() => handleTouchEnd("arrowup")}
-            onMouseLeave={() => handleTouchEnd("arrowup")}
-          >
-            ↑
+          <div className="mobile-ctrl-cluster steer">
+            <ArrowButton
+              label="Steer left"
+              keyName="arrowleft"
+              glyph="←"
+              pressed={!!pressedButtons.arrowleft}
+              onStart={handleTouchStart}
+              onEnd={handleTouchEnd}
+            />
+            <ArrowButton
+              label="Steer right"
+              keyName="arrowright"
+              glyph="→"
+              pressed={!!pressedButtons.arrowright}
+              onStart={handleTouchStart}
+              onEnd={handleTouchEnd}
+            />
           </div>
 
-          {/* Down Arrow */}
-          <div
-            style={{
-              ...mobileControlStyle,
-              right: "50%",
-              transform: "translateX(50%)",
-              bottom: "20px",
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              handleTouchStart("arrowdown");
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              handleTouchEnd("arrowdown");
-            }}
-            onMouseDown={() => handleTouchStart("arrowdown")}
-            onMouseUp={() => handleTouchEnd("arrowdown")}
-            onMouseLeave={() => handleTouchEnd("arrowdown")}
-          >
-            ↓
-          </div>
-
-          {/* Left Arrow */}
-          <div
-            style={{
-              ...mobileControlStyle,
-              right: "50%",
-              transform: "translateX(calc(50% - 100px))",
-              bottom: "100px",
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              handleTouchStart("arrowleft");
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              handleTouchEnd("arrowleft");
-            }}
-            onMouseDown={() => handleTouchStart("arrowleft")}
-            onMouseUp={() => handleTouchEnd("arrowleft")}
-            onMouseLeave={() => handleTouchEnd("arrowleft")}
-          >
-            ←
-          </div>
-
-          {/* Right Arrow */}
-          <div
-            style={{
-              ...mobileControlStyle,
-              right: "50%",
-              transform: "translateX(calc(50% + 100px))",
-              bottom: "100px",
-            }}
-            onTouchStart={(e) => {
-              e.preventDefault();
-              handleTouchStart("arrowright");
-            }}
-            onTouchEnd={(e) => {
-              e.preventDefault();
-              handleTouchEnd("arrowright");
-            }}
-            onMouseDown={() => handleTouchStart("arrowright")}
-            onMouseUp={() => handleTouchEnd("arrowright")}
-            onMouseLeave={() => handleTouchEnd("arrowright")}
-          >
-            →
+          <div className="mobile-ctrl-cluster throttle">
+            <ArrowButton
+              label="Accelerate"
+              keyName="arrowup"
+              glyph="↑"
+              pressed={!!pressedButtons.arrowup}
+              onStart={handleTouchStart}
+              onEnd={handleTouchEnd}
+            />
+            <ArrowButton
+              label="Reverse"
+              keyName="arrowdown"
+              glyph="↓"
+              pressed={!!pressedButtons.arrowdown}
+              onStart={handleTouchStart}
+              onEnd={handleTouchEnd}
+            />
           </div>
         </>
       )}
