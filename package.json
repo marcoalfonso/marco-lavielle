@@ -12,8 +12,8 @@
     "heroku-postbuild": "webpack --mode production"
   },
   "engines": {
-    "node": "16.x",
-    "npm": "8.x"
+    "node": "24.x",
+    "npm": "11.x"
   },
   "repository": {
     "type": "git",
