@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
-import { Button, Input, Form } from "antd";
+import { Button, Input } from "antd";
+import { Form } from "@ant-design/compatible";
 import {
   createPost,
   editPost,
@@ -10,9 +11,9 @@ import {
   setPost,
   setClient,
 } from "actions/appActions";
-import ReactQuill from "react-quill";
+import ReactQuill from "react-quill-new";
 
-import "react-quill/dist/quill.snow.css";
+import "react-quill-new/dist/quill.snow.css";
 import styles from "./EditPost.module.css";
 
 export class EditPost extends Component {
@@ -56,7 +57,6 @@ export class EditPost extends Component {
       "blockquote",
       "code-block",
       "list",
-      "bullet",
       "indent",
       "link",
       "image",
@@ -76,10 +76,6 @@ export class EditPost extends Component {
         ["link", "image", "video"],
         ["clean"],
       ],
-      clipboard: {
-        // toggle to add extra line breaks when pasting HTML:
-        matchVisual: false,
-      },
     };
     return (
       <main

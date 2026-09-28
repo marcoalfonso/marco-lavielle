@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
-import { Button, Input, Form } from "antd";
+import { Button, Input } from "antd";
+import { Form } from "@ant-design/compatible";
 import { withCookies } from "react-cookie";
 import { toast } from "react-toastify";
 import { signin } from "actions/appActions";

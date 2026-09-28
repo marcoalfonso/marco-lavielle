@@ -5,8 +5,7 @@ var crypto = require('crypto'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
 	session = require('express-session'),
-	passport = require('passport'),
-  engines = require('consolidate');
+	passport = require('passport');
 
 module.exports = function(app, config) {
 	app.set('views', config.rootPath + '/server/views');

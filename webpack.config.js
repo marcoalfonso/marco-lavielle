@@ -1,10 +1,15 @@
-const webpack = require("webpack");
 const path = require("path");
 
 module.exports = {
-  entry: ["react-hot-loader/patch", "./src/index.js"],
+  entry: ["./src/index.js"],
   module: {
     rules: [
+      {
+        // ESM packages (e.g. react-quill-new) import "react/jsx-runtime"
+        // without an extension; React 16 has no exports map to resolve it.
+        test: /\.m?js$/,
+        resolve: { fullySpecified: false },
+      },
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
@@ -12,11 +17,15 @@ module.exports = {
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"],
+        // The *.module.css files are used as plain global stylesheets
+        // (nothing reads their exports), so keep CSS Modules off; css-loader
+        // 7 would otherwise hash their class names and break the styles.
+        use: ["style-loader", { loader: "css-loader", options: { modules: false } }],
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg)$/,
-        loader: "file-loader?name=[path][name].[ext]?[hash]",
+        type: "asset/resource",
+        generator: { filename: "[path][name][ext]?[hash]" },
       },
     ],
   },
@@ -25,19 +34,20 @@ module.exports = {
     extensions: [".js", ".jsx", ".json"],
   },
   output: {
-    path: __dirname + "/public/dist",
+    path: path.join(__dirname, "public/dist"),
     publicPath: "/",
     filename: "bundle.js",
-    hotUpdateChunkFilename: "hot/hot-update.js",
-    hotUpdateMainFilename: "hot/hot-update.json",
   },
   devtool: "source-map",
   optimization: {
     minimize: false,
   },
-  plugins: [new webpack.HotModuleReplacementPlugin()],
+  performance: {
+    hints: false,
+  },
   devServer: {
-    contentBase: "./public/dist",
+    static: "./public/dist",
+    historyApiFallback: true,
     hot: true,
   },
 };
