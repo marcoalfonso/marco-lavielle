@@ -3025,16 +3025,26 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
   width: 100% !important;
   height: 100% !important;
 }
+/* The canvas is stretched (from script) over the whole black section, so
+   dragged limbs never meet a visible edge. It sits underneath; the intro
+   and details float above it and stay selectable and clickable. */
 .about-content .body-hologram-canvas {
   position: absolute;
   top: 0;
-  right: 0;
-  bottom: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+.about-content .personal-info .text,
+.about-content .personal-info .stats {
+  position: relative;
+  z-index: 1;
 }
 /* iPhone only: motion access must be requested from a tap */
 .body-hologram-hint {
   position: absolute;
+  z-index: 1;
   left: 50%;
   bottom: 0;
   display: flex;

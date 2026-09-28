@@ -109,7 +109,8 @@ const isTouchDevice = () =>
   typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
 const BodyHologram = ({ className }) => {
-  const mountRef = useRef(null);
+  const slotRef = useRef(null); // the figure's place in the layout
+  const mountRef = useRef(null); // the canvas: stretched over the whole section
   const motionRef = useRef(null); // { start } once the scene is set up
   const [showMotionHint, setShowMotionHint] = useState(false);
   const [showDragHint, setShowDragHint] = useState(false);
@@ -289,23 +290,74 @@ const BodyHologram = ({ className }) => {
 
     // --- sizing, visibility, pointer
     let redrawStatic = null; // set when there's no animation loop (reduced motion)
+    // The canvas covers the whole black section so dragged limbs never hit a
+    // visible edge; the camera is offset so the figure stays framed in its
+    // own slot (the first column), exactly as if the canvas were that size.
+    const slot = slotRef.current;
+    const section = slot.closest(".personal-info") || slot;
+    const edgeNdc = [
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1],
+    ];
+    const edgeRay = new THREE.Raycaster();
+    const edgeHit = new THREE.Vector3();
+    const facingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const ndcPoint = new THREE.Vector2();
     const resize = () => {
-      const w = mount.clientWidth || 1;
-      const h = mount.clientHeight || 1;
+      const slotBox = slot.getBoundingClientRect();
+      const sectionBox = section.getBoundingClientRect();
+      const left = sectionBox.left - slotBox.left;
+      const top = sectionBox.top - slotBox.top;
+      const w = Math.max(1, sectionBox.width);
+      const h = Math.max(1, sectionBox.height);
+      Object.assign(mount.style, { left: `${left}px`, top: `${top}px`, width: `${w}px`, height: `${h}px` });
       renderer.setSize(w, h, false);
-      camera.aspect = w / h;
+
+      const sw = Math.max(1, slotBox.width);
+      const sh = Math.max(1, slotBox.height);
+      camera.aspect = sw / sh;
       // Fit the platform (~0.8 m either side) horizontally and the full
       // height vertically, whichever needs the wider field of view.
       const distance = camera.position.z;
       const fitWidth = (2 * Math.atan(0.8 / (distance * camera.aspect)) * 180) / Math.PI;
       camera.fov = Math.max(28, fitWidth);
+      // the canvas starts (left, top) from the slot's corner, in slot pixels
+      camera.setViewOffset(sw, sh, left, top, w, h);
       camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+
+      // Everything the canvas shows, on the figure's plane: that's how far
+      // dragged limbs may go (a little inside the edges).
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      edgeNdc.forEach(([x, y]) => {
+        edgeRay.setFromCamera(ndcPoint.set(x, y), camera);
+        if (edgeRay.ray.intersectPlane(facingPlane, edgeHit)) {
+          minX = Math.min(minX, edgeHit.x);
+          maxX = Math.max(maxX, edgeHit.x);
+          maxY = Math.max(maxY, edgeHit.y);
+        }
+      });
+      if (Number.isFinite(minX)) {
+        const margin = 0.12;
+        ragdoll.setBounds({ x: [minX + margin, maxX - margin], y: [0.05, maxY - margin] });
+      }
       if (redrawStatic) redrawStatic();
     };
     resize();
+    // the slot slides in on load (a transform, which resize observers don't
+    // report): measure again once it has settled
+    slot.addEventListener("transitionend", resize);
     const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
-    if (resizeObserver) resizeObserver.observe(mount);
-    else window.addEventListener("resize", resize);
+    if (resizeObserver) {
+      resizeObserver.observe(slot);
+      // border box: padding changes (e.g. the site's mobile class arriving
+      // after first render) move and resize the section too
+      resizeObserver.observe(section, { box: "border-box" });
+    } else window.addEventListener("resize", resize);
 
     let visible = true;
     const intersection =
@@ -341,7 +393,7 @@ const BodyHologram = ({ className }) => {
     const isMouse = (e) => e.pointerType === "mouse" || e.pointerType === "pen";
     const onWindowPointerMove = (e) => {
       if (!isMouse(e)) return;
-      const r = mount.getBoundingClientRect();
+      const r = slot.getBoundingClientRect();
       pointerX = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
     };
     const onCanvasPointerMove = (e) => {
@@ -535,6 +587,7 @@ const BodyHologram = ({ className }) => {
       window.removeEventListener("devicemotion", onMotion);
       clearTimeout(hintTimer);
       motionRef.current = null;
+      slot.removeEventListener("transitionend", resize);
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener("resize", resize);
       if (intersection) intersection.disconnect();
@@ -545,7 +598,7 @@ const BodyHologram = ({ className }) => {
   }, []);
 
   return (
-    <div className={className} onClick={showMotionHint ? requestMotion : undefined}>
+    <div className={className} ref={slotRef} onClick={showMotionHint ? requestMotion : undefined}>
       <div className="body-hologram-canvas" ref={mountRef} aria-hidden="true" />
       {showMotionHint && (
         <button type="button" className="body-hologram-hint">
