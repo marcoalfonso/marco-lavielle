@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
 import { buildBodyPoints, BODY_HEIGHT } from "./bodyPoints";
@@ -75,8 +75,31 @@ const circlePoints = (radius, segments = 128) => {
   return pts;
 };
 
+// iPhones only share motion data after the visitor grants permission, and
+// the request has to come from a tap.
+const needsMotionPermission = () =>
+  typeof window !== "undefined" &&
+  typeof window.DeviceOrientationEvent !== "undefined" &&
+  typeof window.DeviceOrientationEvent.requestPermission === "function";
+
+const isTouchDevice = () =>
+  typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+
 const BodyHologram = ({ className }) => {
   const mountRef = useRef(null);
+  const tiltRef = useRef(null); // { start } once the scene is set up
+  const [showTiltHint, setShowTiltHint] = useState(false);
+
+  const requestTilt = () => {
+    setShowTiltHint(false);
+    window.DeviceOrientationEvent.requestPermission()
+      .then((state) => {
+        if (state === "granted" && tiltRef.current) tiltRef.current.start();
+      })
+      .catch(() => {
+        // denied or unavailable: keep the automatic sway
+      });
+  };
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -262,6 +285,45 @@ const BodyHologram = ({ className }) => {
     };
     window.addEventListener("pointermove", onPointerMove);
 
+    // Phone tilt steers the figure the way the pointer does on desktop.
+    // Whatever angle the phone is held at becomes "straight", slowly
+    // re-centring if the grip changes; ±30° of tilt gives the full turn.
+    let tiltX = null;
+    let tiltBaseline = null;
+    let hintTimer = null;
+    const onOrientation = (e) => {
+      const angle =
+        (window.screen && window.screen.orientation && window.screen.orientation.angle) ||
+        window.orientation ||
+        0;
+      // in landscape the phone's left/right tilt is reported as beta
+      const value = angle === 90 ? e.beta : angle === -90 || angle === 270 ? -e.beta : e.gamma;
+      if (value === null || value === undefined) return;
+      if (tiltBaseline === null) {
+        // motion data is flowing: no need to ask for it
+        tiltBaseline = value;
+        clearTimeout(hintTimer);
+        setShowTiltHint(false);
+      }
+      tiltBaseline += (value - tiltBaseline) * 0.002;
+      tiltX = Math.max(-1, Math.min(1, (value - tiltBaseline) / 30));
+    };
+    let tilting = false;
+    const startTilt = () => {
+      if (tilting) return;
+      tilting = true;
+      window.addEventListener("deviceorientation", onOrientation);
+    };
+    tiltRef.current = { start: startTilt };
+    if (!reduceMotion && isTouchDevice() && typeof window.DeviceOrientationEvent !== "undefined") {
+      // Listen straight away: Android sends motion data without asking. If
+      // nothing arrives and the browser can ask (iPhone), offer the hint.
+      startTilt();
+      hintTimer = setTimeout(() => {
+        if (tiltBaseline === null && needsMotionPermission()) setShowTiltHint(true);
+      }, 1000);
+    }
+
     // --- loop
     const clock = new THREE.Clock();
     let raf = null;
@@ -276,7 +338,11 @@ const BodyHologram = ({ className }) => {
         u.uReveal.value = Math.min(1.1, t / 1.6);
         // sweep once up while revealing, then keep scanning up and down
         u.uScan.value = t < 1.6 ? (t / 1.6) * BODY_HEIGHT : 0.95 + 0.9 * Math.sin((t - 1.6) * 0.75 + Math.PI / 2);
-        const targetTurn = Math.sin(t * 0.22) * 0.55 + pointerX * 0.35;
+        // with tilt active the phone drives the turn and the idle sway calms down
+        const targetTurn =
+          tiltX !== null
+            ? Math.sin(t * 0.22) * 0.15 + tiltX * 0.75
+            : Math.sin(t * 0.22) * 0.55 + pointerX * 0.35;
         turn += (targetTurn - turn) * 0.04;
         figure.rotation.y = turn;
         dashed.rotation.y = t * 0.12;
@@ -299,6 +365,9 @@ const BodyHologram = ({ className }) => {
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("deviceorientation", onOrientation);
+      clearTimeout(hintTimer);
+      tiltRef.current = null;
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener("resize", resize);
       if (intersection) intersection.disconnect();
@@ -308,7 +377,17 @@ const BodyHologram = ({ className }) => {
     };
   }, []);
 
-  return <div className={className} ref={mountRef} aria-hidden="true" />;
+  return (
+    <div className={className} onClick={showTiltHint ? requestTilt : undefined}>
+      <div className="body-hologram-canvas" ref={mountRef} aria-hidden="true" />
+      {showTiltHint && (
+        <button type="button" className="body-hologram-hint">
+          <span className="body-hologram-hint-icon" aria-hidden="true" />
+          Tap to tilt &amp; explore
+        </button>
+      )}
+    </div>
+  );
 };
 
 export default BodyHologram;
