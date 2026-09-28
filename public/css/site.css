@@ -2950,3 +2950,9 @@ legend {
 pre {
   white-space: pre-wrap;
 }
+/* Bootstrap 3 forces an outline on every :focus, so clicking a link or button
+   leaves a ring. Hide it for mouse/touch focus only; keyboard users still get
+   the ring through :focus-visible. */
+:focus:not(:focus-visible) {
+  outline: none !important;
+}
