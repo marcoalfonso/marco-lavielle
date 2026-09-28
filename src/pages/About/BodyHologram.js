@@ -43,13 +43,15 @@ const bodyVertexShader = `
     vec4 mv = modelViewMatrix * skinned;
     vec3 n = normalize(normalMatrix * skinnedNormal);
     vRim = 1.0 - abs(dot(n, normalize(-mv.xyz)));
-    float d = skinned.y - uScan;
+    // the scan band follows the body (rest-pose height): a limb lifted
+    // horizontal must not light up and swell along its whole length
+    float d = position.y - uScan;
     vScan = exp(-d * d / 0.0016);
     vTwinkle = 0.7 + 0.3 * sin(uTime * 2.3 + aRand * 60.0);
     vY = skinned.y;
     vHot = uHotAmount * ((abs(aBone - uHot) < 0.5 ? 1.0 - aWeight : 0.0) + (abs(aBone2 - uHot) < 0.5 ? aWeight : 0.0));
     float revealed = step(position.y, uReveal * ${BODY_HEIGHT.toFixed(2)} + aRand * 0.05);
-    gl_PointSize = revealed * uSize * uPixelRatio * (1.0 + vScan * 0.9 + vHot * 0.35) / -mv.z;
+    gl_PointSize = revealed * uSize * uPixelRatio * (1.0 + vScan * 0.45 + vHot * 0.25) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;

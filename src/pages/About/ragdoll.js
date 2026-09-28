@@ -39,8 +39,11 @@ const TUNING = {
   // keep parts inside the visible frame (figure space, metres): the mouse
   // can't drag beyond it, and tilting/shaking the phone can't fling limbs out
   dragBounds: { x: [-0.72, 0.72], y: [0.05, 1.9], z: [-0.5, 0.5] },
-  frameX: 0.62, // soft wall for any body part's centre
+  frameMargin: 0.1, // soft walls sit this far inside the drag bounds
   maxInertial: 18, // m/s², clamp for phone shakes
+  coreInertia: { pelvis: 5, chest: 3 },
+  muscleReaction: 0.25,
+  footMaxPull: 120, // N
   // the pelvis anchor holds the body over the platform, so it resists tilt
   // and jolts much less than the limbs: let phone motion move it too
   rootFollow: 0.6,
@@ -83,7 +86,9 @@ export const createRagdoll = () => {
     body.addShape(new CANNON.Box(half), new CANNON.Vec3(), bone.box ? undefined : quatFromTo(Y, dir));
     // Even (isotropic) inertia: a thin limb's tiny spin inertia would make
     // the explicit muscle springs unstable around the bone's long axis.
-    const iso = (body.inertia.x + body.inertia.y + body.inertia.z) / 3;
+    // (the core gets extra rotational inertia so it can carry stiffer
+    // springs: pulling a limb bends the limb, not the whole torso)
+    const iso = ((body.inertia.x + body.inertia.y + body.inertia.z) / 3) * (TUNING.coreInertia[bone.name] || 1);
     body.inertia.set(iso, iso, iso);
     body.invInertia.set(1 / iso, 1 / iso, 1 / iso);
     body.updateInertiaWorld(true);
@@ -120,11 +125,34 @@ export const createRagdoll = () => {
       inertia += ownInertia(other) + other.body.mass * (dx * dx + dy * dy + dz * dz);
     });
     const parent = entry.bone.parentIndex >= 0 ? bodies[entry.bone.parentIndex] : null;
-    const lightest = parent ? Math.min(ownInertia(entry), ownInertia(parent)) : ownInertia(entry);
     const m = TUNING.muscle[group(entry.bone.name)];
     entry.parent = parent;
-    entry.kr = Math.min(inertia * m.omega * m.omega, (0.4 * lightest) / (h * h));
-    entry.dr = Math.min(inertia * 2 * m.zeta * m.omega, (0.4 * lightest) / h);
+    if (!parent) {
+      // pelvis: upright torque (it has no joint to pivot on)
+      const own = ownInertia(entry);
+      entry.kr = Math.min(inertia * m.omega * m.omega, (0.4 * own) / (h * h));
+      entry.dr = Math.min(inertia * 2 * m.zeta * m.omega, (0.4 * own) / h);
+      return;
+    }
+    // Jointed bones: a spring pulls the bone's tip toward where the standing
+    // pose puts it relative to the parent. A pull at the far end of a pinned
+    // bone turns it about its joint without loading the joint.
+    const b = entry.bone;
+    const tipRest = new CANNON.Vec3(...b.b);
+    const jointRest = new CANNON.Vec3(...b.joint);
+    const length = tipRest.vsub(jointRest).length();
+    const effMass = inertia / (length * length); // subtree, felt at the tip
+    const ownTipMass = entry.body.mass / 3; // a pinned rod, felt at its tip
+    entry.tipLocal = tipRest.vsub(entry.rest);
+    entry.jointInParent = jointRest.vsub(parent.rest);
+    entry.tipFromJoint = tipRest.vsub(jointRest); // rest pose: parent frame = world
+    entry.kt = Math.min(effMass * m.omega * m.omega, (0.3 * ownTipMass) / (h * h));
+    entry.ct = Math.min(effMass * 2 * m.zeta * m.omega, (0.3 * ownTipMass) / h);
+    // twist about the bone's own axis: a torque is safe there (the joint and
+    // centre both lie on that axis)
+    const own = ownInertia(entry);
+    entry.kr = Math.min(own * m.omega * m.omega * 4, (0.4 * own) / (h * h));
+    entry.dr = Math.min(own * 2 * m.zeta * m.omega * 2, (0.4 * own) / h);
   });
   const totalMass = bodies.reduce((sum, e) => sum + e.body.mass, 0);
   // soles: the shin segment's end point, in the shin body's own frame
@@ -132,6 +160,7 @@ export const createRagdoll = () => {
     .filter((e) => group(e.bone.name) === "shin")
     .map((e) => ({
       body: e.body,
+      leg: [e.body, e.parent.body], // shin + thigh
       sole: new CANNON.Vec3(...e.bone.b.map((v, k) => v - e.bone.center[k])),
       restY: e.bone.b[1],
     }));
@@ -154,6 +183,8 @@ export const createRagdoll = () => {
       maxForce: 1e5,
     });
     constraint.collideConnected = false;
+    // stiff joints: the default is soft enough to visibly stretch under load
+    constraint.equations.forEach((eq) => eq.setSpookParams(1e9, 3, TUNING.step));
     world.addConstraint(constraint);
   });
 
@@ -162,6 +193,28 @@ export const createRagdoll = () => {
   const qErr = new CANNON.Quaternion();
   const qParentInv = new CANNON.Quaternion();
   const torque = new CANNON.Vec3();
+  const jointWorld = new CANNON.Vec3();
+  const tipTarget = new CANNON.Vec3();
+  const tipWorld = new CANNON.Vec3();
+  const tipVel = new CANNON.Vec3();
+  const targetVel = new CANNON.Vec3();
+  const pull = new CANNON.Vec3();
+  const boneAxis = new CANNON.Vec3();
+  const relPoint = new CANNON.Vec3();
+  // quaternion (shortest way round) -> axis * angle * gain
+  const axisAngle = (q, gain, out) => {
+    if (q.w < 0) {
+      q.x = -q.x;
+      q.y = -q.y;
+      q.z = -q.z;
+      q.w = -q.w;
+    }
+    const w = Math.min(1, q.w);
+    const sn = Math.sqrt(1 - w * w);
+    const k = sn > 1e-6 ? (2 * Math.acos(w) * gain) / sn : 0;
+    return out.set(q.x * k, q.y * k, q.z * k);
+  };
+
   const root = bodies[0];
   const rootK = Math.min(totalMass * TUNING.root.omega ** 2, (0.4 * root.body.mass) / (h * h));
   const rootD = Math.min(totalMass * 2 * TUNING.root.zeta * TUNING.root.omega, (0.4 * root.body.mass) / h);
@@ -187,46 +240,67 @@ export const createRagdoll = () => {
     // Plant the feet: the shins' own support would still lift a tilted leg,
     // so pull each foot's sole back down to the platform (never up).
     feet.forEach((foot) => {
+      // a leg that's being dragged is free to lift off the platform
+      if (grip && foot.leg.includes(grip.bodyA)) return;
       foot.body.pointToWorldFrame(foot.sole, soleWorld);
-      if (soleWorld.y > foot.restY) foot.body.applyForce(footPull.set(0, (foot.restY - soleWorld.y) * footK, 0), soleWorld);
+      if (soleWorld.y > foot.restY) {
+        // capped: a hard yank on the body lifts the foot rather than
+        // tearing the knee apart
+        footPull.set(0, Math.max(-TUNING.footMaxPull, (foot.restY - soleWorld.y) * footK), 0);
+        foot.body.applyForce(footPull, soleWorld.vsub(foot.body.position, relPoint));
+      }
     });
     rb.force.z += (tz - rb.position.z) * rootK - rb.velocity.z * rootD;
 
     bodies.forEach((entry) => {
       const { body, parent, kr, dr } = entry;
-      // Error rotation that brings the bone back to rest: relative to its
-      // parent (rest relative orientation is identity), or absolute for the
-      // pelvis. Expressed as an axis * angle in world space.
-      if (parent) {
-        parent.body.quaternion.conjugate(qParentInv);
-        qParentInv.mult(body.quaternion, qErr); // child in parent frame
-        qErr.conjugate(qErr);
-      } else {
+      if (!parent) {
+        // pelvis: rotate back upright (absolute)
         body.quaternion.conjugate(qErr);
+        axisAngle(qErr, kr, torque);
+        torque.x -= body.angularVelocity.x * dr;
+        torque.y -= body.angularVelocity.y * dr;
+        torque.z -= body.angularVelocity.z * dr;
+        body.torque.vadd(torque, body.torque);
+      } else {
+        // swing: spring the tip toward its standing-pose spot on the parent
+        const pb = parent.body;
+        pb.pointToWorldFrame(entry.jointInParent, jointWorld);
+        pb.quaternion.vmult(entry.tipFromJoint, tipTarget);
+        tipTarget.vadd(jointWorld, tipTarget);
+        body.pointToWorldFrame(entry.tipLocal, tipWorld);
+        body.getVelocityAtWorldPoint(tipWorld, tipVel);
+        pb.getVelocityAtWorldPoint(tipTarget, targetVel);
+        pull.set(
+          (tipTarget.x - tipWorld.x) * entry.kt + (targetVel.x - tipVel.x) * entry.ct,
+          (tipTarget.y - tipWorld.y) * entry.kt + (targetVel.y - tipVel.y) * entry.ct,
+          (tipTarget.z - tipWorld.z) * entry.kt + (targetVel.z - tipVel.z) * entry.ct,
+        );
+        // (cannon-es wants the point relative to the body's centre)
+        body.applyForce(pull, tipWorld.vsub(body.position, relPoint));
+        // Only part of the reaction goes back into the parent: with the full
+        // equal-and-opposite pull, holding a leg up would twist the pelvis
+        // and fold the whole torso.
+        pull.scale(-TUNING.muscleReaction, pull);
+        pb.applyForce(pull, jointWorld.vsub(pb.position, relPoint));
+
+        // twist: only the part of the error about the bone's own axis
+        pb.quaternion.conjugate(qParentInv);
+        qParentInv.mult(body.quaternion, qErr);
+        qErr.conjugate(qErr);
+        axisAngle(qErr, kr, torque);
+        pb.quaternion.vmult(torque, torque);
+        body.quaternion.vmult(entry.axis, boneAxis);
+        const twist = torque.dot(boneAxis);
+        const spin = body.angularVelocity.vsub(pb.angularVelocity).dot(boneAxis);
+        body.torque.addScaledVector(twist - spin * dr, boneAxis, body.torque);
       }
-      if (qErr.w < 0) {
-        qErr.x = -qErr.x;
-        qErr.y = -qErr.y;
-        qErr.z = -qErr.z;
-        qErr.w = -qErr.w;
-      }
-      const w = Math.min(1, qErr.w);
-      const s = Math.sqrt(1 - w * w);
-      const k = s > 1e-6 ? (2 * Math.acos(w) * kr) / s : 0;
-      torque.set(qErr.x * k, qErr.y * k, qErr.z * k);
-      if (parent) parent.body.quaternion.vmult(torque, torque); // parent frame -> world
-      // damping on the joint's relative spin
-      const pw = parent ? parent.body.angularVelocity : null;
-      torque.x -= (body.angularVelocity.x - (pw ? pw.x : 0)) * dr;
-      torque.y -= (body.angularVelocity.y - (pw ? pw.y : 0)) * dr;
-      torque.z -= (body.angularVelocity.z - (pw ? pw.z : 0)) * dr;
-      body.torque.vadd(torque, body.torque);
-      if (parent) parent.body.torque.vsub(torque, parent.body.torque);
 
       // soft side walls: nothing drifts out of the frame
-      const over = Math.abs(body.position.x) - TUNING.frameX;
+      const px = body.position.x;
+      const over = px > 0 ? px - (bounds.x[1] - TUNING.frameMargin) : bounds.x[0] + TUNING.frameMargin - px;
       if (over > 0) {
-        const sign = Math.sign(body.position.x);
+        const sign = Math.sign(px);
         body.force.x -= sign * over * body.mass * 400;
         if (body.velocity.x * sign > 0) body.velocity.x *= 0.9;
       }
@@ -240,11 +314,30 @@ export const createRagdoll = () => {
   });
 
   // --- dragging with a mouse "hand"
+  // drag / frame limits (figure space); the page can widen them to the
+  // visible area with setBounds()
+  let bounds = { ...TUNING.dragBounds };
+  const setBounds = (next) => {
+    bounds = { ...bounds, ...next };
+  };
   const hand = new CANNON.Body({ mass: 0, type: CANNON.Body.KINEMATIC });
   hand.collisionFilterGroup = 0;
   hand.collisionFilterMask = 0;
   world.addBody(hand);
   let grip = null;
+
+  // A limb can only reach so far from where it attaches to the torso
+  // (shoulder, hip, neck, waist). Pulling past that would drag and fold the
+  // whole body, so the target is held on the edge of that reach instead.
+  let reach = null; // { centre, min, max } while dragging a limb/head/chest
+  const limbRoot = (index) => {
+    let bone = BONES[index];
+    while (bone.parentIndex >= 0 && !["chest", "pelvis"].includes(BONES[bone.parentIndex].name)) {
+      bone = BONES[bone.parentIndex];
+    }
+    return bone;
+  };
+  const dist3 = (a, b) => Math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2);
 
   const startDrag = (index, point) => {
     endDrag();
@@ -253,16 +346,92 @@ export const createRagdoll = () => {
     const pivot = body.pointToLocalFrame(new CANNON.Vec3(...point));
     grip = new CANNON.PointToPointConstraint(body, pivot, hand, new CANNON.Vec3(), TUNING.dragMaxForce);
     world.addConstraint(grip);
+
+    reach = null;
+    if (BONES[index].parentIndex < 0) return; // the pelvis itself: bounds only
+    const root = limbRoot(index);
+    // rest-pose path from the root joint down to the grabbed point
+    const restPoint = [pivot.x + bodies[index].rest.x, pivot.y + bodies[index].rest.y, pivot.z + bodies[index].rest.z];
+    const segments = [];
+    let cone = 0;
+    let bone = BONES[index];
+    let from = restPoint;
+    while (bone) {
+      segments.push(dist3(from, bone.joint));
+      cone += bone.cone;
+      from = bone.joint;
+      if (bone === root) break;
+      bone = BONES[bone.parentIndex];
+    }
+    // reachable region is a shell: a single bone's end can only be exactly
+    // its length away; a two-bone chain can fold in to |a - b|
+    const total = segments.reduce((sum, v) => sum + v, 0);
+    const longest = Math.max(...segments);
+    // centred on where the root joint sits in the standing pose: following
+    // the moving joint instead would feed back (the pull tips the torso, the
+    // target follows, the torso tips further) until the body flips over
+    reach = {
+      centre: new CANNON.Vec3(...root.joint),
+      // the limb can only swing so far from its standing direction (joint
+      // limits); pulling beyond that would rotate the whole body instead
+      axis: new CANNON.Vec3(root.b[0] - root.joint[0], root.b[1] - root.joint[1], root.b[2] - root.joint[2]).unit(),
+      cone: Math.min(Math.PI, cone) * 0.95,
+      min: Math.max(0, longest - (total - longest)) * 0.98,
+      max: total * 0.98,
+    };
   };
   const clamp = (v, [lo, hi]) => Math.max(lo, Math.min(hi, v));
   const moveDrag = (point) => {
     if (!grip) return;
-    const b = TUNING.dragBounds;
-    hand.position.set(clamp(point[0], b.x), clamp(point[1], b.y), clamp(point[2], b.z));
+    let [x, y, z] = point;
+    if (reach) {
+      let dx = x - reach.centre.x;
+      let dy = y - reach.centre.y;
+      let dz = z - reach.centre.z;
+      const len = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const a = reach.axis;
+      const along = (dx * a.x + dy * a.y + dz * a.z) / (len || 1);
+      if (len > 1e-6 && Math.acos(Math.max(-1, Math.min(1, along))) > reach.cone) {
+        // rotate the target back onto the edge of the cone
+        let px = dx / len - along * a.x;
+        let py = dy / len - along * a.y;
+        let pz = dz / len - along * a.z;
+        const pl = Math.sqrt(px * px + py * py + pz * pz);
+        if (pl < 1e-6) {
+          // straight opposite the axis: pick any sideways direction
+          px = a.y !== 0 || a.z !== 0 ? 1 : 0;
+          py = px ? 0 : 1;
+          pz = 0;
+        } else {
+          px /= pl;
+          py /= pl;
+          pz /= pl;
+        }
+        const c = Math.cos(reach.cone);
+        const sn = Math.sin(reach.cone);
+        dx = (a.x * c + px * sn) * len;
+        dy = (a.y * c + py * sn) * len;
+        dz = (a.z * c + pz * sn) * len;
+        x = reach.centre.x + dx;
+        y = reach.centre.y + dy;
+        z = reach.centre.z + dz;
+      }
+      const d = Math.sqrt(dx * dx + dy * dy + dz * dz);
+      const limit = d > reach.max ? reach.max : d < reach.min ? reach.min : d;
+      if (limit !== d && d > 1e-6) {
+        const k = limit / d;
+        x = reach.centre.x + dx * k;
+        y = reach.centre.y + dy * k;
+        z = reach.centre.z + dz * k;
+      }
+    }
+    const b = bounds;
+    hand.position.set(clamp(x, b.x), clamp(y, b.y), clamp(z, b.z));
   };
   function endDrag() {
     if (grip) world.removeConstraint(grip);
     grip = null;
+    reach = null;
   }
 
   // --- picking: which bone does a ray (in figure space) hit first?
@@ -304,6 +473,12 @@ export const createRagdoll = () => {
       const reach = (bone.box ? Math.max(bone.box[0], bone.box[2]) : bone.r) * 1.15 + 0.015;
       if (dist < reach && (!best || t < best.t)) best = { index, t, point: [qx, qy, qz] };
     });
+    // The pelvis is the anchor: dragging it would just slide the whole body
+    // and strain every joint. A click on the hips grabs that side's thigh.
+    if (best && best.index === 0) {
+      const side = best.point[0] >= 0 ? "thighP" : "thighN";
+      best.index = BONES.findIndex((b) => b.name === side);
+    }
     return best;
   };
 
@@ -318,7 +493,28 @@ export const createRagdoll = () => {
   const step = (dt) => world.step(TUNING.step, Math.min(dt, 1 / 20), 8);
 
   // Column-major 4x4 per bone: T(position) · R(orientation) · T(-rest centre)
+  // Joints can open a little under hard pulls (the solver is iterative). For
+  // drawing, each child is shifted so its joint sits exactly on its parent's:
+  // the skeleton you see is always connected. Parents come before children
+  // in BONES, so offsets accumulate down each chain.
+  const drawOffset = BONES.map(() => new CANNON.Vec3());
+  const jointA = new CANNON.Vec3();
+  const jointB = new CANNON.Vec3();
+  const jointRel = new CANNON.Vec3();
   const writeBoneMatrices = (out) => {
+    bodies.forEach((entry, i) => {
+      const bone = entry.bone;
+      if (bone.parentIndex < 0) drawOffset[i].setZero();
+      else {
+        const parent = bodies[bone.parentIndex];
+        jointRel.set(bone.joint[0] - parent.rest.x, bone.joint[1] - parent.rest.y, bone.joint[2] - parent.rest.z);
+        parent.body.pointToWorldFrame(jointRel, jointA);
+        jointRel.set(bone.joint[0] - entry.rest.x, bone.joint[1] - entry.rest.y, bone.joint[2] - entry.rest.z);
+        entry.body.pointToWorldFrame(jointRel, jointB);
+        jointA.vsub(jointB, drawOffset[i]);
+        drawOffset[i].vadd(drawOffset[bone.parentIndex], drawOffset[i]);
+      }
+    });
     bodies.forEach((entry, i) => {
       const { x, y, z, w } = entry.body.quaternion;
       const p = entry.body.position;
@@ -354,9 +550,10 @@ export const createRagdoll = () => {
       out[o + 9] = r12;
       out[o + 10] = r22;
       out[o + 11] = 0;
-      out[o + 12] = p.x - (r00 * c.x + r01 * c.y + r02 * c.z);
-      out[o + 13] = p.y - (r10 * c.x + r11 * c.y + r12 * c.z);
-      out[o + 14] = p.z - (r20 * c.x + r21 * c.y + r22 * c.z);
+      const off = drawOffset[i];
+      out[o + 12] = p.x + off.x - (r00 * c.x + r01 * c.y + r02 * c.z);
+      out[o + 13] = p.y + off.y - (r10 * c.x + r11 * c.y + r12 * c.z);
+      out[o + 14] = p.z + off.z - (r20 * c.x + r21 * c.y + r22 * c.z);
       out[o + 15] = 1;
     });
     return out;
@@ -369,6 +566,7 @@ export const createRagdoll = () => {
     moveDrag,
     endDrag,
     isDragging: () => !!grip,
+    setBounds,
     setGravity,
     resetGravity,
     setInertial,

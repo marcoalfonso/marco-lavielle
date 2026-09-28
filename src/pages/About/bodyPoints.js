@@ -82,8 +82,8 @@ export const BONES = [
   { name: "head", parent: "chest", joint: [0, 1.5, 0], a: [0, 1.5, 0], b: [0, 1.77, 0.01], r: 0.09, mass: 5, cone: 0.55, twist: 0.7, blend: 0.05 },
   ...limb("upperArm", "chest", SHOULDER, SHOULDER, ELBOW, 0.055, 2.5, 1.35, 0.7, 0.08),
   ...limb("forearm", "upperArm", ELBOW, ELBOW, HAND_TIP, 0.045, 2, 1.1, 0.4, 0.06),
-  ...limb("thigh", "pelvis", HIP, HIP, KNEE, 0.085, 7, 0.8, 0.3, 0.09),
-  ...limb("shin", "thigh", KNEE, KNEE, TOE, 0.06, 4, 0.9, 0.2, 0.07),
+  ...limb("thigh", "pelvis", HIP, HIP, KNEE, 0.085, 7, 1.25, 0.3, 0.07),
+  ...limb("shin", "thigh", KNEE, KNEE, TOE, 0.06, 4, 1.2, 0.2, 0.06),
 ];
 BONES.forEach((bone, i) => {
   bone.index = i;
@@ -94,10 +94,28 @@ BONES.forEach((bone) => {
   bone.parentIndex = bone.parent ? boneIndex(bone.parent) : -1;
 });
 
-const resolveBone = (tag, x, y) => {
+// side comes from the part's own centre, not the point: inner-thigh points
+// sit on (or just past) the midline and must stay with their own leg
+const resolveBone = (part, y) => {
+  const tag = part.bone;
   if (tag === "torso") return y > WAIST_Y ? "chest" : "pelvis";
   if (tag === "head" || tag === "chest" || tag === "pelvis") return tag;
-  return tag + (x >= 0 ? "P" : "N");
+  return tag + (part.bc[0] >= 0 ? "P" : "N");
+};
+
+// After projection onto the blended surface, a point belongs to whichever
+// part it now lies closest to (it may have slid onto a neighbour).
+const nearestPart = (parts, x, y, z) => {
+  let best = parts[0];
+  let bestD = Infinity;
+  for (let i = 0; i < parts.length; i++) {
+    const d = partDistance(parts[i], x, y, z);
+    if (d < bestD) {
+      bestD = d;
+      best = parts[i];
+    }
+  }
+  return best;
 };
 
 const smoothstep = (e0, e1, x) => {
@@ -107,8 +125,8 @@ const smoothstep = (e0, e1, x) => {
 
 // Skin weights: each point follows its own bone, blending up to 50/50 with
 // the neighbouring bone across the nearest joint, so bends stay smooth.
-const skinPoint = (tag, x, y, z) => {
-  const own = boneIndex(resolveBone(tag, x, y));
+const skinPoint = (part, x, y, z) => {
+  const own = boneIndex(resolveBone(part, y));
   let other = own;
   let weight = 0;
   const consider = (jointBone, neighbour) => {
@@ -300,7 +318,7 @@ export const buildBodyPoints = (count) => {
       normals[n * 3 + 1] = gy;
       normals[n * 3 + 2] = gz;
       randoms[n] = rand();
-      const [own, other, weight] = skinPoint(part.bone, p[0], p[1], p[2]);
+      const [own, other, weight] = skinPoint(nearestPart(near, p[0], p[1], p[2]), p[0], p[1], p[2]);
       bones[n] = own;
       bones2[n] = other;
       weights[n] = weight;
