@@ -53,10 +53,10 @@ export class About extends Component {
                   <dd>Marco Lavielle</dd>
                   <dt>Location</dt>
                   <dd>Little Bay, NSW, Sydney</dd>
-                </dl>
-                <dl className="stats-2 smaller">
                   <dt>Email</dt>
                   <dd><a href="mailto:marcoalfonso@gmail.com">marcoalfonso@gmail.com</a></dd>
+                </dl>
+                <dl className="stats-2 smaller">
                   <dt><a href="/signin" data-section="about">Login</a></dt>
                 </dl>
               </div>

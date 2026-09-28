@@ -93,8 +93,9 @@ const BodyHologram = ({ className }) => {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(28, 1, 0.1, 50);
-    camera.position.set(0, 1.08, 4.3);
-    camera.lookAt(0, 0.9, 0);
+    // aimed slightly low so the figure + platform sit centred in the frame
+    camera.position.set(0, 1.02, 4.3);
+    camera.lookAt(0, 0.84, 0);
 
     const disposables = [];
     const track = (...items) => {

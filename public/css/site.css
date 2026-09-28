@@ -2976,6 +2976,7 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
 }
 .about-content .fancy-header {
   flex: 0 0 auto;
+  margin: 30px 42px 22px 42px;
 }
 .about-content .personal-info {
   flex: 1 0 auto;
@@ -3006,9 +3007,9 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
 }
 .about-content .body-hologram {
   position: relative;
-  height: calc(100vh - 280px);
+  height: calc(100vh - 230px);
   min-height: 420px;
-  max-height: 760px;
+  max-height: 800px;
   opacity: 0;
   -webkit-transform: translateY(14px);
   transform: translateY(14px);
@@ -3044,6 +3045,14 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
 .about-content .personal-info .stats dt,
 .about-content .personal-info .stats dd {
   margin-left: 0;
+}
+/* labels aren't interactive (the global dl dt rule gives them a hand cursor);
+   only the Login link should */
+.about-content .personal-info .stats dt {
+  cursor: default;
+}
+.about-content .personal-info .stats dt a {
+  cursor: pointer;
 }
 .about-content .personal-info .stats dl + dl {
   margin-top: 28px;
