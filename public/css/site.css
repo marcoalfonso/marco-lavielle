@@ -2956,3 +2956,11 @@ pre {
 :focus:not(:focus-visible) {
   outline: none !important;
 }
+
+/* antd 5's legacy form (via @ant-design/compatible) colours labels near-black,
+   which is unreadable on the dark admin pages; inherit like antd 3 did. */
+form.ant-legacy-form,
+form.ant-legacy-form .ant-legacy-form-item,
+form.ant-legacy-form .ant-legacy-form-item-label > label {
+  color: inherit;
+}

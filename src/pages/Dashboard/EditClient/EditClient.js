@@ -2,7 +2,8 @@ import React, { Component } from "react";
 import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 import { toast } from "react-toastify";
-import { Button, Input, Form } from "antd";
+import { Button, Input } from "antd";
+import { Form } from "@ant-design/compatible";
 
 import {
   editClient,

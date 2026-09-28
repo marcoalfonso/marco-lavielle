@@ -45,9 +45,11 @@ module.exports = function(app) {
 
 	app.post('/login', auth.authenticate);
 
-	app.post('/logout', function(req, res) {
-		req.logout();
-		res.end();
+	app.post('/logout', function(req, res, next) {
+		req.logout(function(err) {
+			if (err) { return next(err); }
+			res.end();
+		});
 	});
 
 	app.all('/api/*', function(req, res) {

@@ -1,7 +1,4 @@
 var Post = require('mongoose').model('Post');
-var http = require('http');
-var request = require('request');
-var medium = require('./medium');
 
 exports.getPosts = function(req, res) {
 	Post.find({}).exec(function(err, collection) {
@@ -37,7 +34,6 @@ exports.createPost = function(req, res, next) {
 			res.status(400);
 			return res.send({reason:err.toString()});
 		} else {
-			// medium.createMediumPost(req);
 			res.send(post);
 		}		
 	});
