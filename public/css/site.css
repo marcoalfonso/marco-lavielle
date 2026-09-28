@@ -3134,3 +3134,16 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
     min-height: 360px;
   }
 }
+/* About page on phones: heading sits close under the "About" bar, and the
+   black section uses the same flat black as the header above it. */
+.mobile .about-content .fancy-header {
+  margin-top: 0;
+}
+.mobile .about-content .fancy-header h1 {
+  margin-top: 0;
+}
+.mobile .about-content .personal-info {
+  margin-top: 0;
+  padding-top: 0;
+  background: #000;
+}
