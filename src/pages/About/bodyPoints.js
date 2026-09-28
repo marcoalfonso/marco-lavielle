@@ -15,6 +15,10 @@ const mirrored = (part) =>
     ? [part, ellipsoid(mirror(part.c), part.r)]
     : [part, capsule(mirror(part.a), mirror(part.b), part.ra, part.rb)];
 
+// Tag parts with the bone they move with. Limb bones get a side suffix from
+// the point's x ("P" = +x, "N" = -x); "torso" splits at the waist.
+const on = (bone, parts) => (Array.isArray(parts) ? parts : [parts]).map((part) => ({ ...part, bone }));
+
 const SHOULDER = [0.2, 1.405, 0.0];
 const ELBOW = [0.305, 1.14, -0.015];
 const WRIST = [0.395, 0.895, 0.02];
@@ -23,30 +27,116 @@ const KNEE = [0.108, 0.51, 0.015];
 const ANKLE = [0.12, 0.085, -0.01];
 
 export const PARTS = [
-  ellipsoid([0, 1.665, 0.005], [0.075, 0.1, 0.09]), // cranium
-  ellipsoid([0, 1.6, 0.03], [0.055, 0.055, 0.06]), // face / jaw
-  capsule([0, 1.47, -0.01], [0, 1.6, 0.0], 0.056, 0.048), // neck
-  ellipsoid([0, 1.33, 0.005], [0.16, 0.165, 0.1]), // ribcage
-  ellipsoid([0, 1.29, -0.035], [0.17, 0.14, 0.08]), // upper back / lats
-  ellipsoid([0, 1.14, 0.012], [0.135, 0.13, 0.088]), // abdomen
-  ellipsoid([0, 0.99, 0.0], [0.155, 0.1, 0.098]), // pelvis
-  ...mirrored(ellipsoid([0.075, 1.365, 0.055], [0.085, 0.055, 0.05])), // pecs
-  ...mirrored(ellipsoid([0.07, 0.925, -0.045], [0.085, 0.09, 0.075])), // glutes
-  ...mirrored(capsule([0.03, 1.49, -0.02], [0.16, 1.44, -0.015], 0.05, 0.045)), // trapezius
-  ...mirrored(ellipsoid([0.188, 1.42, 0.0], [0.07, 0.075, 0.068])), // deltoid
-  ...mirrored(capsule(SHOULDER, ELBOW, 0.05, 0.038)), // upper arm
-  ...mirrored(capsule([0.27, 1.26, 0.0], [0.29, 1.19, 0.0], 0.046, 0.04)), // biceps
-  ...mirrored(capsule(ELBOW, WRIST, 0.042, 0.026)), // forearm
-  ...mirrored(capsule([0.4, 0.875, 0.025], [0.43, 0.75, 0.035], 0.03, 0.021)), // hand
-  ...mirrored(capsule(HIP, KNEE, 0.088, 0.05)), // thigh
-  ...mirrored(capsule([0.085, 0.8, 0.02], [0.1, 0.62, 0.03], 0.075, 0.055)), // quads
-  ...mirrored(ellipsoid([KNEE[0], KNEE[1], 0.022], [0.048, 0.052, 0.048])), // knee
-  ...mirrored(capsule(KNEE, [0.115, 0.33, -0.02], 0.05, 0.05)), // upper calf
-  ...mirrored(ellipsoid([0.112, 0.38, -0.03], [0.048, 0.08, 0.045])), // calf muscle
-  ...mirrored(capsule([0.115, 0.33, -0.015], ANKLE, 0.047, 0.03)), // shin
-  ...mirrored(capsule([0.12, 0.05, -0.03], [0.135, 0.028, 0.13], 0.036, 0.025)), // foot
-  ...mirrored(ellipsoid([0.12, 0.04, -0.035], [0.032, 0.04, 0.038])), // heel
+  ...on("head", ellipsoid([0, 1.665, 0.005], [0.075, 0.1, 0.09])), // cranium
+  ...on("head", ellipsoid([0, 1.6, 0.03], [0.055, 0.055, 0.06])), // face / jaw
+  ...on("head", capsule([0, 1.47, -0.01], [0, 1.6, 0.0], 0.056, 0.048)), // neck
+  ...on("chest", ellipsoid([0, 1.33, 0.005], [0.16, 0.165, 0.1])), // ribcage
+  ...on("chest", ellipsoid([0, 1.29, -0.035], [0.17, 0.14, 0.08])), // upper back / lats
+  ...on("torso", ellipsoid([0, 1.14, 0.012], [0.135, 0.13, 0.088])), // abdomen
+  ...on("pelvis", ellipsoid([0, 0.99, 0.0], [0.155, 0.1, 0.098])), // pelvis
+  ...on("chest", mirrored(ellipsoid([0.075, 1.365, 0.055], [0.085, 0.055, 0.05]))), // pecs
+  ...on("pelvis", mirrored(ellipsoid([0.07, 0.925, -0.045], [0.085, 0.09, 0.075]))), // glutes
+  ...on("chest", mirrored(capsule([0.03, 1.49, -0.02], [0.16, 1.44, -0.015], 0.05, 0.045))), // trapezius
+  ...on("upperArm", mirrored(ellipsoid([0.188, 1.42, 0.0], [0.07, 0.075, 0.068]))), // deltoid
+  ...on("upperArm", mirrored(capsule(SHOULDER, ELBOW, 0.05, 0.038))), // upper arm
+  ...on("upperArm", mirrored(capsule([0.27, 1.26, 0.0], [0.29, 1.19, 0.0], 0.046, 0.04))), // biceps
+  ...on("forearm", mirrored(capsule(ELBOW, WRIST, 0.042, 0.026))), // forearm
+  ...on("forearm", mirrored(capsule([0.4, 0.875, 0.025], [0.43, 0.75, 0.035], 0.03, 0.021))), // hand
+  ...on("thigh", mirrored(capsule(HIP, KNEE, 0.088, 0.05))), // thigh
+  ...on("thigh", mirrored(capsule([0.085, 0.8, 0.02], [0.1, 0.62, 0.03], 0.075, 0.055))), // quads
+  ...on("shin", mirrored(ellipsoid([KNEE[0], KNEE[1], 0.022], [0.048, 0.052, 0.048]))), // knee
+  ...on("shin", mirrored(capsule(KNEE, [0.115, 0.33, -0.02], 0.05, 0.05))), // upper calf
+  ...on("shin", mirrored(ellipsoid([0.112, 0.38, -0.03], [0.048, 0.08, 0.045]))), // calf muscle
+  ...on("shin", mirrored(capsule([0.115, 0.33, -0.015], ANKLE, 0.047, 0.03))), // shin
+  ...on("shin", mirrored(capsule([0.12, 0.05, -0.03], [0.135, 0.028, 0.13], 0.036, 0.025))), // foot
+  ...on("shin", mirrored(ellipsoid([0.12, 0.04, -0.035], [0.032, 0.04, 0.038]))), // heel
 ];
+
+// ---------------------------------------------------------------------------
+// Skeleton for the rag doll. Each bone is a segment a→b (rest pose) with a
+// thickness r; "joint" is where it hangs from its parent. cone/twist are the
+// joint limits (radians), blend is how far skin weights fade across a joint.
+// ---------------------------------------------------------------------------
+const WAIST_Y = 1.1;
+const HAND_TIP = [0.43, 0.75, 0.035];
+const TOE = [0.125, 0.065, 0.03]; // collision box ends just above the floor
+const limb = (name, parent, joint, a, b, r, mass, cone, twist, blend) => [
+  { name: name + "P", parent: parent + (parent === "chest" || parent === "pelvis" ? "" : "P"), joint, a, b, r, mass, cone, twist, blend },
+  {
+    name: name + "N",
+    parent: parent + (parent === "chest" || parent === "pelvis" ? "" : "N"),
+    joint: mirror(joint),
+    a: mirror(a),
+    b: mirror(b),
+    r,
+    mass,
+    cone,
+    twist,
+    blend,
+  },
+];
+
+export const BONES = [
+  { name: "pelvis", parent: null, a: [0, 0.9, 0], b: [0, WAIST_Y, 0], r: 0.15, box: [0.15, 0.1, 0.1], mass: 18 },
+  { name: "chest", parent: "pelvis", joint: [0, WAIST_Y, 0], a: [0, WAIST_Y, 0], b: [0, 1.48, 0], r: 0.16, box: [0.165, 0.19, 0.1], mass: 20, cone: 0.35, twist: 0.35, blend: 0.09 },
+  { name: "head", parent: "chest", joint: [0, 1.5, 0], a: [0, 1.5, 0], b: [0, 1.77, 0.01], r: 0.09, mass: 5, cone: 0.55, twist: 0.7, blend: 0.05 },
+  ...limb("upperArm", "chest", SHOULDER, SHOULDER, ELBOW, 0.055, 2.5, 1.35, 0.7, 0.08),
+  ...limb("forearm", "upperArm", ELBOW, ELBOW, HAND_TIP, 0.045, 2, 1.1, 0.4, 0.06),
+  ...limb("thigh", "pelvis", HIP, HIP, KNEE, 0.085, 7, 0.8, 0.3, 0.09),
+  ...limb("shin", "thigh", KNEE, KNEE, TOE, 0.06, 4, 0.9, 0.2, 0.07),
+];
+BONES.forEach((bone, i) => {
+  bone.index = i;
+  bone.center = bone.a.map((v, k) => (v + bone.b[k]) / 2);
+});
+export const boneIndex = (name) => BONES.findIndex((bone) => bone.name === name);
+BONES.forEach((bone) => {
+  bone.parentIndex = bone.parent ? boneIndex(bone.parent) : -1;
+});
+
+const resolveBone = (tag, x, y) => {
+  if (tag === "torso") return y > WAIST_Y ? "chest" : "pelvis";
+  if (tag === "head" || tag === "chest" || tag === "pelvis") return tag;
+  return tag + (x >= 0 ? "P" : "N");
+};
+
+const smoothstep = (e0, e1, x) => {
+  const t = Math.max(0, Math.min(1, (x - e0) / (e1 - e0)));
+  return t * t * (3 - 2 * t);
+};
+
+// Skin weights: each point follows its own bone, blending up to 50/50 with
+// the neighbouring bone across the nearest joint, so bends stay smooth.
+const skinPoint = (tag, x, y, z) => {
+  const own = boneIndex(resolveBone(tag, x, y));
+  let other = own;
+  let weight = 0;
+  const consider = (jointBone, neighbour) => {
+    // distance to the joint plane (across the child bone's axis) and to the joint
+    const j = jointBone.joint;
+    const ax = jointBone.b[0] - jointBone.a[0];
+    const ay = jointBone.b[1] - jointBone.a[1];
+    const az = jointBone.b[2] - jointBone.a[2];
+    const al = Math.sqrt(ax * ax + ay * ay + az * az);
+    const dx = x - j[0];
+    const dy = y - j[1];
+    const dz = z - j[2];
+    const plane = Math.abs((dx * ax + dy * ay + dz * az) / al);
+    const dist = Math.sqrt(dx * dx + dy * dy + dz * dz);
+    const R = jointBone.blend;
+    const w = 0.5 * (1 - smoothstep(0, R, plane)) * (1 - smoothstep(1.6 * R, 2.8 * R, dist));
+    if (w > weight) {
+      weight = w;
+      other = neighbour;
+    }
+  };
+  const bone = BONES[own];
+  if (bone.parentIndex >= 0) consider(bone, bone.parentIndex);
+  BONES.forEach((child) => {
+    if (child.parentIndex === own) consider(child, child.index);
+  });
+  return [own, other, weight];
+};
 
 export const BODY_HEIGHT = 1.8;
 const BLEND = 0.035; // smooth-union radius: how softly parts melt together
@@ -170,6 +260,9 @@ export const buildBodyPoints = (count) => {
   const positions = new Float32Array(count * 3);
   const normals = new Float32Array(count * 3);
   const randoms = new Float32Array(count);
+  const bones = new Float32Array(count);
+  const bones2 = new Float32Array(count);
+  const weights = new Float32Array(count);
   const p = [0, 0, 0];
   const e = 0.0015;
   let n = 0;
@@ -207,6 +300,10 @@ export const buildBodyPoints = (count) => {
       normals[n * 3 + 1] = gy;
       normals[n * 3 + 2] = gz;
       randoms[n] = rand();
+      const [own, other, weight] = skinPoint(part.bone, p[0], p[1], p[2]);
+      bones[n] = own;
+      bones2[n] = other;
+      weights[n] = weight;
       n++;
       kept++;
     }
@@ -215,6 +312,9 @@ export const buildBodyPoints = (count) => {
     positions: positions.subarray(0, n * 3),
     normals: normals.subarray(0, n * 3),
     randoms: randoms.subarray(0, n),
+    bones: bones.subarray(0, n),
+    bones2: bones2.subarray(0, n),
+    weights: weights.subarray(0, n),
     count: n,
   };
 };

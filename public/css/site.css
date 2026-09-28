@@ -3065,6 +3065,29 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
   -webkit-animation: hologram-hint-tilt 2.4s ease-in-out infinite;
   animation: hologram-hint-tilt 2.4s ease-in-out infinite;
 }
+/* desktop "Drag the body" hint: informational only, never blocks a grab */
+.body-hologram-hint.is-passive {
+  pointer-events: none;
+  cursor: default;
+}
+.body-hologram-hint-icon.is-hand {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: currentColor;
+  border: none;
+  box-shadow: 0 0 0 3px rgba(111, 245, 238, 0.25);
+  -webkit-animation: hologram-hint-drag 1.8s ease-in-out infinite;
+  animation: hologram-hint-drag 1.8s ease-in-out infinite;
+}
+@-webkit-keyframes hologram-hint-drag {
+  0%, 100% { -webkit-transform: translateX(-5px); }
+  50% { -webkit-transform: translateX(5px); }
+}
+@keyframes hologram-hint-drag {
+  0%, 100% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+}
 @-webkit-keyframes hologram-hint-tilt {
   0%, 100% { -webkit-transform: rotate(-18deg); }
   50% { -webkit-transform: rotate(18deg); }
