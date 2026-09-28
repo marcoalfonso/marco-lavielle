@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
 
 import styles from './About.module.css'
+import BodyHologram from './BodyHologram'
 
 export class About extends Component {
   componentDidMount() {
@@ -41,17 +42,7 @@ export class About extends Component {
           </div>
           <div className="personal-info">
             <div className="container">
-              <div className="mri mobile-only">
-                <span className="grey layer" style={{ animationName: 'none' }}></span>
-                <span className="layer one" style={{ animationName: 'mri-glow-1' }}></span>
-                <span className="layer two" style={{ animationName: 'mri-glow-2' }}></span>
-                <span className="layer three" style={{ animationName: 'mri-glow-3' }}></span>
-                <span className="layer four" style={{ animationName: 'mri-glow-4' }}></span>
-                <span className="layer five" style={{ animationName: 'mri-glow-5' }}></span>
-                <span className="blip" style={{ animationName: 'mri-blip' }}>
-                  <span className="cover-below"></span>
-                </span>
-              </div>
+              <BodyHologram className="body-hologram" />
               <div className="text">
                 <p>Hi, I'm Marco Lavielle, I design and develop web apps and VR apps. In my free time I work on my paintings and VR art projects.</p>
                 <p>This site is a showcase of my work. Get in touch if you want to explore collaborating on a project.</p>
@@ -60,32 +51,16 @@ export class About extends Component {
                 <dl className="stats-1">
                   <dt>Name</dt>
                   <dd>Marco Lavielle</dd>
-                  <dt>Birthday</dt>
-                  <dd>October 13</dd>
-                  <dt>Currently in</dt>
-                  <dd>Sydney</dd>
+                  <dt>Location</dt>
+                  <dd>Little Bay, NSW, Sydney</dd>
+                  <dt>Email</dt>
+                  <dd><a href="mailto:marcoalfonso@gmail.com">marcoalfonso@gmail.com</a></dd>
                 </dl>
                 <dl className="stats-2 smaller">
-                  <dt>Telephone</dt>
-                  <dd>0423478156</dd>
-                  <dt>Email</dt>
-                  <dd>marcoalfonso@gmail.com</dd>
-                  <dt>Address</dt>
-                  <dd>Bondi, NSW, Sydney</dd>
                   <dt><a href="/signin" data-section="about">Login</a></dt>
                 </dl>
               </div>
             </div>
-          </div>
-          <div className="attribution">
-            <ul>
-              <li className="linkedin"><span className="logo"></span>
-              </li>
-              <li className="twitter"><span className="logo"></span>
-              </li>
-              <li className="facebook"><span className="logo"></span>
-              </li>
-            </ul>
           </div>
         </div>
       </main>
