@@ -10,7 +10,20 @@ import { useEffect, useRef, useState } from "react";
 // Android sends orientation straight away. iPhones only share it after the
 // visitor grants permission from a tap, so when nothing arrives and the
 // browser can ask, showHint turns true: render a button that calls
-// requestPermission.
+// requestPermission. If the phone refuses (the visitor said no, now or
+// earlier), denied turns true, so the page can say so rather than just
+// losing the button.
+
+// Ask for both motion and orientation in one tap: pages use one or the
+// other, and a grant for one doesn't always cover the other on iOS. Both
+// asks start synchronously, inside the tap. Resolves true if either is
+// granted.
+export const askForMotion = () => {
+  const asks = [window.DeviceOrientationEvent, window.DeviceMotionEvent]
+    .filter((E) => E && typeof E.requestPermission === "function")
+    .map((E) => E.requestPermission().catch(() => "denied"));
+  return Promise.all(asks).then((states) => states.includes("granted"));
+};
 
 export const canAskForOrientation = () =>
   typeof window !== "undefined" &&
@@ -32,6 +45,7 @@ const useDeviceTilt = (onTilt, enabled = true) => {
   onTiltRef.current = onTilt;
   const startRef = useRef(null);
   const [showHint, setShowHint] = useState(false);
+  const [denied, setDenied] = useState(false);
 
   useEffect(() => {
     if (!enabled || !isTouchDevice() || typeof window.DeviceOrientationEvent === "undefined") return undefined;
@@ -93,16 +107,13 @@ const useDeviceTilt = (onTilt, enabled = true) => {
 
   const requestPermission = () => {
     setShowHint(false);
-    window.DeviceOrientationEvent.requestPermission()
-      .then((state) => {
-        if (state === "granted" && startRef.current) startRef.current();
-      })
-      .catch(() => {
-        // denied or unavailable: the page just keeps its own motion
-      });
+    askForMotion().then((granted) => {
+      if (!granted) setDenied(true);
+      else if (startRef.current) startRef.current();
+    });
   };
 
-  return { showHint, requestPermission };
+  return { showHint, requestPermission, denied };
 };
 
 export default useDeviceTilt;
