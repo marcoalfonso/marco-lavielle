@@ -17,8 +17,18 @@ const NAV = [
   { href: '/about', label: 'Contact' },
 ]
 
+// a fresh order on every page load
+const shuffle = (list) => {
+  const out = list.slice()
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
+
 export class Art extends Component {
-  state = { index: 0 }
+  state = { index: 0, paintings: shuffle(this.props.paintings) }
 
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown)
@@ -35,7 +45,7 @@ export class Art extends Component {
 
   // fetch the neighbours so switching paintings doesn't wait on the network
   preloadAround = (index) => {
-    const { paintings } = this.props
+    const { paintings } = this.state
     ;[1, -1].forEach((step) => {
       const img = new Image()
       img.src = paintings[(index + step + paintings.length) % paintings.length].link
@@ -48,17 +58,15 @@ export class Art extends Component {
   }
 
   onClickForward = () => {
-    this.setState(({ index }) => ({ index: (index + 1) % this.props.paintings.length }))
+    this.setState(({ index, paintings }) => ({ index: (index + 1) % paintings.length }))
   }
 
   onClickBack = () => {
-    const count = this.props.paintings.length
-    this.setState(({ index }) => ({ index: (index - 1 + count) % count }))
+    this.setState(({ index, paintings }) => ({ index: (index - 1 + paintings.length) % paintings.length }))
   }
 
   render() {
-    const { paintings } = this.props
-    const { index } = this.state
+    const { index, paintings } = this.state
     const painting = paintings[index]
     const forSale = painting.status === 'For Sale'
 
