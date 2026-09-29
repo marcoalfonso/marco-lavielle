@@ -1,109 +1,135 @@
 import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
 import { connect } from 'react-redux'
-import styles from './Art.module.css'
+import BrushName from './BrushName'
+import PaintingStage from './PaintingStage'
+
+const pad = (n) => String(n).padStart(2, '0')
+
+// "../images/paintings/clovelly_beach.jpg" -> "Clovelly beach"
+const paintingName = (painting) => {
+  const file = painting.link.split('/').pop().replace(/\.[a-z]+$/i, '').replace(/_/g, ' ')
+  return file.charAt(0).toUpperCase() + file.slice(1)
+}
+
+const NAV = [
+  { href: '/', label: 'Home' },
+  { href: '/art', label: 'Paintings', active: true },
+  { href: '/about', label: 'Contact' },
+]
+
+// a fresh order on every page load
+const shuffle = (list) => {
+  const out = list.slice()
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[out[i], out[j]] = [out[j], out[i]]
+  }
+  return out
+}
 
 export class Art extends Component {
-  constructor(props) {
-    super(props)
-    const img1 = props.paintings[0];
-    const img2 = props.paintings[1];
-    const img3 = props.paintings[2];
-    const img4 = props.paintings[3];
-    const img5 = props.paintings[4];
-    const img6 = props.paintings[5];
+  state = { index: 0, paintings: shuffle(this.props.paintings) }
 
-    this.state = {
-      index: 0,
-      imgList: [img1, img2, img3, img4, img5, img6 ]
-    }
+  componentDidMount() {
+    window.addEventListener('keydown', this.onKeyDown)
+    this.preloadAround(0)
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('keydown', this.onKeyDown)
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.index !== this.state.index) this.preloadAround(this.state.index)
+  }
+
+  // fetch the neighbours so switching paintings doesn't wait on the network
+  preloadAround = (index) => {
+    const { paintings } = this.state
+    ;[1, -1].forEach((step) => {
+      const img = new Image()
+      img.src = paintings[(index + step + paintings.length) % paintings.length].link
+    })
+  }
+
+  onKeyDown = (e) => {
+    if (e.key === 'ArrowRight') this.onClickForward()
+    else if (e.key === 'ArrowLeft') this.onClickBack()
   }
 
   onClickForward = () => {
-    if (this.state.index + 1 === this.state.imgList.length) {
-      this.setState({ index: 0 })
-    } else {
-      this.setState({ index: this.state.index + 1 })
-    }
+    this.setState(({ index, paintings }) => ({ index: (index + 1) % paintings.length }))
   }
 
   onClickBack = () => {
-    if (this.state.index - 1 === -1) {
-      this.setState({ index: this.state.imgList.length - 1 })
-    } else {
-      this.setState({ index: this.state.index - 1 })
-    }
+    this.setState(({ index, paintings }) => ({ index: (index - 1 + paintings.length) % paintings.length }))
   }
 
   render() {
+    const { index, paintings } = this.state
+    const painting = paintings[index]
+    const forSale = painting.status === 'For Sale'
+
     return (
-      <div>
-        <div className="container">
-          <div className="menu">
-            <h1 className="menu-logo">
-              <div className="logo-text">Marco Lavielle</div>
-            </h1>
-            <ul className="menu-nav">
-        			<li className="item top_level">
-        				<a href="/" target="_self" className="">
-        					Home
-        				</a>
-        			</li>
-        			<li className="item top_level">
-                <a href="/art" className='active'>
-                  Paintings
-                </a>
-        			</li>
-        			<li className="item top_level">
-        				<a href="/about" className="">
-        					Contact
-        				</a>
-        			</li>
-            </ul>
-          </div>
-        </div>
-        <div id="close" className="hidden">
-          <a className="link-close"><img src="../images/artwork/header-close.svg"/></a>
-        </div>
-        <div id="exp-frame" className="inset-square">
-          <div id="header" className="header">
+      <div className="art-page">
+        <header className="art-menu">
+          <a href="/" className="art-name" aria-label="Marco Lavielle, home">
+            <BrushName className="art-name-svg" />
+          </a>
+          <nav className="art-nav">
+            {NAV.map((item, i) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={item.active ? 'active' : undefined}
+                aria-current={item.active ? 'page' : undefined}
+              >
+                <span className="art-nav-index">{pad(i + 1)}</span>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </header>
 
-            {/*<div id="logo" className="logo"><a><img src="../images/artwork/header-logo.svg"/></a></div>*/}
-            <div className="nav-top">
-              <a id="video-link" className="link-video"><img src="../images/artwork/header-video.svg"/></a>
-              <a className="link-shop" target="_blank" href="https://dreamdiary.greedbag.com/"><img src="../images/artwork/header-shop.svg"/></a>
+        <PaintingStage
+          painting={painting}
+          name={paintingName(painting)}
+          index={index}
+          onNext={this.onClickForward}
+          onPrev={this.onClickBack}
+        />
 
-              <div className="stream">
-                <a className="stream-ap" target="_blank" href="https://itunes.apple.com/gb/album/soul-to-skin-ep/1372231203"></a>
-                <a className="stream-sp" target="_blank" href="https://open.spotify.com/artist/6Aj8TtYDe1X42BuRrkvIvT?si=IciPpNjhROiJqgoem5crgw"></a>
-                <a className="stream-sc" target="_blank" href="https://soundcloud.com/vtrpage"></a>
-              </div>
-            </div>
-            {/*<div id="title" className="title right hidden"><a><img src="../images/artwork/header-title.svg"/></a></div>*/}
+        <footer className="art-hud">
+          <div className="art-hud-status">
+            <dl className={forSale ? 'art-status is-for-sale' : 'art-status'}>
+              <dt>Status</dt>
+              <dd>
+                <span className="art-status-dot" aria-hidden="true" />
+                {forSale ? 'For sale' : painting.status}
+              </dd>
+            </dl>
+            {forSale && (
+              <a
+                className="art-enquire"
+                href={`mailto:marcoalfonso@gmail.com?subject=${encodeURIComponent(`Painting enquiry: ${paintingName(painting)}`)}`}
+              >
+                Enquire
+              </a>
+            )}
           </div>
-          <div id="cover" onClick={this.onClickForward}>
-            <img className="vtr-cover" width="100%" height="100%" src={this.state.imgList[this.state.index].link}/>
+          <div className="art-controls">
+            <button type="button" className="art-arrow" onClick={this.onClickBack} aria-label="Previous painting">
+              <span aria-hidden="true">&lsaquo;</span>
+            </button>
+            <span className="art-counter" aria-live="polite">
+              <span className="art-counter-current">{pad(index + 1)}</span>
+              <span className="art-counter-total"> / {pad(paintings.length)}</span>
+            </span>
+            <button type="button" className="art-arrow" onClick={this.onClickForward} aria-label="Next painting">
+              <span aria-hidden="true">&rsaquo;</span>
+            </button>
           </div>
-          <iframe id="video" className="hidden" width="100%" height="100%" frameBorder="0" allow="autoplay; encrypted-media" allowFullScreen=""></iframe>
-          <iframe id="exp" className="hidden" width="100%" height="100%" src="../images/experience.html" frameBorder="0"></iframe>
-        </div>
-        <div className="footer">
-          <div className="next">
-            <div className="status">
-              {this.state.imgList[this.state.index].status === 'For Sale' ?
-                <div>{this.state.imgList[this.state.index].status}: <a href="mailto:marcoalfonso@gmail.com">Enquire</a></div>
-                : <div>{this.state.imgList[this.state.index].status}</div>
-              }
-            </div>
-            <a href="#" onClick={this.onClickBack}>Previous</a>
-            {`  |  `}
-            <a href="#" onClick={this.onClickForward}>Next</a>
-            <span className="counter">(<span id="current">{this.state.index + 1}</span> of <span id="total">{this.state.imgList.length}</span>)</span>
-          </div>
-          <audio id="music">
-            <source src="../images/whisper.mp3" type="audio/mpeg"/>
-          </audio>
-        </div>
+        </footer>
       </div>
     )
   }
@@ -113,7 +139,4 @@ const mapStateToProps = state => ({
   paintings: state.app.paintings,
 })
 
-const mapDispatchToProps = dispatch => ({
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(Art)
+export default connect(mapStateToProps)(Art)

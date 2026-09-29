@@ -32,7 +32,7 @@ const initialState = {
   paintings: [
     { 
       link: '../images/paintings/clovelly_beach.jpg',
-      status: 'For Sale',
+      status: 'Sold',
     },
     {
       link: '../images/paintings/abstract_2.jpg',
@@ -55,8 +55,8 @@ const initialState = {
       status: 'Sold',
     },
     { 
-      link: '../images/paintings/flowers_2.jpg',
-      status: 'For Sale',
+      link: '../images/paintings/abstract_3.jpg',
+      status: 'Sold',
     },
   ]
 }
