@@ -45,12 +45,29 @@ body.home-v2-body {
 .flash-letter {
   display: inline-block;
   opacity: 0;
-  animation: flash-on 1000ms linear both;
+  /* strike on (delay set per letter), then, once every letter is lit, a
+     glow runs through the name from left to right, one letter at a time */
+  animation:
+    flash-on 1000ms linear var(--flash-delay, 0ms) both,
+    name-glow 5s ease-in-out var(--glow-delay, 2800ms) infinite;
 }
 
 .flash-space {
   display: inline-block;
   width: 0.5em;
+}
+
+@keyframes name-glow {
+  0%,
+  12%,
+  100% {
+    color: #dff4ff;
+    text-shadow: 0 0 10px rgba(0, 191, 243, 0.35);
+  }
+  5% {
+    color: #fff;
+    text-shadow: 0 0 12px #6ff5ee, 0 0 28px #00bff3, 0 0 44px rgba(0, 191, 243, 0.6);
+  }
 }
 
 /* a tube light striking: bright flash, flicker, then steady */
@@ -171,8 +188,9 @@ body.home-v2-body {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  /* equal squares even when a link's name is wider than its square */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 4%;
   padding: 4%;
   box-sizing: border-box;
@@ -181,8 +199,6 @@ body.home-v2-body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
-  /* only the links take the pointer; drags land on the scene behind */
-  pointer-events: none;
 }
 
 /* every square: same dark colour, only its edges glow */
@@ -194,6 +210,17 @@ body.home-v2-body {
   border-radius: 6%;
   background: rgba(4, 12, 24, 0.6);
   box-shadow: 0 0 6px rgba(0, 191, 243, 0.4), inset 0 0 10px rgba(0, 191, 243, 0.14);
+}
+
+/* hovered square: its edges light right up */
+.rc-cell {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.home-v2 .rc-cell:hover {
+  border-color: var(--home-holo);
+  background: rgba(111, 245, 238, 0.08);
+  box-shadow: 0 0 18px rgba(111, 245, 238, 0.85), inset 0 0 18px rgba(111, 245, 238, 0.35);
 }
 
 /* light running across the squares in waves */
@@ -223,59 +250,276 @@ body.home-v2-body {
 
 /* the centre square of each face: a link that presses in on hover */
 .home-v2 .rc-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--rc-size) * 0.012);
   border-color: rgba(111, 245, 238, 0.95);
-  color: #e8f6ff;
-  text-decoration: none;
   cursor: pointer;
-  pointer-events: auto;
   box-shadow: 0 0 10px rgba(111, 245, 238, 0.6), inset 0 0 14px rgba(111, 245, 238, 0.2);
   transition: transform 220ms cubic-bezier(0.3, 0, 0.2, 1), box-shadow 220ms ease, background 220ms ease;
 }
 
 .home-v2 .rc-link:hover,
 .home-v2 .rc-link:focus-visible {
-  color: #fff;
-  text-decoration: none;
   outline: none;
-  background: rgba(111, 245, 238, 0.12);
-  /* pressed in: shrinks with a deep inner glow (moving it back in z would
-     tuck it behind its own face, which then steals the hover) */
-  box-shadow: 0 0 22px rgba(111, 245, 238, 0.85), inset 0 0 26px rgba(111, 245, 238, 0.5);
-  transform: scale(0.9);
+  background: rgba(111, 245, 238, 0.14);
+  /* pressed in: a deep inner glow and its name sinks a little. The square
+     itself keeps its size: shrinking it would slip it out from under the
+     cursor at its edges, and the hover (and cursor) would flicker. */
+  box-shadow: 0 0 22px rgba(111, 245, 238, 0.9), inset 0 0 30px rgba(111, 245, 238, 0.6),
+    inset 0 0 0 3px rgba(111, 245, 238, 0.25);
+}
+
+.home-v2 .rc-link:hover .rc-link-text,
+.home-v2 .rc-link:focus-visible .rc-link-text {
+  transform: translateZ(2px) scale(0.92);
 }
 
 .home-v2 .rc-link:active {
-  transform: scale(0.84);
+  box-shadow: 0 0 26px rgba(111, 245, 238, 1), inset 0 0 40px rgba(111, 245, 238, 0.8),
+    inset 0 0 0 5px rgba(111, 245, 238, 0.35);
 }
 
 .home-v2 .rc-link:focus:not(:focus-visible) {
   outline: none;
 }
 
-.rc-link-index {
-  color: #4e5f76;
-  font: 600 calc(var(--rc-size) * 0.026) / 1 var(--home-font);
+/* the link's name, flat on the face over its centre square; big enough to
+   read, so longer names spill across the middle row */
+.rc-link-text {
+  position: relative;
+  z-index: 2;
+  padding-left: 0.1em;
+  color: #effdff;
+  /* squared-off display face, in the cube's light */
+  font: 600 calc(var(--rc-size) * 0.05) / 1 "Orbitron", var(--home-font);
   letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(111, 245, 238, 0.85), 0 0 22px rgba(0, 191, 243, 0.5);
+  pointer-events: none;
+  transform: translateZ(2px);
+  transition: transform 220ms cubic-bezier(0.3, 0, 0.2, 1);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.rc-link-label {
-  padding-left: 0.14em;
-  font: 600 calc(var(--rc-size) * 0.04) / 1 var(--home-font);
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.home-v2 .rc-link,
+.home-v2 .rc-link:hover,
+.home-v2 .rc-link:focus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  text-decoration: none;
 }
 
-.rc-link-sub {
-  padding-left: 0.2em;
-  color: var(--home-cyan);
-  font: 600 calc(var(--rc-size) * 0.026) / 1 var(--home-font);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
+/* --- holograms: line art over the whole face while it's looked at ------ */
+.rc-holo {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity 250ms ease;
+}
+
+.rc-face.is-active .rc-holo {
+  opacity: 1;
+  animation: holo-in 520ms ease-out both;
+}
+
+/* projected in: a flickering sweep from the middle out */
+@keyframes holo-in {
+  0% {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+  }
+  35% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.45;
+  }
+  60% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* scan lines over the hologram */
+.rc-holo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, rgba(111, 245, 238, 0.07) 0 1px, transparent 1px 4px);
+}
+
+.holo-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.75));
+}
+
+.holo-line {
+  fill: none;
+  stroke: var(--home-holo);
+  stroke-width: 1;
+  opacity: 0.85;
+  vector-effect: non-scaling-stroke;
+}
+
+.holo-line.faint {
+  opacity: 0.35;
+}
+
+/* a pulse of light running along a line */
+.holo-flow {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-dasharray: 4 96;
+  animation: holo-flow 2.4s linear infinite;
+}
+
+.holo-software .holo-flow {
+  stroke-dasharray: 12 88;
+  animation-duration: 2.4s;
+}
+
+.holo-pad {
+  fill: #02070f;
+  stroke: var(--home-holo);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.holo-radar-sweep {
+  transform-origin: 50px 50px;
+  animation: holo-spin 4s linear infinite;
+}
+
+@keyframes holo-flow {
+  from {
+    stroke-dashoffset: 100;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.holo-node,
+.holo-dot,
+.holo-commit {
+  fill: var(--home-holo);
+}
+
+.holo-node.twinkle {
+  animation: holo-twinkle 2s ease-in-out infinite;
+}
+
+@keyframes holo-twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.holo-pulse {
+  fill: none;
+  stroke: var(--home-holo);
+  stroke-width: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holo-pulse 2s ease-out infinite;
+}
+
+@keyframes holo-pulse {
+  from {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4);
+  }
+}
+
+.holo-dot {
+  opacity: 0.75;
+}
+
+.holo-spin-slow {
+  transform-origin: 50px 50px;
+  animation: holo-spin 40s linear infinite;
+}
+
+@keyframes holo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.holo-stroke {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 120;
+  animation: holo-draw 3.2s ease-in-out infinite;
+}
+
+.holo-stroke.thin {
+  stroke: var(--home-holo);
+  stroke-width: 0.8;
+  animation-delay: 0.25s;
+}
+
+@keyframes holo-draw {
+  0% {
+    stroke-dashoffset: 120;
+  }
+  45%,
+  70% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+/* neon grid rows sliding toward the viewer, faster as they come closer */
+.holo-grid-rows path {
+  opacity: 0;
+  animation: holo-grid 3s cubic-bezier(0.55, 0, 1, 0.6) infinite;
+}
+
+@keyframes holo-grid {
+  0% {
+    opacity: 0;
+    transform: translateY(46px);
+  }
+  15% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateY(100px);
+  }
+}
+
+.holo-commit {
+  stroke: #02070f;
+  stroke-width: 0.8;
 }
 
 /* picked: every edge lights up while the cube folds away into a dot */
@@ -440,9 +684,16 @@ body.home-v2-body {
     margin-top: calc(var(--rc-size) * -0.12);
   }
 
+
   /* clear of the UI version toggle in the corner */
   .home-v2-hints {
     bottom: 74px;
+  }
+
+  .home-v2 .home-v2-hint {
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
   }
 }
 

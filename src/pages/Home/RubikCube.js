@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from "react";
-import useDeviceTilt, { isTouchDevice, prefersReducedMotion } from "components/motion/useDeviceTilt";
+import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
 import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss } from "./quat";
 
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
 // Each face's centre square is a link. The cube tumbles on its own; drag it
 // (mouse or touch) to turn it, and on phones it also follows the phone's
-// tilt. Picking a link turns that face to the front, flattens the cube to a
-// square, shrinks it to a dot, then navigates.
+// tilt. Picking a link whirls the cube round, lands that face at the front,
+// flattens the cube to a square, shrinks it to a dot, then navigates.
+//
+// Hovering a face (tapping it on phones) holds the cube still and lights up
+// that face's hologram, which covers the whole face.
 
 const Q = (x, y, z, deg) => fromAxisAngle(x, y, z, (deg * Math.PI) / 180);
 
@@ -24,7 +27,8 @@ const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
 const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
-const ALIGN_MS = 650;
+const SPIN_MS = 1100; // the whirl before the fold
+const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
 const DOT_MS = 460;
 
@@ -42,11 +46,18 @@ const RubikCube = ({ links, onHint }) => {
     drag: null,
     dragged: false, // the last press turned into a drag: swallow its click
     focus: null, // a link has keyboard focus: hold its face to the front
+    tapped: -1, // phones: the face last tapped (shows its hologram, holds still)
+    active: -1, // the face whose hologram is showing
     select: null, // the pick animation in progress
     tilt: IDENTITY,
   }).current;
+  const release = () => {
+    state.focus = null;
+    state.tapped = -1;
+  };
   const [reduceMotion] = useState(prefersReducedMotion);
   const [collapsing, setCollapsing] = useState(false);
+  const [active, setActive] = useState(-1);
 
   // phones: the cube follows the phone's tilt, on top of its own tumbling
   const { showHint, requestPermission } = useDeviceTilt((x, y) => {
@@ -75,6 +86,7 @@ const RubikCube = ({ links, onHint }) => {
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < DRAG_SLOP) return;
         d.moved = true;
         state.dragged = true;
+        release();
         // only capture once it's a drag, so plain clicks still reach the links
         scene.setPointerCapture(e.pointerId);
         scene.classList.add("is-dragging");
@@ -105,9 +117,16 @@ const RubikCube = ({ links, onHint }) => {
     const onEnter = (e) => {
       if (e.pointerType === "mouse") state.near = true;
     };
-    const onLeave = () => {
+    const onLeave = (e) => {
       state.near = false;
+      // the mouse has moved on: let a face that was turned to the front go
+      if (e.pointerType === "mouse" && !state.select) release();
     };
+    // a click beside the cube lets a face that was turned to the front go
+    const onClick = (e) => {
+      if (!e.target.closest(".rc-face") && !state.dragged) release();
+    };
+    scene.addEventListener("click", onClick);
     scene.addEventListener("pointerenter", onEnter);
     scene.addEventListener("pointerleave", onLeave);
     scene.addEventListener("pointerdown", onDown);
@@ -117,6 +136,7 @@ const RubikCube = ({ links, onHint }) => {
     return () => {
       scene.removeEventListener("pointerenter", onEnter);
       scene.removeEventListener("pointerleave", onLeave);
+      scene.removeEventListener("click", onClick);
       scene.removeEventListener("pointerdown", onDown);
       scene.removeEventListener("pointermove", onMove);
       scene.removeEventListener("pointerup", onUp);
@@ -126,7 +146,6 @@ const RubikCube = ({ links, onHint }) => {
 
   // --- the animation loop
   useEffect(() => {
-    const touch = isTouchDevice();
     let raf = null;
     let last = performance.now();
     const loop = (now) => {
@@ -140,41 +159,61 @@ const RubikCube = ({ links, onHint }) => {
         runSelect(now);
       } else if (state.focus) {
         state.q = slerp(state.q, state.focus, 1 - Math.exp(-dt * 8));
-      } else if (!state.drag) {
-        // mouse over a link: stop, so it can be clicked (read from :hover
-        // rather than enter/leave events, which flicker as the link presses in)
-        const paused = !touch && !!sceneRef.current.querySelector(".rc-link:hover");
+      }
+      // the face being looked at: hovered, else tapped (phones) or focused.
+      // Checked every frame rather than fixed at load, so it keeps working
+      // when a window switches between touch and mouse.
+      const el = sceneRef.current.querySelector(".rc-face:hover");
+      const hovered = el ? Number(el.dataset.face) : state.tapped;
+      const nextActive = state.select ? state.active : hovered;
+      if (nextActive !== state.active) {
+        state.active = nextActive;
+        setActive(nextActive);
+      }
+      if (!state.select && !state.focus && !state.drag) {
+        // hold still while a face is being looked at, so it can be picked
+        const paused = hovered >= 0;
         // tumble about a slowly wandering axis; a flick's spin eases into it
         const speed = reduceMotion || paused ? 0 : state.near ? AUTO_SPEED * 0.25 : AUTO_SPEED;
         const axis = normalize([Math.sin(t * 0.13 + 0.5), Math.cos(t * 0.09), 0.6 * Math.sin(t * 0.07 + 1.3), 0]);
-        const k = 1 - Math.exp(-dt * (paused ? 6 : 1.1));
+        // stop dead under the mouse: easing to a stop would slide the square
+        // being aimed at out from under the cursor
+        const k = paused ? 1 : 1 - Math.exp(-dt * 1.1);
         state.omega = state.omega.map((v, i) => v + (axis[i] * speed - v) * k);
         const w = Math.hypot(...state.omega);
         if (w > 1e-5) state.q = normalize(multiply(fromAxisAngle(...state.omega, w * dt), state.q));
       }
       if (cubeRef.current) {
-        const shown = state.select ? state.q : multiply(state.tilt, state.q);
-        cubeRef.current.style.transform = toCss(shown);
+        cubeRef.current.style.transform = toCss(state.select ? state.q : multiply(state.tilt, state.q));
       }
     };
 
-    // pick: face forward, flatten to a square, shrink to a dot, go
+    // pick: whirl round onto the face, flatten to a square, shrink to a dot, go
     const runSelect = (now) => {
       const s = state.select;
       const e = now - s.start;
-      if (e < ALIGN_MS) {
-        state.q = slerp(s.from, s.to, easeInOut(e / ALIGN_MS));
+      if (e < SPIN_MS) {
+        // whirl round two axes at once, fastest mid-way, while easing to the
+        // picked face; the turns are whole, so it lands exactly face-on
+        const k = easeInOut(e / SPIN_MS);
+        const whirl = multiply(
+          fromAxisAngle(...s.axes[0], SPIN_TURNS[0] * 2 * Math.PI * k),
+          fromAxisAngle(...s.axes[1], SPIN_TURNS[1] * 2 * Math.PI * k),
+        );
+        state.q = multiply(whirl, slerp(s.from, s.to, k));
+        // swells a little as it spins up
+        squashRef.current.style.transform = `scale(${(1 + 0.1 * Math.sin(k * Math.PI)).toFixed(4)})`;
         return;
       }
       state.q = s.to;
       const squash = squashRef.current;
       const dot = dotRef.current;
-      if (e < ALIGN_MS + FLATTEN_MS) {
-        const k = easeInOut((e - ALIGN_MS) / FLATTEN_MS);
+      if (e < SPIN_MS + FLATTEN_MS) {
+        const k = easeInOut((e - SPIN_MS) / FLATTEN_MS);
         squash.style.transform = `scale3d(1, 1, ${Math.max(0.001, 1 - k)})`;
         return;
       }
-      const k = Math.min(1, (e - ALIGN_MS - FLATTEN_MS) / DOT_MS);
+      const k = Math.min(1, (e - SPIN_MS - FLATTEN_MS) / DOT_MS);
       const shrink = Math.max(0.012, 1 - easeInOut(k));
       squash.style.transform = `scale3d(${shrink}, ${shrink}, 0.001)`;
       dot.style.opacity = String(Math.min(1, k * 2.2));
@@ -211,6 +250,19 @@ const RubikCube = ({ links, onHint }) => {
     return d < 0 ? to.map((v) => -v) : to;
   };
 
+  // Clicking (or tapping) any other square of a face turns that face to the
+  // front, upright, as a pick does before it folds away, and holds it there
+  // so its name reads straight; its hologram shows too. Dragging, clicking
+  // beside the cube or moving the mouse off it lets the cube tumble again.
+  const look = (f) => {
+    if (state.dragged) {
+      state.dragged = false;
+      return;
+    }
+    state.focus = facing(FACES[f]);
+    state.tapped = f;
+  };
+
   const pick = (e, face, link) => {
     e.preventDefault();
     if (state.dragged) {
@@ -226,7 +278,8 @@ const RubikCube = ({ links, onHint }) => {
     state.q = from;
     state.tilt = IDENTITY;
     state.focus = null;
-    state.select = { start: performance.now(), from, to: facing(face), href: link.href };
+    const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
+    state.select = { start: performance.now(), from, to: facing(face), href: link.href, axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 
@@ -237,7 +290,11 @@ const RubikCube = ({ links, onHint }) => {
           {FACES.map((face, f) => {
             const link = links[f];
             return (
-              <div key={face.name} className={`rc-face rc-face-${face.name}`} style={{ transform: `${face.rotate} translateZ(var(--rc-half))` }}>
+              <div
+                key={face.name}
+                data-face={f}
+                className={`rc-face rc-face-${face.name}${f === active ? " is-active" : ""}`}
+                style={{ transform: `${face.rotate} translateZ(var(--rc-half))` }}>
                 {Array.from({ length: 9 }, (_, i) =>
                   i === 4 ? (
                     <a
@@ -247,19 +304,28 @@ const RubikCube = ({ links, onHint }) => {
                       onClick={(e) => pick(e, face, link)}
                       onFocus={() => {
                         state.focus = facing(face);
+                        state.tapped = f;
                       }}
                       onBlur={() => {
                         state.focus = null;
+                        state.tapped = -1;
                       }}
                     >
-                      <span className="rc-link-index">{String(f + 1).padStart(2, "0")}</span>
-                      <span className="rc-link-label">{link.label}</span>
-                      <span className="rc-link-sub">{link.sub}</span>
+                      <span className="rc-link-text">{link.label}</span>
                     </a>
                   ) : (
-                    <span key={i} className="rc-cell" style={{ "--rc-wave": `${(((i % 3) + Math.floor(i / 3) + f * 2) * 0.35).toFixed(2)}s` }} />
+                    <span
+                      key={i}
+                      className="rc-cell"
+                      onClick={() => look(f)}
+                      style={{ "--rc-wave": `${(((i % 3) + Math.floor(i / 3) + f * 2) * 0.35).toFixed(2)}s` }}
+                    />
                   ),
                 )}
+                {/* this face's hologram, lit while the face is looked at */}
+                <div className="rc-holo" aria-hidden="true">
+                  {link.holo}
+                </div>
               </div>
             );
           })}

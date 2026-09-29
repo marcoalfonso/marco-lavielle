@@ -3,6 +3,7 @@ import HoloPlatform from "components/HoloPlatform/HoloPlatform";
 import UiVersionToggle from "components/UiVersionToggle/UiVersionToggle";
 import { isTouchDevice } from "components/motion/useDeviceTilt";
 import FlashName from "./FlashName";
+import { AboutArt, GameArt, GitHubArt, PaintingsArt, SoftwareArt, ThoughtsArt } from "./HoloArt";
 import RubikCube from "./RubikCube";
 import "./Home.css";
 
@@ -12,12 +13,12 @@ import "./Home.css";
 
 // one per face: front, right, back, left, top, bottom
 const LINKS = [
-  { href: "/software", label: "Software", sub: "Portfolio" },
-  { href: "/art", label: "Paintings", sub: "Gallery" },
-  { href: "/journal", label: "Thoughts", sub: "Blog" },
-  { href: "/about", label: "About", sub: "Contact" },
-  { href: "/game", label: "Game", sub: "Play" },
-  { href: "https://github.com/marcoalfonso", label: "GitHub", sub: "Code" },
+  { href: "/software", label: "Software", holo: <SoftwareArt /> },
+  { href: "/art", label: "Paintings", holo: <PaintingsArt /> },
+  { href: "/journal", label: "Thoughts", holo: <ThoughtsArt /> },
+  { href: "/about", label: "About", holo: <AboutArt /> },
+  { href: "/game", label: "Game", holo: <GameArt /> },
+  { href: "https://github.com/marcoalfonso", label: "GitHub", holo: <GitHubArt /> },
 ];
 
 const Home = () => {
@@ -25,6 +26,14 @@ const Home = () => {
   const [touch] = useState(isTouchDevice);
 
   useEffect(() => {
+    // the cube's lettering; loaded here so it travels with this page
+    if (!document.getElementById("home-v2-font")) {
+      const link = document.createElement("link");
+      link.id = "home-v2-font";
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap";
+      document.head.appendChild(link);
+    }
     document.body.classList.add("home-v2-body");
     return () => document.body.classList.remove("home-v2-body");
   }, []);
@@ -55,7 +64,7 @@ const Home = () => {
         ) : (
           <p className="home-v2-hint" aria-hidden="true">
             <span className="home-v2-hint-icon" aria-hidden="true" />
-            {touch ? "Swipe to turn, tap a centre square" : "Drag to turn, click a centre square"}
+            {touch ? "Swipe to spin, tap center to open" : "Drag to turn, click a centre square"}
           </p>
         )}
       </div>
