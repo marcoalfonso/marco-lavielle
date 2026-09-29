@@ -43,7 +43,7 @@ const initialState = {
       status: 'Sold',
     },
     { 
-      link: '../images/paintings/swimmer.png',
+      link: '../images/paintings/swimmer.jpg',
       status: 'Sold',
     },
     { 
