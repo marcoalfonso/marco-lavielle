@@ -34,8 +34,17 @@ const Home = () => {
       link.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap";
       document.head.appendChild(link);
     }
+    document.documentElement.classList.add("home-v2-html");
     document.body.classList.add("home-v2-body");
-    return () => document.body.classList.remove("home-v2-body");
+    // iOS can still drag (and pull-to-refresh) a locked page; nothing here
+    // scrolls, so stop touch moves from doing anything but turn the cube
+    const noScroll = (e) => e.preventDefault();
+    document.addEventListener("touchmove", noScroll, { passive: false });
+    return () => {
+      document.documentElement.classList.remove("home-v2-html");
+      document.body.classList.remove("home-v2-body");
+      document.removeEventListener("touchmove", noScroll);
+    };
   }, []);
 
   return (
@@ -56,7 +65,11 @@ const Home = () => {
       </div>
 
       <div className="home-v2-hints">
-        {motion && motion.showHint ? (
+        {motion && motion.denied ? (
+          <p className="home-v2-hint" aria-live="polite">
+            Motion blocked in Safari settings
+          </p>
+        ) : motion && motion.showHint ? (
           <button type="button" className="home-v2-hint is-button" onClick={motion.requestPermission}>
             <span className="home-v2-hint-icon is-phone" aria-hidden="true" />
             Tap, then move your phone

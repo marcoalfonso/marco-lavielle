@@ -60,14 +60,14 @@ const RubikCube = ({ links, onHint }) => {
   const [active, setActive] = useState(-1);
 
   // phones: the cube follows the phone's tilt, on top of its own tumbling
-  const { showHint, requestPermission } = useDeviceTilt((x, y) => {
+  const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
     // dip the right edge and the cube turns right; raise the top and it tips back
     state.tilt = multiply(Q(0, 1, 0, x * PHONE_GAIN), Q(1, 0, 0, -y * PHONE_GAIN));
   }, !reduceMotion);
 
   useEffect(() => {
-    if (onHint) onHint({ showHint, requestPermission });
-  }, [showHint]);
+    if (onHint) onHint({ showHint, requestPermission, denied });
+  }, [showHint, denied]);
 
   // --- turning the cube by hand
   useEffect(() => {

@@ -762,3 +762,10 @@ body {
     transition: none !important;
   }
 }
+
+/* the phone refused motion access: say so, in place of the button */
+.art-hint.is-passive {
+  margin: 0;
+  cursor: default;
+  pointer-events: none;
+}

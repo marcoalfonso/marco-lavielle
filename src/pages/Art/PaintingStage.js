@@ -26,7 +26,7 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
   const [reduceMotion] = useState(prefersReducedMotion);
 
   // phones: like a marble on a tray, the painting slides toward the lower edge
-  const { showHint, requestPermission } = useDeviceTilt((x, y) => {
+  const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
     targetRef.current.x = clamp(x / PHONE_TILT);
     targetRef.current.y = clamp(y / PHONE_TILT);
   }, !reduceMotion);
@@ -180,6 +180,11 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
             <span className="art-hint-icon" aria-hidden="true" />
             Tap, then move your phone
           </button>
+        )}
+        {denied && (
+          <p className="art-hint is-passive" aria-live="polite">
+            Motion blocked in Safari settings
+          </p>
         )}
       </div>
     </main>

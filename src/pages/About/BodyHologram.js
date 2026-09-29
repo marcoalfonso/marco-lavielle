@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { askForMotion } from "components/motion/useDeviceTilt";
 
 import { buildBodyPoints, BODY_HEIGHT, BONES } from "./bodyPoints";
 import { createRagdoll } from "./ragdoll";
@@ -113,17 +114,15 @@ const BodyHologram = ({ className }) => {
   const mountRef = useRef(null); // the canvas: stretched over the whole section
   const motionRef = useRef(null); // { start } once the scene is set up
   const [showMotionHint, setShowMotionHint] = useState(false);
+  const [motionDenied, setMotionDenied] = useState(false);
   const [showDragHint, setShowDragHint] = useState(false);
 
   const requestMotion = () => {
     setShowMotionHint(false);
-    window.DeviceMotionEvent.requestPermission()
-      .then((state) => {
-        if (state === "granted" && motionRef.current) motionRef.current.start();
-      })
-      .catch(() => {
-        // denied or unavailable: the figure keeps its idle sway
-      });
+    askForMotion().then((granted) => {
+      if (!granted) setMotionDenied(true);
+      else if (motionRef.current) motionRef.current.start();
+    });
   };
 
   useEffect(() => {
@@ -605,6 +604,11 @@ const BodyHologram = ({ className }) => {
           <span className="body-hologram-hint-icon" aria-hidden="true" />
           Tap, then move your phone
         </button>
+      )}
+      {motionDenied && (
+        <div className="body-hologram-hint is-passive" aria-live="polite">
+          Motion blocked in Safari settings
+        </div>
       )}
       {showDragHint && (
         <div className="body-hologram-hint is-passive" aria-hidden="true">

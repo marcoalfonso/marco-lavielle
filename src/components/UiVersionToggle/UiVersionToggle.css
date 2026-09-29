@@ -1,8 +1,9 @@
 .ui-toggle {
   position: fixed;
-  z-index: 50;
+  z-index: 1000;
   right: 28px;
   bottom: 26px;
+  bottom: calc(26px + env(safe-area-inset-bottom, 0px));
   display: flex;
   align-items: center;
   gap: 12px;
@@ -70,6 +71,7 @@
   .ui-toggle {
     right: 16px;
     bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
     gap: 8px;
   }
 }
