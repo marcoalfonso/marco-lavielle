@@ -1,6 +1,7 @@
 //MIDDLEWARE
 var crypto = require('crypto'),
 	express = require('express'),
+	compression = require('compression'),
 	logger = require('morgan'),
 	bodyParser = require('body-parser'),
 	cookieParser = require('cookie-parser'),
@@ -11,6 +12,8 @@ module.exports = function(app, config) {
 	app.set('views', config.rootPath + '/server/views');
   app.set('view engine', 'ejs');
 	app.use(logger('dev'));
+	// gzip responses: the JS bundle shrinks to about a quarter
+	app.use(compression());
 	app.use(cookieParser());
 	app.use(bodyParser.urlencoded({
 	  extended: true
