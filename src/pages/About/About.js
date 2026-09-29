@@ -1,18 +1,21 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
-import { connect } from 'react-redux'
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
 
-import styles from './About.module.css'
-import BodyHologram from './BodyHologram'
+import styles from "./About.module.css";
+import BodyHologram from "./BodyHologram";
 
 export class About extends Component {
   componentDidMount() {
-    document.body.classList.add('level-0')
+    document.body.classList.add("level-0");
   }
 
   render() {
     return (
-      <main className={`page loaded level-1 ${this.props.device} detected scan-faster`} id="page">
+      <main
+        className={`page loaded level-1 ${this.props.device} detected scan-faster`}
+        id="page"
+      >
         <div className="column-1">
           <a className="uplevel pjax" href="/" data-section="home">
             <span className="arrow">‹</span>
@@ -22,7 +25,7 @@ export class About extends Component {
               <span className="r">R</span>
               <span className="c">C</span>
               <span className="o">O</span>
-              <br/>
+              <br />
               <span className="l">L</span>
               <span className="a2">A</span>
               <span className="v">V</span>
@@ -44,8 +47,15 @@ export class About extends Component {
             <div className="container">
               <BodyHologram className="body-hologram" />
               <div className="text">
-                <p>Hi, I'm Marco Lavielle, I design and develop web apps and VR apps. In my free time I work on my paintings and VR art projects.</p>
-                <p>This site is a showcase of my work. Get in touch if you want to explore collaborating on a project.</p>
+                <p>
+                  Hi, I'm Marco Lavielle, I design and develop web apps and VR
+                  apps. In my free time I work on my paintings and VR art
+                  projects.
+                </p>
+                <p>
+                  This site is a showcase of my work. Get in touch if you want
+                  to explore collaborating on a project.
+                </p>
               </div>
               <div className="stats">
                 <dl className="stats-1">
@@ -53,27 +63,38 @@ export class About extends Component {
                   <dd>Marco Lavielle</dd>
                   <dt>Location</dt>
                   <dd>Little Bay, NSW, Sydney</dd>
+                  <dt>Telephone</dt>
+                  <dd>
+                    <a href="tel:+61423478156">0423 478 156</a>
+                  </dd>
                   <dt>Email</dt>
-                  <dd><a href="mailto:marcoalfonso@gmail.com">marcoalfonso@gmail.com</a></dd>
+                  <dd>
+                    <a href="mailto:marcoalfonso@gmail.com">
+                      marcoalfonso@gmail.com
+                    </a>
+                  </dd>
                 </dl>
                 <dl className="stats-2 smaller">
-                  <dt><a href="/signin" data-section="about">Login</a></dt>
+                  <dt>
+                    <a href="/signin" data-section="about">
+                      Login
+                    </a>
+                  </dt>
                 </dl>
               </div>
             </div>
           </div>
         </div>
       </main>
-    )
+    );
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state) => ({
   loading: state.app.loading,
-  device: state.app.device
-})
+  device: state.app.device,
+});
 
-const mapDispatchToProps = dispatch => ({
-})
+const mapDispatchToProps = (dispatch) => ({});
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(About))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(About));

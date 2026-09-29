@@ -1,13 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 
-import { buildBodyPoints, BODY_HEIGHT } from "./bodyPoints";
+import { buildBodyPoints, BODY_HEIGHT, BONES } from "./bodyPoints";
+import { createRagdoll } from "./ragdoll";
 
 // ---------------------------------------------------------------------------
 // Holographic body scan (in the spirit of gyrosco.pe): a standing figure drawn
 // as a glowing point cloud, a scan band sweeping up and down, and a HUD
 // platform under the feet. The figure itself comes from ./bodyPoints.
+//
+// The figure is an active rag doll (./ragdoll): on desktop its parts can be
+// grabbed and dragged with the mouse; on phones, tilting and moving the phone
+// sways and jostles it. Points are skinned to the rag doll's bones in the
+// vertex shader, blending across joints so bends stay smooth.
 // ---------------------------------------------------------------------------
+
+const BONE_COUNT = BONES.length;
 
 const bodyVertexShader = `
   uniform float uTime;
@@ -15,21 +23,35 @@ const bodyVertexShader = `
   uniform float uReveal;
   uniform float uSize;
   uniform float uPixelRatio;
+  uniform mat4 uBones[${BONE_COUNT}];
+  uniform float uHot;
+  uniform float uHotAmount;
   attribute float aRand;
+  attribute float aBone;
+  attribute float aBone2;
+  attribute float aWeight;
   varying float vRim;
   varying float vScan;
   varying float vTwinkle;
   varying float vY;
+  varying float vHot;
   void main() {
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vec3 n = normalize(normalMatrix * normal);
+    mat4 boneA = uBones[int(aBone + 0.5)];
+    mat4 boneB = uBones[int(aBone2 + 0.5)];
+    vec4 skinned = mix(boneA * vec4(position, 1.0), boneB * vec4(position, 1.0), aWeight);
+    vec3 skinnedNormal = mix(mat3(boneA) * normal, mat3(boneB) * normal, aWeight);
+    vec4 mv = modelViewMatrix * skinned;
+    vec3 n = normalize(normalMatrix * skinnedNormal);
     vRim = 1.0 - abs(dot(n, normalize(-mv.xyz)));
+    // the scan band follows the body (rest-pose height): a limb lifted
+    // horizontal must not light up and swell along its whole length
     float d = position.y - uScan;
     vScan = exp(-d * d / 0.0016);
     vTwinkle = 0.7 + 0.3 * sin(uTime * 2.3 + aRand * 60.0);
-    vY = position.y;
+    vY = skinned.y;
+    vHot = uHotAmount * ((abs(aBone - uHot) < 0.5 ? 1.0 - aWeight : 0.0) + (abs(aBone2 - uHot) < 0.5 ? aWeight : 0.0));
     float revealed = step(position.y, uReveal * ${BODY_HEIGHT.toFixed(2)} + aRand * 0.05);
-    gl_PointSize = revealed * uSize * uPixelRatio * (1.0 + vScan * 0.9) / -mv.z;
+    gl_PointSize = revealed * uSize * uPixelRatio * (1.0 + vScan * 0.45 + vHot * 0.25) / -mv.z;
     gl_Position = projectionMatrix * mv;
   }
 `;
@@ -41,14 +63,15 @@ const bodyFragmentShader = `
   varying float vScan;
   varying float vTwinkle;
   varying float vY;
+  varying float vHot;
   void main() {
     float r = length(gl_PointCoord - 0.5);
     if (r > 0.5) discard;
     float soft = smoothstep(0.5, 0.05, r);
     float body = 0.42 + 0.75 * pow(vRim, 2.0);
     float lines = 0.8 + 0.2 * sin(vY * 430.0);
-    vec3 color = mix(uColor, uScanColor, clamp(vScan * 1.2, 0.0, 1.0));
-    float a = (body * lines * vTwinkle + vScan * 0.85) * soft;
+    vec3 color = mix(uColor, uScanColor, clamp(vScan * 1.2 + vHot * 0.55, 0.0, 1.0));
+    float a = (body * lines * vTwinkle + vScan * 0.85 + vHot * 0.3) * soft;
     gl_FragColor = vec4(color * a, a);
   }
 `;
@@ -77,27 +100,29 @@ const circlePoints = (radius, segments = 128) => {
 
 // iPhones only share motion data after the visitor grants permission, and
 // the request has to come from a tap.
-const needsMotionPermission = () =>
+const canAskForMotion = () =>
   typeof window !== "undefined" &&
-  typeof window.DeviceOrientationEvent !== "undefined" &&
-  typeof window.DeviceOrientationEvent.requestPermission === "function";
+  typeof window.DeviceMotionEvent !== "undefined" &&
+  typeof window.DeviceMotionEvent.requestPermission === "function";
 
 const isTouchDevice = () =>
   typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
 const BodyHologram = ({ className }) => {
-  const mountRef = useRef(null);
-  const tiltRef = useRef(null); // { start } once the scene is set up
-  const [showTiltHint, setShowTiltHint] = useState(false);
+  const slotRef = useRef(null); // the figure's place in the layout
+  const mountRef = useRef(null); // the canvas: stretched over the whole section
+  const motionRef = useRef(null); // { start } once the scene is set up
+  const [showMotionHint, setShowMotionHint] = useState(false);
+  const [showDragHint, setShowDragHint] = useState(false);
 
-  const requestTilt = () => {
-    setShowTiltHint(false);
-    window.DeviceOrientationEvent.requestPermission()
+  const requestMotion = () => {
+    setShowMotionHint(false);
+    window.DeviceMotionEvent.requestPermission()
       .then((state) => {
-        if (state === "granted" && tiltRef.current) tiltRef.current.start();
+        if (state === "granted" && motionRef.current) motionRef.current.start();
       })
       .catch(() => {
-        // denied or unavailable: keep the automatic sway
+        // denied or unavailable: the figure keeps its idle sway
       });
   };
 
@@ -132,6 +157,13 @@ const BodyHologram = ({ className }) => {
     bodyGeometry.setAttribute("position", new THREE.BufferAttribute(points.positions, 3));
     bodyGeometry.setAttribute("normal", new THREE.BufferAttribute(points.normals, 3));
     bodyGeometry.setAttribute("aRand", new THREE.BufferAttribute(points.randoms, 1));
+    bodyGeometry.setAttribute("aBone", new THREE.BufferAttribute(points.bones, 1));
+    bodyGeometry.setAttribute("aBone2", new THREE.BufferAttribute(points.bones2, 1));
+    bodyGeometry.setAttribute("aWeight", new THREE.BufferAttribute(points.weights, 1));
+    // skinning moves points outside the rest-pose bounds; never cull the doll
+    bodyGeometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0.9, 0), 3);
+    const boneMatrices = BONES.map(() => new THREE.Matrix4());
+    const boneBuffer = new Float32Array(BONE_COUNT * 16);
     const bodyMaterial = track(
       new THREE.ShaderMaterial({
         uniforms: {
@@ -142,6 +174,9 @@ const BodyHologram = ({ className }) => {
           uPixelRatio: { value: renderer.getPixelRatio() },
           uColor: { value: new THREE.Color(0x3d8bff) },
           uScanColor: { value: new THREE.Color(0x6ff5ee) },
+          uBones: { value: boneMatrices },
+          uHot: { value: -1 },
+          uHotAmount: { value: 0 },
         },
         vertexShader: bodyVertexShader,
         fragmentShader: bodyFragmentShader,
@@ -151,8 +186,12 @@ const BodyHologram = ({ className }) => {
       }),
     );
     const figure = new THREE.Group();
-    figure.add(new THREE.Points(bodyGeometry, bodyMaterial));
+    const cloud = new THREE.Points(bodyGeometry, bodyMaterial);
+    cloud.frustumCulled = false;
+    figure.add(cloud);
     scene.add(figure);
+
+    const ragdoll = createRagdoll();
 
     // --- HUD: platform rings, glow, background circles
     const hud = new THREE.Group();
@@ -251,23 +290,74 @@ const BodyHologram = ({ className }) => {
 
     // --- sizing, visibility, pointer
     let redrawStatic = null; // set when there's no animation loop (reduced motion)
+    // The canvas covers the whole black section so dragged limbs never hit a
+    // visible edge; the camera is offset so the figure stays framed in its
+    // own slot (the first column), exactly as if the canvas were that size.
+    const slot = slotRef.current;
+    const section = slot.closest(".personal-info") || slot;
+    const edgeNdc = [
+      [-1, -1],
+      [1, -1],
+      [-1, 1],
+      [1, 1],
+    ];
+    const edgeRay = new THREE.Raycaster();
+    const edgeHit = new THREE.Vector3();
+    const facingPlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
+    const ndcPoint = new THREE.Vector2();
     const resize = () => {
-      const w = mount.clientWidth || 1;
-      const h = mount.clientHeight || 1;
+      const slotBox = slot.getBoundingClientRect();
+      const sectionBox = section.getBoundingClientRect();
+      const left = sectionBox.left - slotBox.left;
+      const top = sectionBox.top - slotBox.top;
+      const w = Math.max(1, sectionBox.width);
+      const h = Math.max(1, sectionBox.height);
+      Object.assign(mount.style, { left: `${left}px`, top: `${top}px`, width: `${w}px`, height: `${h}px` });
       renderer.setSize(w, h, false);
-      camera.aspect = w / h;
+
+      const sw = Math.max(1, slotBox.width);
+      const sh = Math.max(1, slotBox.height);
+      camera.aspect = sw / sh;
       // Fit the platform (~0.8 m either side) horizontally and the full
       // height vertically, whichever needs the wider field of view.
       const distance = camera.position.z;
       const fitWidth = (2 * Math.atan(0.8 / (distance * camera.aspect)) * 180) / Math.PI;
       camera.fov = Math.max(28, fitWidth);
+      // the canvas starts (left, top) from the slot's corner, in slot pixels
+      camera.setViewOffset(sw, sh, left, top, w, h);
       camera.updateProjectionMatrix();
+      camera.updateMatrixWorld();
+
+      // Everything the canvas shows, on the figure's plane: that's how far
+      // dragged limbs may go (a little inside the edges).
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let maxY = -Infinity;
+      edgeNdc.forEach(([x, y]) => {
+        edgeRay.setFromCamera(ndcPoint.set(x, y), camera);
+        if (edgeRay.ray.intersectPlane(facingPlane, edgeHit)) {
+          minX = Math.min(minX, edgeHit.x);
+          maxX = Math.max(maxX, edgeHit.x);
+          maxY = Math.max(maxY, edgeHit.y);
+        }
+      });
+      if (Number.isFinite(minX)) {
+        const margin = 0.12;
+        ragdoll.setBounds({ x: [minX + margin, maxX - margin], y: [0.05, maxY - margin] });
+      }
       if (redrawStatic) redrawStatic();
     };
     resize();
+    // the slot slides in on load (a transform, which resize observers don't
+    // report): measure again once it has settled
+    slot.addEventListener("transitionend", resize);
     const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(resize) : null;
-    if (resizeObserver) resizeObserver.observe(mount);
-    else window.addEventListener("resize", resize);
+    if (resizeObserver) {
+      resizeObserver.observe(slot);
+      // border box: padding changes (e.g. the site's mobile class arriving
+      // after first render) move and resize the section too
+      resizeObserver.observe(section, { box: "border-box" });
+    } else window.addEventListener("resize", resize);
 
     let visible = true;
     const intersection =
@@ -278,58 +368,177 @@ const BodyHologram = ({ className }) => {
         : null;
     if (intersection) intersection.observe(mount);
 
+    // --- desktop: hover to highlight a body part, drag to pull it around
+    const canvas = renderer.domElement;
+    const raycaster = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const toLocal = new THREE.Matrix4();
+    const rayOrigin = new THREE.Vector3();
+    const rayDir = new THREE.Vector3();
+    const planeNormal = new THREE.Vector3();
+    const planePoint = new THREE.Vector3();
     let pointerX = 0;
-    const onPointerMove = (e) => {
-      const r = mount.getBoundingClientRect();
+    let hot = -1;
+    let dragging = false;
+    const localRay = (e) => {
+      const r = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      raycaster.setFromCamera(ndc, camera);
+      figure.updateMatrixWorld();
+      toLocal.copy(figure.matrixWorld).invert();
+      rayOrigin.copy(raycaster.ray.origin).applyMatrix4(toLocal);
+      rayDir.copy(raycaster.ray.direction).transformDirection(toLocal);
+      return [rayOrigin.toArray(), rayDir.toArray()];
+    };
+    const isMouse = (e) => e.pointerType === "mouse" || e.pointerType === "pen";
+    const onWindowPointerMove = (e) => {
+      if (!isMouse(e)) return;
+      const r = slot.getBoundingClientRect();
       pointerX = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
     };
-    window.addEventListener("pointermove", onPointerMove);
-
-    // Phone tilt steers the figure the way the pointer does on desktop.
-    // Whatever angle the phone is held at becomes "straight", slowly
-    // re-centring if the grip changes; ±30° of tilt gives the full turn.
-    let tiltX = null;
-    let tiltBaseline = null;
-    let hintTimer = null;
-    const onOrientation = (e) => {
-      const angle =
-        (window.screen && window.screen.orientation && window.screen.orientation.angle) ||
-        window.orientation ||
-        0;
-      // in landscape the phone's left/right tilt is reported as beta
-      const value = angle === 90 ? e.beta : angle === -90 || angle === 270 ? -e.beta : e.gamma;
-      if (value === null || value === undefined) return;
-      if (tiltBaseline === null) {
-        // motion data is flowing: no need to ask for it
-        tiltBaseline = value;
-        clearTimeout(hintTimer);
-        setShowTiltHint(false);
+    const onCanvasPointerMove = (e) => {
+      if (!isMouse(e) || reduceMotion) return;
+      const [o, d] = localRay(e);
+      if (dragging) {
+        // keep the grabbed point on a plane facing the camera
+        const denom = planeNormal.x * d[0] + planeNormal.y * d[1] + planeNormal.z * d[2];
+        if (Math.abs(denom) > 1e-6) {
+          const t =
+            ((planePoint.x - o[0]) * planeNormal.x + (planePoint.y - o[1]) * planeNormal.y + (planePoint.z - o[2]) * planeNormal.z) /
+            denom;
+          ragdoll.moveDrag([o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t]);
+        }
+        return;
       }
-      tiltBaseline += (value - tiltBaseline) * 0.002;
-      tiltX = Math.max(-1, Math.min(1, (value - tiltBaseline) / 30));
+      const hit = ragdoll.pick(o, d);
+      hot = hit ? hit.index : -1;
+      canvas.style.cursor = hit ? "grab" : "";
     };
-    let tilting = false;
-    const startTilt = () => {
-      if (tilting) return;
-      tilting = true;
-      window.addEventListener("deviceorientation", onOrientation);
+    const onCanvasPointerDown = (e) => {
+      if (!isMouse(e) || e.button !== 0 || reduceMotion) return;
+      const [o, d] = localRay(e);
+      const hit = ragdoll.pick(o, d);
+      if (!hit) return;
+      e.preventDefault();
+      dragging = true;
+      hot = hit.index;
+      planePoint.fromArray(hit.point);
+      planeNormal.set(0, 0, -1).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+      ragdoll.startDrag(hit.index, hit.point);
+      canvas.setPointerCapture(e.pointerId);
+      canvas.style.cursor = "grabbing";
+      setShowDragHint(false);
     };
-    tiltRef.current = { start: startTilt };
-    if (!reduceMotion && isTouchDevice() && typeof window.DeviceOrientationEvent !== "undefined") {
-      // Listen straight away: Android sends motion data without asking. If
-      // nothing arrives and the browser can ask (iPhone), offer the hint.
-      startTilt();
+    const onCanvasPointerUp = (e) => {
+      if (!dragging) return;
+      dragging = false;
+      ragdoll.endDrag();
+      if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+      canvas.style.cursor = hot >= 0 ? "grab" : "";
+    };
+    const onCanvasPointerLeave = () => {
+      if (dragging) return;
+      hot = -1;
+      canvas.style.cursor = "";
+    };
+    window.addEventListener("pointermove", onWindowPointerMove);
+    canvas.addEventListener("pointermove", onCanvasPointerMove);
+    canvas.addEventListener("pointerdown", onCanvasPointerDown);
+    canvas.addEventListener("pointerup", onCanvasPointerUp);
+    canvas.addEventListener("pointercancel", onCanvasPointerUp);
+    canvas.addEventListener("pointerleave", onCanvasPointerLeave);
+
+    // --- phones: motion in every direction drives the rag doll
+    // Tilt: gravity in the scene rotates with the phone, relative to however
+    // it was held at first (slowly re-centring). Movement: the doll is pushed
+    // opposite to the phone's acceleration, like a passenger in a car.
+    const TILT_GAIN = 1.4;
+    const MAX_TILT = 1.05; // rad
+    const MOVE_GAIN = 2.4; // phones move in short, small bursts: amplify
+    let motionSeen = false;
+    let hintTimer = null;
+    const reading = new THREE.Vector3();
+    const gravityNow = new THREE.Vector3();
+    const gravityBase = new THREE.Vector3();
+    const moveRaw = new THREE.Vector3();
+    const move = new THREE.Vector3();
+    const tiltQuat = new THREE.Quaternion();
+    const localQuat = new THREE.Quaternion();
+    const gravityLocal = new THREE.Vector3();
+    const tiltAxis = new THREE.Vector3();
+    // device axes -> screen axes (x right, y up, z toward the viewer)
+    const toScreen = (x, y, z, out) => {
+      const deg =
+        (window.screen && window.screen.orientation && window.screen.orientation.angle) || window.orientation || 0;
+      const a = (deg * Math.PI) / 180;
+      return out.set(x * Math.cos(a) + y * Math.sin(a), -x * Math.sin(a) + y * Math.cos(a), z);
+    };
+    const onMotion = (e) => {
+      const g = e.accelerationIncludingGravity;
+      if (!g || g.x === null || g.x === undefined) return;
+      toScreen(g.x, g.y, g.z, reading);
+      if (!motionSeen) {
+        // motion data is flowing: no need to ask for it
+        motionSeen = true;
+        clearTimeout(hintTimer);
+        setShowMotionHint(false);
+        gravityNow.copy(reading);
+        gravityBase.copy(reading);
+      }
+      gravityNow.lerp(reading, 0.15);
+      gravityBase.lerp(gravityNow, 0.002);
+      const a = e.acceleration;
+      if (a && a.x !== null && a.x !== undefined) toScreen(a.x, a.y, a.z, moveRaw);
+      else moveRaw.copy(reading).sub(gravityNow); // no separate reading: remove gravity ourselves
+      move.lerp(moveRaw, 0.6);
+    };
+    let listening = false;
+    const startMotion = () => {
+      if (listening) return;
+      listening = true;
+      window.addEventListener("devicemotion", onMotion);
+    };
+    motionRef.current = { start: startMotion };
+    const touch = isTouchDevice();
+    if (!reduceMotion && touch && typeof window.DeviceMotionEvent !== "undefined") {
+      // Listen straight away: Android sends motion without asking. If nothing
+      // arrives and the browser can ask (iPhone), offer the hint.
+      startMotion();
       hintTimer = setTimeout(() => {
-        if (tiltBaseline === null && needsMotionPermission()) setShowTiltHint(true);
+        if (!motionSeen && canAskForMotion()) setShowMotionHint(true);
       }, 1000);
     }
+    if (!reduceMotion && !touch) setShowDragHint(true);
+
+    const applyMotion = () => {
+      if (!motionSeen) return;
+      // tilt: rotation from the baseline gravity reading to the current one
+      tiltQuat.setFromUnitVectors(gravityBase.clone().normalize(), gravityNow.clone().normalize());
+      const angle = 2 * Math.acos(Math.min(1, Math.abs(tiltQuat.w)));
+      if (angle > 1e-4) {
+        tiltAxis.set(tiltQuat.x, tiltQuat.y, tiltQuat.z).normalize();
+        if (tiltQuat.w < 0) tiltAxis.negate();
+        tiltQuat.setFromAxisAngle(tiltAxis, Math.min(angle * TILT_GAIN, MAX_TILT));
+      } else tiltQuat.identity();
+      localQuat.copy(figure.quaternion).invert();
+      gravityLocal.set(0, -ragdoll.gravity, 0).applyQuaternion(tiltQuat).applyQuaternion(localQuat);
+      ragdoll.setGravity(gravityLocal.x, gravityLocal.y, gravityLocal.z);
+      gravityLocal.copy(move).multiplyScalar(-MOVE_GAIN).applyQuaternion(localQuat);
+      ragdoll.setInertial(gravityLocal.x, gravityLocal.y, gravityLocal.z);
+    };
 
     // --- loop
     const clock = new THREE.Clock();
     let raf = null;
     let turn = 0;
+    const syncBones = () => {
+      ragdoll.writeBoneMatrices(boneBuffer);
+      boneMatrices.forEach((m, i) => m.fromArray(boneBuffer, i * 16));
+    };
+    syncBones();
     const renderFrame = () => {
-      const t = clock.getElapsedTime();
+      const dt = clock.getDelta();
+      const t = clock.elapsedTime;
       const u = bodyMaterial.uniforms;
       u.uTime.value = t;
       if (reduceMotion) {
@@ -338,15 +547,20 @@ const BodyHologram = ({ className }) => {
         u.uReveal.value = Math.min(1.1, t / 1.6);
         // sweep once up while revealing, then keep scanning up and down
         u.uScan.value = t < 1.6 ? (t / 1.6) * BODY_HEIGHT : 0.95 + 0.9 * Math.sin((t - 1.6) * 0.75 + Math.PI / 2);
-        // with tilt active the phone drives the turn and the idle sway calms down
-        const targetTurn =
-          tiltX !== null
-            ? Math.sin(t * 0.22) * 0.15 + tiltX * 0.75
-            : Math.sin(t * 0.22) * 0.55 + pointerX * 0.35;
-        turn += (targetTurn - turn) * 0.04;
+        // gentle idle sway + a little turn toward the mouse; hold still while
+        // a part is being dragged so it stays under the cursor
+        if (!dragging) {
+          const targetTurn = Math.sin(t * 0.22) * (touch ? 0.3 : 0.35) + pointerX * 0.2;
+          turn += (targetTurn - turn) * 0.04;
+        }
         figure.rotation.y = turn;
         dashed.rotation.y = t * 0.12;
         tickLines.rotation.y = -t * 0.05;
+        applyMotion();
+        ragdoll.step(dt);
+        syncBones();
+        u.uHot.value = hot;
+        u.uHotAmount.value += ((hot >= 0 ? 1 : 0) - u.uHotAmount.value) * 0.2;
       }
       halo.position.y = u.uScan.value;
       halo.material.opacity = 0.35 * Math.sin(Math.min(1, Math.max(0, u.uScan.value / BODY_HEIGHT)) * Math.PI);
@@ -364,10 +578,16 @@ const BodyHologram = ({ className }) => {
 
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("deviceorientation", onOrientation);
+      window.removeEventListener("pointermove", onWindowPointerMove);
+      canvas.removeEventListener("pointermove", onCanvasPointerMove);
+      canvas.removeEventListener("pointerdown", onCanvasPointerDown);
+      canvas.removeEventListener("pointerup", onCanvasPointerUp);
+      canvas.removeEventListener("pointercancel", onCanvasPointerUp);
+      canvas.removeEventListener("pointerleave", onCanvasPointerLeave);
+      window.removeEventListener("devicemotion", onMotion);
       clearTimeout(hintTimer);
-      tiltRef.current = null;
+      motionRef.current = null;
+      slot.removeEventListener("transitionend", resize);
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener("resize", resize);
       if (intersection) intersection.disconnect();
@@ -378,13 +598,19 @@ const BodyHologram = ({ className }) => {
   }, []);
 
   return (
-    <div className={className} onClick={showTiltHint ? requestTilt : undefined}>
+    <div className={className} ref={slotRef} onClick={showMotionHint ? requestMotion : undefined}>
       <div className="body-hologram-canvas" ref={mountRef} aria-hidden="true" />
-      {showTiltHint && (
+      {showMotionHint && (
         <button type="button" className="body-hologram-hint">
           <span className="body-hologram-hint-icon" aria-hidden="true" />
-          Tap to tilt &amp; explore
+          Tap, then move your phone
         </button>
+      )}
+      {showDragHint && (
+        <div className="body-hologram-hint is-passive" aria-hidden="true">
+          <span className="body-hologram-hint-icon is-hand" />
+          Drag the body
+        </div>
       )}
     </div>
   );
