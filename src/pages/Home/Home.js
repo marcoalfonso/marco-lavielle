@@ -64,7 +64,7 @@ const Home = () => {
         ) : (
           <p className="home-v2-hint" aria-hidden="true">
             <span className="home-v2-hint-icon" aria-hidden="true" />
-            {touch ? "Swipe to spin, tap to open" : "Drag to turn, click a centre square"}
+            {touch ? "Swipe to spin, tap center to open" : "Drag to turn, click a centre square"}
           </p>
         )}
       </div>

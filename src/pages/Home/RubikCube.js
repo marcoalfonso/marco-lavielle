@@ -5,8 +5,8 @@ import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss }
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
 // Each face's centre square is a link. The cube tumbles on its own; drag it
 // (mouse or touch) to turn it, and on phones it also follows the phone's
-// tilt. Picking a link turns that face to the front, flattens the cube to a
-// square, shrinks it to a dot, then navigates.
+// tilt. Picking a link whirls the cube round, lands that face at the front,
+// flattens the cube to a square, shrinks it to a dot, then navigates.
 //
 // Hovering a face (tapping it on phones) holds the cube still and lights up
 // that face's hologram, which covers the whole face.
@@ -27,7 +27,8 @@ const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
 const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
-const ALIGN_MS = 650;
+const SPIN_MS = 1100; // the whirl before the fold
+const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
 const DOT_MS = 460;
 
@@ -187,23 +188,32 @@ const RubikCube = ({ links, onHint }) => {
       }
     };
 
-    // pick: face forward, flatten to a square, shrink to a dot, go
+    // pick: whirl round onto the face, flatten to a square, shrink to a dot, go
     const runSelect = (now) => {
       const s = state.select;
       const e = now - s.start;
-      if (e < ALIGN_MS) {
-        state.q = slerp(s.from, s.to, easeInOut(e / ALIGN_MS));
+      if (e < SPIN_MS) {
+        // whirl round two axes at once, fastest mid-way, while easing to the
+        // picked face; the turns are whole, so it lands exactly face-on
+        const k = easeInOut(e / SPIN_MS);
+        const whirl = multiply(
+          fromAxisAngle(...s.axes[0], SPIN_TURNS[0] * 2 * Math.PI * k),
+          fromAxisAngle(...s.axes[1], SPIN_TURNS[1] * 2 * Math.PI * k),
+        );
+        state.q = multiply(whirl, slerp(s.from, s.to, k));
+        // swells a little as it spins up
+        squashRef.current.style.transform = `scale(${(1 + 0.1 * Math.sin(k * Math.PI)).toFixed(4)})`;
         return;
       }
       state.q = s.to;
       const squash = squashRef.current;
       const dot = dotRef.current;
-      if (e < ALIGN_MS + FLATTEN_MS) {
-        const k = easeInOut((e - ALIGN_MS) / FLATTEN_MS);
+      if (e < SPIN_MS + FLATTEN_MS) {
+        const k = easeInOut((e - SPIN_MS) / FLATTEN_MS);
         squash.style.transform = `scale3d(1, 1, ${Math.max(0.001, 1 - k)})`;
         return;
       }
-      const k = Math.min(1, (e - ALIGN_MS - FLATTEN_MS) / DOT_MS);
+      const k = Math.min(1, (e - SPIN_MS - FLATTEN_MS) / DOT_MS);
       const shrink = Math.max(0.012, 1 - easeInOut(k));
       squash.style.transform = `scale3d(${shrink}, ${shrink}, 0.001)`;
       dot.style.opacity = String(Math.min(1, k * 2.2));
@@ -268,7 +278,8 @@ const RubikCube = ({ links, onHint }) => {
     state.q = from;
     state.tilt = IDENTITY;
     state.focus = null;
-    state.select = { start: performance.now(), from, to: facing(face), href: link.href };
+    const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
+    state.select = { start: performance.now(), from, to: facing(face), href: link.href, axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 
