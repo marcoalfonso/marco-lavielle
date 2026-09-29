@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import HoloPlatform from "components/HoloPlatform/HoloPlatform";
 import UiVersionToggle from "components/UiVersionToggle/UiVersionToggle";
 import { isTouchDevice } from "components/motion/useDeviceTilt";
+import loadOrbitron from "components/fonts/loadOrbitron";
 import FlashName from "./FlashName";
 import { AboutArt, GameArt, GitHubArt, PaintingsArt, SoftwareArt, ThoughtsArt } from "./HoloArt";
 import RubikCube from "./RubikCube";
@@ -26,14 +27,7 @@ const Home = () => {
   const [touch] = useState(isTouchDevice);
 
   useEffect(() => {
-    // the cube's lettering; loaded here so it travels with this page
-    if (!document.getElementById("home-v2-font")) {
-      const link = document.createElement("link");
-      link.id = "home-v2-font";
-      link.rel = "stylesheet";
-      link.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap";
-      document.head.appendChild(link);
-    }
+    loadOrbitron(); // the cube's lettering
     document.documentElement.classList.add("home-v2-html");
     document.body.classList.add("home-v2-body");
     // iOS can still drag (and pull-to-refresh) a locked page; nothing here

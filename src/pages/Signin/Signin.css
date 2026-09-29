@@ -1,0 +1,365 @@
+/* ---------------------------------------------------------------------
+   Sign in: a form in lines of light, its layers at different depths,
+   hovering over the holo platform on the site's black.
+   --------------------------------------------------------------------- */
+body.signin-v2-body {
+  background: #000;
+}
+
+.signin-v2 {
+  --si-cyan: #00bff3;
+  --si-holo: #6ff5ee;
+  --si-line: rgba(111, 245, 238, 0.5);
+  --si-error: #ff6b86;
+  --si-font: "DINWeb", "Lucida Grande", verdana, sans-serif;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: linear-gradient(170deg, #03050a 0%, #000 55%, #02050b 100%);
+  color: #ccd4de;
+  font-family: var(--si-font);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.signin-v2 .signin-v2-home {
+  position: absolute;
+  z-index: 2;
+  top: 28px;
+  left: 28px;
+  color: #788b94;
+  font: 600 11px/1 var(--si-font);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color 250ms ease;
+}
+
+.signin-v2 .signin-v2-home:hover,
+.signin-v2 .signin-v2-home:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.signin-v2-stage {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 16px 40px;
+}
+
+.signin-v2-float {
+  position: relative;
+  z-index: 1;
+  perspective: 1200px;
+  animation: signin-bob 6s ease-in-out infinite;
+}
+
+@keyframes signin-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* the panel: tipped back a little and leaning toward the pointer (the
+   --tilt-* values come from script), so its layers' depths show */
+.signin-v2-panel {
+  --tilt-x: 4deg;
+  --tilt-y: -8deg;
+  position: relative;
+  width: min(400px, calc(100vw - 48px));
+  transform-style: preserve-3d;
+  transform: rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 700ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* back layer: the panel's glass and outline */
+.signin-v2-frame {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(111, 245, 238, 0.22);
+  border-radius: 6px;
+  background: rgba(2, 7, 15, 0.86);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.9), 0 0 40px rgba(61, 139, 255, 0.12),
+    inset 0 0 30px rgba(0, 191, 243, 0.06);
+  transform-style: preserve-3d;
+}
+
+/* scan lines across the glass */
+.signin-v2-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(0deg, rgba(111, 245, 238, 0.035) 0 1px, transparent 1px 4px);
+  pointer-events: none;
+}
+
+/* the painting's HUD brackets, standing off the glass */
+.signin-v2-corner {
+  position: absolute;
+  width: 22px;
+  height: 22px;
+  border: 0 solid rgba(111, 245, 238, 0.7);
+  filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.6));
+  transform: translateZ(18px);
+}
+
+.signin-v2-corner.is-tl {
+  top: -14px;
+  left: -14px;
+  border-top-width: 1px;
+  border-left-width: 1px;
+}
+
+.signin-v2-corner.is-tr {
+  top: -14px;
+  right: -14px;
+  border-top-width: 1px;
+  border-right-width: 1px;
+}
+
+.signin-v2-corner.is-bl {
+  bottom: -14px;
+  left: -14px;
+  border-bottom-width: 1px;
+  border-left-width: 1px;
+}
+
+.signin-v2-corner.is-br {
+  bottom: -14px;
+  right: -14px;
+  border-bottom-width: 1px;
+  border-right-width: 1px;
+}
+
+/* front layers: heading, fields and button each stand further out */
+.signin-v2-form {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin: 0;
+  padding: 40px 36px 26px;
+  transform-style: preserve-3d;
+}
+
+.signin-v2-heading {
+  transform: translateZ(26px);
+}
+
+.signin-v2 .signin-v2-kicker {
+  margin: 0 0 12px;
+  color: var(--si-cyan);
+  font: 600 10px/1 var(--si-font);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+.signin-v2 .signin-v2-title {
+  margin: 0;
+  color: #effdff;
+  font: 600 28px/1 "Orbitron", var(--si-font);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(111, 245, 238, 0.7), 0 0 26px rgba(0, 191, 243, 0.45);
+}
+
+.signin-v2 .signin-v2-legend {
+  margin: 12px 0 0;
+  color: #788b94;
+  font: 400 13px/1.4 var(--si-font);
+  letter-spacing: 0.04em;
+}
+
+.signin-v2-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  transform: translateZ(40px);
+}
+
+.signin-v2 .signin-v2-label {
+  color: var(--si-cyan);
+  font: 600 10px/1 var(--si-font);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+/* inputs and button: like the cube's squares, just lines of glowing light */
+.signin-v2 input {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--si-line);
+  border-radius: 4px;
+  outline: none;
+  background: rgba(4, 12, 24, 0.6);
+  box-shadow: 0 0 6px rgba(0, 191, 243, 0.4), inset 0 0 10px rgba(0, 191, 243, 0.14);
+  color: #eaf7ff;
+  caret-color: var(--si-holo);
+  /* 16px stops iOS zooming in on focus */
+  font: 500 16px/1.2 var(--si-font);
+  letter-spacing: 0.06em;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.signin-v2 input:hover {
+  border-color: rgba(111, 245, 238, 0.75);
+}
+
+.signin-v2 input:focus {
+  border-color: var(--si-holo);
+  background: rgba(111, 245, 238, 0.06);
+  box-shadow: 0 0 16px rgba(111, 245, 238, 0.75), inset 0 0 16px rgba(111, 245, 238, 0.3);
+}
+
+/* keep the browser's autofill from painting the fields yellow */
+.signin-v2 input:-webkit-autofill,
+.signin-v2 input:-webkit-autofill:hover,
+.signin-v2 input:-webkit-autofill:focus {
+  -webkit-text-fill-color: #eaf7ff;
+  -webkit-box-shadow: 0 0 0 1000px #04101c inset, 0 0 8px rgba(111, 245, 238, 0.5);
+  transition: background-color 9999s ease-out 0s;
+}
+
+.signin-v2-field.has-error input {
+  border-color: var(--si-error);
+  box-shadow: 0 0 10px rgba(255, 107, 134, 0.5), inset 0 0 10px rgba(255, 107, 134, 0.15);
+}
+
+.signin-v2 .signin-v2-error {
+  color: var(--si-error);
+  font: 600 10px/1 var(--si-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.signin-v2 .signin-v2-submit {
+  position: relative;
+  margin-top: 6px;
+  padding: 14px 18px;
+  overflow: hidden;
+  border: 1px solid rgba(111, 245, 238, 0.85);
+  border-radius: 4px;
+  background: rgba(111, 245, 238, 0.06);
+  box-shadow: 0 0 10px rgba(111, 245, 238, 0.55), inset 0 0 14px rgba(111, 245, 238, 0.2);
+  color: var(--si-holo);
+  cursor: pointer;
+  font: 600 13px/1 "Orbitron", var(--si-font);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.6);
+  transform: translateZ(56px);
+  transition: box-shadow 200ms ease, background 200ms ease, color 200ms ease;
+}
+
+.signin-v2 .signin-v2-submit:hover,
+.signin-v2 .signin-v2-submit:focus-visible {
+  outline: none;
+  background: rgba(111, 245, 238, 0.14);
+  color: #fff;
+  box-shadow: 0 0 22px rgba(111, 245, 238, 0.9), inset 0 0 26px rgba(111, 245, 238, 0.5);
+}
+
+.signin-v2 .signin-v2-submit:active {
+  box-shadow: 0 0 26px rgba(111, 245, 238, 1), inset 0 0 36px rgba(111, 245, 238, 0.7);
+}
+
+.signin-v2 .signin-v2-submit:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* signing in: a band of light sweeps along the button */
+.signin-v2 .signin-v2-submit.is-busy {
+  cursor: progress;
+}
+
+.signin-v2-submit.is-busy::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  width: 40%;
+  background: linear-gradient(90deg, transparent, rgba(111, 245, 238, 0.35), transparent);
+  animation: signin-sweep 1.1s linear infinite;
+}
+
+@keyframes signin-sweep {
+  to {
+    left: 100%;
+  }
+}
+
+.signin-v2 .signin-v2-message {
+  min-height: 14px;
+  margin: 0;
+  color: var(--si-error);
+  font: 600 11px/1.3 var(--si-font);
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: translateZ(40px);
+}
+
+.signin-v2-platform {
+  width: min(520px, 110vw);
+  margin-top: 18px;
+}
+
+/* phones: no pointer to lean toward; lie flat while typing so the caret
+   and text stay put */
+@media (hover: none) {
+  .signin-v2-panel:focus-within {
+    --tilt-x: 0deg;
+    --tilt-y: 0deg;
+  }
+}
+
+@media (max-width: 700px) {
+  .signin-v2 .signin-v2-home {
+    top: 20px;
+    left: 20px;
+  }
+
+  .signin-v2-stage {
+    padding-top: 64px;
+  }
+
+  /* a gentler resting lean on a narrow screen */
+  .signin-v2-panel {
+    --tilt-x: 3deg;
+    --tilt-y: -5deg;
+  }
+
+  .signin-v2-form {
+    padding: 32px 24px 22px;
+  }
+
+  .signin-v2 .signin-v2-title {
+    font-size: 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .signin-v2-float {
+    animation: none;
+  }
+
+  .signin-v2-panel {
+    transition: none;
+  }
+}
