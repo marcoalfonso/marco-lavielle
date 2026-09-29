@@ -3180,3 +3180,13 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
   padding-top: 0;
   background: #000;
 }
+
+/* Homepage V1 on the same black as V2 */
+html.home-v1,
+html.home-v1 body {
+  background: #000;
+}
+html.home-v1 body {
+  background: linear-gradient(170deg, #03050a 0%, #000 55%, #02050b 100%) fixed;
+  min-height: 100vh;
+}

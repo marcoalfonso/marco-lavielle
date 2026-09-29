@@ -51,16 +51,3 @@ export const toCss = (q) => {
   ];
   return `matrix3d(${m.map((v) => v.toFixed(6)).join(",")})`;
 };
-
-// rotate the vector v = [x, y, z] by q
-export const rotate = (q, v) => {
-  const [qx, qy, qz, qw] = q;
-  const tx = 2 * (qy * v[2] - qz * v[1]);
-  const ty = 2 * (qz * v[0] - qx * v[2]);
-  const tz = 2 * (qx * v[1] - qy * v[0]);
-  return [
-    v[0] + qw * tx + (qy * tz - qz * ty),
-    v[1] + qw * ty + (qz * tx - qx * tz),
-    v[2] + qw * tz + (qx * ty - qy * tx),
-  ];
-};

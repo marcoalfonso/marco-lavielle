@@ -188,8 +188,9 @@ body.home-v2-body {
   position: absolute;
   inset: 0;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(3, 1fr);
+  /* equal squares even when a link's name is wider than its square */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
   gap: 4%;
   padding: 4%;
   box-sizing: border-box;
@@ -247,8 +248,7 @@ body.home-v2-body {
   }
 }
 
-/* the centre square of each face: a link that presses in on hover. Its
-   name is shown by a flat label floating over it (.rc-label). */
+/* the centre square of each face: a link that presses in on hover */
 .home-v2 .rc-link {
   border-color: rgba(111, 245, 238, 0.95);
   cursor: pointer;
@@ -274,103 +274,50 @@ body.home-v2-body {
   outline: none;
 }
 
-.rc-sr {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-}
-
-/* --- overlays: labels and holograms, flat and facing the viewer ------- */
-.rc-overlays {
-  position: absolute;
+/* the link's name, flat on the face over its centre square; big enough to
+   read, so longer names spill across the middle row */
+.rc-link-text {
+  position: relative;
   z-index: 2;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
+  padding-left: 0.08em;
+  color: #f2fbff;
+  font: 700 calc(var(--rc-size) * 0.062) / 1 var(--home-font);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 12px rgba(111, 245, 238, 0.7);
   pointer-events: none;
+  transform: translateZ(2px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
-.rc-label {
-  position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 2;
+.home-v2 .rc-link,
+.home-v2 .rc-link:hover,
+.home-v2 .rc-link:focus {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 7px 11px 8px;
-  border: 1px solid rgba(111, 245, 238, 0.4);
-  border-radius: 4px;
-  background: rgba(3, 10, 20, 0.78);
-  box-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
-  white-space: nowrap;
-  opacity: 0;
-  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+  justify-content: center;
+  overflow: visible;
+  text-decoration: none;
 }
 
-.rc-label.is-active {
-  border-color: var(--home-holo);
-  background: rgba(3, 14, 24, 0.9);
-  box-shadow: 0 0 18px rgba(111, 245, 238, 0.45);
-}
-
-.rc-label-index {
-  color: #4e5f76;
-  font: 600 9px/1 var(--home-font);
-  letter-spacing: 0.12em;
-}
-
-.rc-label-text {
-  padding-left: 0.18em;
-  color: #eaf7ff;
-  font: 600 12px/1 var(--home-font);
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.rc-label-sub {
-  padding-left: 0.2em;
-  color: var(--home-cyan);
-  font: 600 9px/1 var(--home-font);
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-}
-
-/* the hovered face's hologram: a card the size of the face, its picture in
-   the top row of squares, the label in the middle, a number or caption in
-   the bottom row */
+/* --- holograms: line art over the whole face while it's looked at ------ */
 .rc-holo {
   position: absolute;
-  left: 0;
-  top: 0;
-  z-index: 1;
-  width: calc(var(--rc-size) * 0.96);
-  height: calc(var(--rc-size) * 0.96);
-}
-
-.holo-card {
-  position: absolute;
   inset: 0;
-  display: grid;
-  grid-template-rows: 1fr 1fr 1fr;
-  justify-items: center;
-  align-items: center;
-  color: var(--home-holo);
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(1px);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity 250ms ease;
+}
+
+.rc-face.is-active .rc-holo {
+  opacity: 1;
   animation: holo-in 520ms ease-out both;
-}
-
-.holo-card > :first-child {
-  grid-row: 1;
-  align-self: end;
-}
-
-.holo-card > :nth-child(2) {
-  grid-row: 3;
 }
 
 /* projected in: a flickering sweep from the middle out */
@@ -383,7 +330,7 @@ body.home-v2-body {
     opacity: 1;
   }
   45% {
-    opacity: 0.4;
+    opacity: 0.45;
   }
   60% {
     opacity: 1;
@@ -395,193 +342,196 @@ body.home-v2-body {
   }
 }
 
-/* images tinted into cyan light, with scan lines */
-.holo-image,
-.holo-map {
-  position: relative;
-  display: block;
-  background-size: cover;
-  background-position: center;
-  filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.2) brightness(1.05);
-  mix-blend-mode: screen;
-  opacity: 0.92;
-}
-
-.holo-image::after,
-.holo-map::after {
+/* scan lines over the hologram */
+.rc-holo::after {
   content: "";
   position: absolute;
   inset: 0;
-  border-radius: inherit;
-  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 3px);
-  animation: holo-scan 2.4s linear infinite;
+  background: repeating-linear-gradient(0deg, rgba(111, 245, 238, 0.07) 0 1px, transparent 1px 4px);
 }
 
-@keyframes holo-scan {
+.holo-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.75));
+}
+
+.holo-line {
+  fill: none;
+  stroke: var(--home-holo);
+  stroke-width: 1;
+  opacity: 0.85;
+  vector-effect: non-scaling-stroke;
+}
+
+.holo-line.faint {
+  opacity: 0.35;
+}
+
+/* a pulse of light running along a line */
+.holo-flow {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  stroke-dasharray: 4 96;
+  animation: holo-flow 2.4s linear infinite;
+}
+
+.holo-software .holo-flow {
+  stroke: var(--home-holo);
+  stroke-width: 0.5;
+  stroke-dasharray: 1.5 1.5;
+  opacity: 0.85;
+  animation: holo-march 1.6s linear infinite;
+}
+
+@keyframes holo-flow {
+  from {
+    stroke-dashoffset: 100;
+  }
   to {
-    background-position: 0 24px;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes holo-march {
+  to {
+    stroke-dashoffset: -6;
+  }
+}
+
+.holo-node,
+.holo-dot,
+.holo-commit {
+  fill: var(--home-holo);
+}
+
+.holo-node.is-bright {
+  fill: #fff;
+}
+
+.holo-node.twinkle {
+  animation: holo-twinkle 2s ease-in-out infinite;
+}
+
+@keyframes holo-twinkle {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.holo-pulse {
+  fill: none;
+  stroke: var(--home-holo);
+  stroke-width: 0.5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: holo-pulse 2s ease-out infinite;
+}
+
+@keyframes holo-pulse {
+  from {
+    opacity: 1;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 0;
+    transform: scale(4);
   }
 }
 
 .holo-map {
-  /* fits the top row of squares, so the Sydney blip lands on the map */
-  width: calc(var(--rc-size) * 0.46);
-  aspect-ratio: 250 / 160;
-  margin-bottom: calc(var(--rc-size) * 0.02);
-  background-size: 100% 100%;
-  background-repeat: no-repeat;
-  filter: hue-rotate(-35deg) saturate(1.3) brightness(2.3) drop-shadow(0 0 5px rgba(111, 245, 238, 0.7));
+  opacity: 0.9;
+  filter: hue-rotate(-35deg) saturate(1.3) brightness(2.2);
 }
 
-.holo-map::after {
-  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+.holo-dot {
+  opacity: 0.75;
 }
 
-.holo-blip {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  margin: -3px 0 0 -3px;
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 8px 2px var(--home-holo);
+.holo-spin-slow {
+  transform-origin: 50px 50px;
+  animation: holo-spin 40s linear infinite;
 }
 
-.holo-blip-ring {
-  position: absolute;
-  inset: -4px;
-  border: 1px solid var(--home-holo);
-  border-radius: 50%;
-  animation: holo-blip 2s ease-out infinite;
+@keyframes holo-spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.holo-blip-ring + .holo-blip-ring {
-  animation-delay: 1s;
+.holo-stroke {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-dasharray: 120;
+  animation: holo-draw 3.2s ease-in-out infinite;
 }
 
-@keyframes holo-blip {
-  from {
+.holo-stroke.thin {
+  stroke: var(--home-holo);
+  stroke-width: 0.8;
+  animation-delay: 0.25s;
+}
+
+@keyframes holo-draw {
+  0% {
+    stroke-dashoffset: 120;
+  }
+  45%,
+  70% {
+    stroke-dashoffset: 0;
     opacity: 1;
-    transform: scale(0.6);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+}
+
+.holo-scanbar {
+  fill: #fff;
+  opacity: 0.75;
+  animation: holo-scanbar 2.6s ease-in-out infinite alternate;
+}
+
+@keyframes holo-scanbar {
+  from {
+    transform: translateY(10px);
   }
   to {
-    opacity: 0;
-    transform: scale(3);
+    transform: translateY(90px);
   }
 }
 
-.holo-painting {
-  width: calc(var(--rc-size) * 0.36);
-  height: calc(var(--rc-size) * 0.3);
-  border-radius: 2px;
-  box-shadow: 0 0 18px rgba(111, 245, 238, 0.45);
-}
-
-.holo-portrait {
-  width: calc(var(--rc-size) * 0.28);
-  height: calc(var(--rc-size) * 0.28);
-  border-radius: 50%;
-  /* crop the photo's border off */
-  background-size: 125%;
-  box-shadow: 0 0 0 1px rgba(111, 245, 238, 0.7), 0 0 20px rgba(111, 245, 238, 0.45);
-}
-
-.holo-post {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 5px;
-  max-width: calc(var(--rc-size) * 0.82);
-  text-align: center;
-}
-
-.holo-post-kicker {
-  color: var(--home-cyan);
-  font: 600 9px/1 var(--home-font);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-}
-
-.holo-post-title {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  color: #eaf7ff;
-  font: 600 13px/1.3 var(--home-font);
-  text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
-}
-
-.holo-post-lines {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 70%;
-}
-
-.holo-post-lines span {
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(111, 245, 238, 0.55), transparent);
-}
-
-.holo-post-lines span:nth-child(2) {
-  width: 80%;
-}
-
-.holo-post-lines span:nth-child(3) {
-  width: 55%;
-}
-
-.holo-svg {
-  width: calc(var(--rc-size) * 0.4);
-  height: auto;
-  fill: none;
-  stroke: var(--home-holo);
-  stroke-width: 1.6;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 5px rgba(111, 245, 238, 0.8));
-}
-
-.holo-svg-fill {
-  width: calc(var(--rc-size) * 0.2);
-  fill: var(--home-holo);
-  stroke: none;
-}
-
-.holo-svg-ground {
-  stroke-dasharray: 3 4;
-  opacity: 0.6;
-}
-
-.holo-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  text-shadow: 0 0 12px rgba(111, 245, 238, 0.7);
-}
-
-.holo-stat strong {
-  color: #fff;
-  font: 600 26px/1 var(--home-font);
-}
-
-.holo-stat small,
-.holo-caption {
-  color: var(--home-holo);
-  font: 600 10px/1 var(--home-font);
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-}
-
-.holo-caption {
-  text-shadow: 0 0 10px rgba(111, 245, 238, 0.7);
-}
-
-.rc-scene.is-collapsing .rc-overlays {
+/* neon grid rows sliding toward the viewer, faster as they come closer */
+.holo-grid-rows path {
   opacity: 0;
-  transition: opacity 250ms ease;
+  animation: holo-grid 3s cubic-bezier(0.55, 0, 1, 0.6) infinite;
+}
+
+@keyframes holo-grid {
+  0% {
+    opacity: 0;
+    transform: translateY(46px);
+  }
+  15% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.8;
+    transform: translateY(100px);
+  }
+}
+
+.holo-commit {
+  stroke: #02070f;
+  stroke-width: 0.8;
 }
 
 /* picked: every edge lights up while the cube folds away into a dot */
@@ -746,27 +696,6 @@ body.home-v2-body {
     margin-top: calc(var(--rc-size) * -0.12);
   }
 
-  .rc-label {
-    padding: 5px 8px 6px;
-    gap: 3px;
-  }
-
-  .rc-label-text {
-    font-size: 10px;
-  }
-
-  .rc-label-index,
-  .rc-label-sub {
-    font-size: 8px;
-  }
-
-  .holo-stat strong {
-    font-size: 20px;
-  }
-
-  .holo-post-title {
-    font-size: 11px;
-  }
 
   /* clear of the UI version toggle in the corner */
   .home-v2-hints {

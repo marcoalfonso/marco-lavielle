@@ -15,6 +15,12 @@ export class Homepage extends Component {
   componentDidMount() {
     this.props.getClients();
     this.props.getPosts();
+    // same black as the V2 homepage
+    document.documentElement.classList.add("home-v1");
+  }
+
+  componentWillUnmount() {
+    document.documentElement.classList.remove("home-v1");
   }
 
   toggleHoverSection = (section) => {

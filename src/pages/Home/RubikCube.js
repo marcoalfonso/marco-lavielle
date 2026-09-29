@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useDeviceTilt, { isTouchDevice, prefersReducedMotion } from "components/motion/useDeviceTilt";
-import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, rotate, slerp, toCss } from "./quat";
+import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss } from "./quat";
 
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
 // Each face's centre square is a link. The cube tumbles on its own; drag it
@@ -8,25 +8,20 @@ import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, rotate, slerp,
 // tilt. Picking a link turns that face to the front, flattens the cube to a
 // square, shrinks it to a dot, then navigates.
 //
-// The links' names float over their faces as flat, screen-facing labels (so
-// they stay legible at any angle), placed each frame by projecting the face
-// centres. Hovering a face (tapping it on phones) holds the cube still and
-// shows that link's hologram over it.
+// Hovering a face (tapping it on phones) holds the cube still and lights up
+// that face's hologram, which covers the whole face.
 
 const Q = (x, y, z, deg) => fromAxisAngle(x, y, z, (deg * Math.PI) / 180);
 
-// each face's orientation on the cube and the way it faces (CSS: y points
-// down, z at the viewer)
+// each face's orientation on the cube (CSS: y points down, z at the viewer)
 const FACES = [
-  { name: "front", rotate: "", q: IDENTITY, normal: [0, 0, 1] },
-  { name: "right", rotate: "rotateY(90deg)", q: Q(0, 1, 0, 90), normal: [1, 0, 0] },
-  { name: "back", rotate: "rotateY(180deg)", q: Q(0, 1, 0, 180), normal: [0, 0, -1] },
-  { name: "left", rotate: "rotateY(-90deg)", q: Q(0, 1, 0, -90), normal: [-1, 0, 0] },
-  { name: "top", rotate: "rotateX(90deg)", q: Q(1, 0, 0, 90), normal: [0, -1, 0] },
-  { name: "bottom", rotate: "rotateX(-90deg)", q: Q(1, 0, 0, -90), normal: [0, 1, 0] },
+  { name: "front", rotate: "", q: IDENTITY },
+  { name: "right", rotate: "rotateY(90deg)", q: Q(0, 1, 0, 90) },
+  { name: "back", rotate: "rotateY(180deg)", q: Q(0, 1, 0, 180) },
+  { name: "left", rotate: "rotateY(-90deg)", q: Q(0, 1, 0, -90) },
+  { name: "top", rotate: "rotateX(90deg)", q: Q(1, 0, 0, 90) },
+  { name: "bottom", rotate: "rotateX(-90deg)", q: Q(1, 0, 0, -90) },
 ];
-
-const PERSPECTIVE = 1500; // px; keep in step with .rc-scene in Home.css
 
 const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
 const AUTO_SPEED = 0.32; // rad/s
@@ -38,12 +33,8 @@ const DOT_MS = 460;
 
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
-const clamp01 = (v) => Math.max(0, Math.min(1, v));
-
 const RubikCube = ({ links, onHint }) => {
   const sceneRef = useRef(null);
-  const labelRefs = useRef([]);
-  const holoRef = useRef(null);
   const squashRef = useRef(null);
   const cubeRef = useRef(null);
   const dotRef = useRef(null);
@@ -180,32 +171,9 @@ const RubikCube = ({ links, onHint }) => {
         const w = Math.hypot(...state.omega);
         if (w > 1e-5) state.q = normalize(multiply(fromAxisAngle(...state.omega, w * dt), state.q));
       }
-      const shown = state.select ? state.q : multiply(state.tilt, state.q);
       if (cubeRef.current) {
-        cubeRef.current.style.transform = toCss(shown);
-        placeOverlays(shown, cubeRef.current.offsetWidth / 2);
+        cubeRef.current.style.transform = toCss(state.select ? state.q : multiply(state.tilt, state.q));
       }
-    };
-
-    // labels (and the hologram) sit over the projected centres of the faces
-    // that face the viewer, fading out as a face turns away
-    const placeOverlays = (q, half) => {
-      FACES.forEach((face, f) => {
-        const n = rotate(q, face.normal);
-        const s = PERSPECTIVE / (PERSPECTIVE - n[2] * half);
-        const x = n[0] * half * s;
-        const y = n[1] * half * s;
-        const visible = clamp01((n[2] - 0.15) / 0.45);
-        const label = labelRefs.current[f];
-        if (label) {
-          label.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${(0.82 + 0.18 * visible).toFixed(3)})`;
-          label.style.opacity = visible.toFixed(3);
-        }
-        if (f === state.active && holoRef.current) {
-          holoRef.current.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -50%) scale(${s.toFixed(3)})`;
-          holoRef.current.style.opacity = clamp01((n[2] - 0.1) / 0.3).toFixed(3);
-        }
-      });
     };
 
     // pick: face forward, flatten to a square, shrink to a dot, go
@@ -296,7 +264,11 @@ const RubikCube = ({ links, onHint }) => {
           {FACES.map((face, f) => {
             const link = links[f];
             return (
-              <div key={face.name} data-face={f} className={`rc-face rc-face-${face.name}`} style={{ transform: `${face.rotate} translateZ(var(--rc-half))` }}>
+              <div
+                key={face.name}
+                data-face={f}
+                className={`rc-face rc-face-${face.name}${f === active ? " is-active" : ""}`}
+                style={{ transform: `${face.rotate} translateZ(var(--rc-half))` }}>
                 {Array.from({ length: 9 }, (_, i) =>
                   i === 4 ? (
                     <a
@@ -313,7 +285,7 @@ const RubikCube = ({ links, onHint }) => {
                         state.tapped = -1;
                       }}
                     >
-                      <span className="rc-sr">{`${link.label}: ${link.sub}`}</span>
+                      <span className="rc-link-text">{link.label}</span>
                     </a>
                   ) : (
                     <span
@@ -324,32 +296,14 @@ const RubikCube = ({ links, onHint }) => {
                     />
                   ),
                 )}
+                {/* this face's hologram, lit while the face is looked at */}
+                <div className="rc-holo" aria-hidden="true">
+                  {link.holo}
+                </div>
               </div>
             );
           })}
         </div>
-      </div>
-      <div className="rc-overlays" aria-hidden="true">
-        <div className="rc-holo" ref={holoRef}>
-          {active >= 0 && (
-            <div key={active} className={`holo-card holo-card-${FACES[active].name}`}>
-              {links[active].holo}
-            </div>
-          )}
-        </div>
-        {links.map((link, f) => (
-          <span
-            key={link.href}
-            ref={(el) => {
-              labelRefs.current[f] = el;
-            }}
-            className={f === active ? "rc-label is-active" : "rc-label"}
-          >
-            <span className="rc-label-index">{String(f + 1).padStart(2, "0")}</span>
-            <span className="rc-label-text">{link.label}</span>
-            <span className="rc-label-sub">{link.sub}</span>
-          </span>
-        ))}
       </div>
       <span className="rc-dot" ref={dotRef} aria-hidden="true" />
     </div>
