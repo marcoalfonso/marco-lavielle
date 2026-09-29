@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 
 // "MARCO LAVIELLE", each letter flashing on like a tube light, in a
-// shuffled order, as the page loads.
+// shuffled order, as the page loads. Once all are lit, a glow runs through
+// the name from left to right, one letter at a time, every few seconds.
 
 const NAME = "MARCO LAVIELLE";
+const GLOW_START = 2800; // ms: after the last letter has struck
+const GLOW_STEP = 110; // ms between neighbouring letters
 
 const shuffledDelays = () => {
   const order = NAME.split("").map((_, i) => i);
@@ -26,7 +29,12 @@ const FlashName = ({ className }) => {
         ch === " " ? (
           <span key={i} className="flash-space" aria-hidden="true" />
         ) : (
-          <span key={i} className="flash-letter" style={{ animationDelay: `${Math.round(delays[i])}ms` }} aria-hidden="true">
+          <span
+            key={i}
+            className="flash-letter"
+            style={{ "--flash-delay": `${Math.round(delays[i])}ms`, "--glow-delay": `${GLOW_START + i * GLOW_STEP}ms` }}
+            aria-hidden="true"
+          >
             {ch}
           </span>
         ),

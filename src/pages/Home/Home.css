@@ -45,12 +45,29 @@ body.home-v2-body {
 .flash-letter {
   display: inline-block;
   opacity: 0;
-  animation: flash-on 1000ms linear both;
+  /* strike on (delay set per letter), then, once every letter is lit, a
+     glow runs through the name from left to right, one letter at a time */
+  animation:
+    flash-on 1000ms linear var(--flash-delay, 0ms) both,
+    name-glow 5s ease-in-out var(--glow-delay, 2800ms) infinite;
 }
 
 .flash-space {
   display: inline-block;
   width: 0.5em;
+}
+
+@keyframes name-glow {
+  0%,
+  12%,
+  100% {
+    color: #dff4ff;
+    text-shadow: 0 0 10px rgba(0, 191, 243, 0.35);
+  }
+  5% {
+    color: #fff;
+    text-shadow: 0 0 12px #6ff5ee, 0 0 28px #00bff3, 0 0 44px rgba(0, 191, 243, 0.6);
+  }
 }
 
 /* a tube light striking: bright flash, flicker, then steady */
@@ -181,8 +198,6 @@ body.home-v2-body {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
-  /* only the links take the pointer; drags land on the scene behind */
-  pointer-events: none;
 }
 
 /* every square: same dark colour, only its edges glow */
@@ -194,6 +209,17 @@ body.home-v2-body {
   border-radius: 6%;
   background: rgba(4, 12, 24, 0.6);
   box-shadow: 0 0 6px rgba(0, 191, 243, 0.4), inset 0 0 10px rgba(0, 191, 243, 0.14);
+}
+
+/* hovered square: its edges light right up */
+.rc-cell {
+  transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+}
+
+.home-v2 .rc-cell:hover {
+  border-color: var(--home-holo);
+  background: rgba(111, 245, 238, 0.08);
+  box-shadow: 0 0 18px rgba(111, 245, 238, 0.85), inset 0 0 18px rgba(111, 245, 238, 0.35);
 }
 
 /* light running across the squares in waves */
@@ -221,31 +247,22 @@ body.home-v2-body {
   }
 }
 
-/* the centre square of each face: a link that presses in on hover */
+/* the centre square of each face: a link that presses in on hover. Its
+   name is shown by a flat label floating over it (.rc-label). */
 .home-v2 .rc-link {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--rc-size) * 0.012);
   border-color: rgba(111, 245, 238, 0.95);
-  color: #e8f6ff;
-  text-decoration: none;
   cursor: pointer;
-  pointer-events: auto;
   box-shadow: 0 0 10px rgba(111, 245, 238, 0.6), inset 0 0 14px rgba(111, 245, 238, 0.2);
   transition: transform 220ms cubic-bezier(0.3, 0, 0.2, 1), box-shadow 220ms ease, background 220ms ease;
 }
 
 .home-v2 .rc-link:hover,
 .home-v2 .rc-link:focus-visible {
-  color: #fff;
-  text-decoration: none;
   outline: none;
-  background: rgba(111, 245, 238, 0.12);
+  background: rgba(111, 245, 238, 0.14);
   /* pressed in: shrinks with a deep inner glow (moving it back in z would
      tuck it behind its own face, which then steals the hover) */
-  box-shadow: 0 0 22px rgba(111, 245, 238, 0.85), inset 0 0 26px rgba(111, 245, 238, 0.5);
+  box-shadow: 0 0 22px rgba(111, 245, 238, 0.9), inset 0 0 26px rgba(111, 245, 238, 0.55);
   transform: scale(0.9);
 }
 
@@ -257,25 +274,314 @@ body.home-v2-body {
   outline: none;
 }
 
-.rc-link-index {
-  color: #4e5f76;
-  font: 600 calc(var(--rc-size) * 0.026) / 1 var(--home-font);
-  letter-spacing: 0.1em;
+.rc-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }
 
-.rc-link-label {
-  padding-left: 0.14em;
-  font: 600 calc(var(--rc-size) * 0.04) / 1 var(--home-font);
-  letter-spacing: 0.14em;
+/* --- overlays: labels and holograms, flat and facing the viewer ------- */
+.rc-overlays {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.rc-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 11px 8px;
+  border: 1px solid rgba(111, 245, 238, 0.4);
+  border-radius: 4px;
+  background: rgba(3, 10, 20, 0.78);
+  box-shadow: 0 0 14px rgba(0, 0, 0, 0.6);
+  white-space: nowrap;
+  opacity: 0;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.rc-label.is-active {
+  border-color: var(--home-holo);
+  background: rgba(3, 14, 24, 0.9);
+  box-shadow: 0 0 18px rgba(111, 245, 238, 0.45);
+}
+
+.rc-label-index {
+  color: #4e5f76;
+  font: 600 9px/1 var(--home-font);
+  letter-spacing: 0.12em;
+}
+
+.rc-label-text {
+  padding-left: 0.18em;
+  color: #eaf7ff;
+  font: 600 12px/1 var(--home-font);
+  letter-spacing: 0.18em;
   text-transform: uppercase;
 }
 
-.rc-link-sub {
+.rc-label-sub {
   padding-left: 0.2em;
   color: var(--home-cyan);
-  font: 600 calc(var(--rc-size) * 0.026) / 1 var(--home-font);
+  font: 600 9px/1 var(--home-font);
   letter-spacing: 0.2em;
   text-transform: uppercase;
+}
+
+/* the hovered face's hologram: a card the size of the face, its picture in
+   the top row of squares, the label in the middle, a number or caption in
+   the bottom row */
+.rc-holo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 1;
+  width: calc(var(--rc-size) * 0.96);
+  height: calc(var(--rc-size) * 0.96);
+}
+
+.holo-card {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr 1fr 1fr;
+  justify-items: center;
+  align-items: center;
+  color: var(--home-holo);
+  animation: holo-in 520ms ease-out both;
+}
+
+.holo-card > :first-child {
+  grid-row: 1;
+  align-self: end;
+}
+
+.holo-card > :nth-child(2) {
+  grid-row: 3;
+}
+
+/* projected in: a flickering sweep from the middle out */
+@keyframes holo-in {
+  0% {
+    opacity: 0;
+    clip-path: inset(50% 0 50% 0);
+  }
+  35% {
+    opacity: 1;
+  }
+  45% {
+    opacity: 0.4;
+  }
+  60% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* images tinted into cyan light, with scan lines */
+.holo-image,
+.holo-map {
+  position: relative;
+  display: block;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) sepia(1) hue-rotate(140deg) saturate(3.2) brightness(1.05);
+  mix-blend-mode: screen;
+  opacity: 0.92;
+}
+
+.holo-image::after,
+.holo-map::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.35) 0 1px, transparent 1px 3px);
+  animation: holo-scan 2.4s linear infinite;
+}
+
+@keyframes holo-scan {
+  to {
+    background-position: 0 24px;
+  }
+}
+
+.holo-map {
+  /* fits the top row of squares, so the Sydney blip lands on the map */
+  width: calc(var(--rc-size) * 0.46);
+  aspect-ratio: 250 / 160;
+  margin-bottom: calc(var(--rc-size) * 0.02);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  filter: hue-rotate(-35deg) saturate(1.3) brightness(2.3) drop-shadow(0 0 5px rgba(111, 245, 238, 0.7));
+}
+
+.holo-map::after {
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0 1px, transparent 1px 3px);
+}
+
+.holo-blip {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 8px 2px var(--home-holo);
+}
+
+.holo-blip-ring {
+  position: absolute;
+  inset: -4px;
+  border: 1px solid var(--home-holo);
+  border-radius: 50%;
+  animation: holo-blip 2s ease-out infinite;
+}
+
+.holo-blip-ring + .holo-blip-ring {
+  animation-delay: 1s;
+}
+
+@keyframes holo-blip {
+  from {
+    opacity: 1;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3);
+  }
+}
+
+.holo-painting {
+  width: calc(var(--rc-size) * 0.36);
+  height: calc(var(--rc-size) * 0.3);
+  border-radius: 2px;
+  box-shadow: 0 0 18px rgba(111, 245, 238, 0.45);
+}
+
+.holo-portrait {
+  width: calc(var(--rc-size) * 0.28);
+  height: calc(var(--rc-size) * 0.28);
+  border-radius: 50%;
+  /* crop the photo's border off */
+  background-size: 125%;
+  box-shadow: 0 0 0 1px rgba(111, 245, 238, 0.7), 0 0 20px rgba(111, 245, 238, 0.45);
+}
+
+.holo-post {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  max-width: calc(var(--rc-size) * 0.82);
+  text-align: center;
+}
+
+.holo-post-kicker {
+  color: var(--home-cyan);
+  font: 600 9px/1 var(--home-font);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.holo-post-title {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: #eaf7ff;
+  font: 600 13px/1.3 var(--home-font);
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
+}
+
+.holo-post-lines {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 70%;
+}
+
+.holo-post-lines span {
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(111, 245, 238, 0.55), transparent);
+}
+
+.holo-post-lines span:nth-child(2) {
+  width: 80%;
+}
+
+.holo-post-lines span:nth-child(3) {
+  width: 55%;
+}
+
+.holo-svg {
+  width: calc(var(--rc-size) * 0.4);
+  height: auto;
+  fill: none;
+  stroke: var(--home-holo);
+  stroke-width: 1.6;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(111, 245, 238, 0.8));
+}
+
+.holo-svg-fill {
+  width: calc(var(--rc-size) * 0.2);
+  fill: var(--home-holo);
+  stroke: none;
+}
+
+.holo-svg-ground {
+  stroke-dasharray: 3 4;
+  opacity: 0.6;
+}
+
+.holo-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  text-shadow: 0 0 12px rgba(111, 245, 238, 0.7);
+}
+
+.holo-stat strong {
+  color: #fff;
+  font: 600 26px/1 var(--home-font);
+}
+
+.holo-stat small,
+.holo-caption {
+  color: var(--home-holo);
+  font: 600 10px/1 var(--home-font);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.holo-caption {
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.7);
+}
+
+.rc-scene.is-collapsing .rc-overlays {
+  opacity: 0;
+  transition: opacity 250ms ease;
 }
 
 /* picked: every edge lights up while the cube folds away into a dot */
@@ -438,6 +744,28 @@ body.home-v2-body {
 
   .home-v2-base {
     margin-top: calc(var(--rc-size) * -0.12);
+  }
+
+  .rc-label {
+    padding: 5px 8px 6px;
+    gap: 3px;
+  }
+
+  .rc-label-text {
+    font-size: 10px;
+  }
+
+  .rc-label-index,
+  .rc-label-sub {
+    font-size: 8px;
+  }
+
+  .holo-stat strong {
+    font-size: 20px;
+  }
+
+  .holo-post-title {
+    font-size: 11px;
   }
 
   /* clear of the UI version toggle in the corner */
