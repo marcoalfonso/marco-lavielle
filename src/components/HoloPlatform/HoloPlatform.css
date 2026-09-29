@@ -1,0 +1,53 @@
+/* Holo platform: a disc of glowing rings tipped back to lie flat */
+.holo-platform {
+  position: relative;
+  aspect-ratio: 10 / 3;
+  perspective: 900px;
+  pointer-events: none;
+}
+
+.holo-platform-disc {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 100%;
+  aspect-ratio: 1;
+  transform: translateY(-50%) rotateX(74deg);
+}
+
+.holo-platform-disc svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.holo-ring {
+  fill: none;
+  stroke: #5fb4ff;
+  stroke-width: 0.5;
+}
+
+.holo-ring-dashed {
+  stroke: #7cc8ff;
+  stroke-dasharray: 3 4.5;
+  animation: holo-spin 50s linear infinite;
+}
+
+.holo-ring-ticks {
+  animation: holo-spin 120s linear infinite reverse;
+}
+
+@keyframes holo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-ring-dashed,
+  .holo-ring-ticks {
+    animation: none;
+  }
+}

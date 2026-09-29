@@ -412,45 +412,6 @@ body {
   inset: 0;
 }
 
-.art-platform-disc {
-  position: absolute;
-  left: 0;
-  top: 50%;
-  width: 100%;
-  aspect-ratio: 1;
-  transform: translateY(-50%) rotateX(74deg);
-}
-
-.art-platform-disc svg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.art-ring {
-  fill: none;
-  stroke: #5fb4ff;
-  stroke-width: 0.5;
-}
-
-.art-ring-dashed {
-  stroke: #7cc8ff;
-  stroke-dasharray: 3 4.5;
-  animation: art-spin 50s linear infinite;
-}
-
-.art-ring-ticks {
-  animation: art-spin 120s linear infinite reverse;
-}
-
-@keyframes art-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 /* the painting's own colours lighting up the platform */
 .art-platform-spill {
   position: absolute;

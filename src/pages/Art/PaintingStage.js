@@ -1,19 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
+import HoloPlatform from "components/HoloPlatform/HoloPlatform";
+import useDeviceTilt, { isTouchDevice, prefersReducedMotion } from "components/motion/useDeviceTilt";
 
 // The painting hovers above a holo platform. On desktop it leans toward the
 // pointer; on phones it slides the way the phone is tilted (sideways, up and
 // down). No library: a small spring eases an {x, y} offset in [-1, 1] toward
 // its target every frame and writes CSS transforms.
-
-// iPhones only share orientation data after the visitor grants permission,
-// and the request has to come from a tap.
-const canAskForOrientation = () =>
-  typeof window !== "undefined" &&
-  typeof window.DeviceOrientationEvent !== "undefined" &&
-  typeof window.DeviceOrientationEvent.requestPermission === "function";
-
-const isTouchDevice = () =>
-  typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
 
 const clamp = (v) => Math.max(-1, Math.min(1, v));
 
@@ -26,45 +18,18 @@ const SWIPE = 45; // px
 const desktopMove = { x: 18, y: 12, turn: 14, tip: 10 };
 const phoneMove = () => ({ x: window.innerWidth * 0.08, y: window.innerHeight * 0.05, turn: 12, tip: 9 });
 
-const Platform = ({ spillSrc }) => {
-  const ticks = [];
-  for (let i = 0; i < 72; i++) {
-    const a = (i / 72) * Math.PI * 2;
-    const r1 = i % 6 === 0 ? 64 : 61.5;
-    ticks.push(`M${Math.cos(a) * 59} ${Math.sin(a) * 59}L${Math.cos(a) * r1} ${Math.sin(a) * r1}`);
-  }
-  return (
-    <div className="art-platform" aria-hidden="true">
-      <div className="art-platform-disc">
-        {/* the painting's colours spilling onto the platform */}
-        <div className="art-platform-spill" style={{ backgroundImage: `url(${spillSrc})` }} />
-        <svg viewBox="-72 -72 144 144">
-          <defs>
-            <radialGradient id="art-platform-glow">
-              <stop offset="0%" stopColor="#6ff5ee" stopOpacity="0.35" />
-              <stop offset="35%" stopColor="#3d8bff" stopOpacity="0.16" />
-              <stop offset="100%" stopColor="#3d8bff" stopOpacity="0" />
-            </radialGradient>
-          </defs>
-          <circle r="75" fill="url(#art-platform-glow)" />
-          <circle className="art-ring" r="34" strokeOpacity="0.55" />
-          <circle className="art-ring" r="38" strokeOpacity="0.28" />
-          <circle className="art-ring art-ring-dashed" r="47" strokeOpacity="0.45" />
-          <circle className="art-ring" r="56" strokeOpacity="0.18" />
-          <path className="art-ring art-ring-ticks" d={ticks.join("")} strokeOpacity="0.22" />
-          <circle className="art-ring" r="68" strokeOpacity="0.08" />
-        </svg>
-      </div>
-    </div>
-  );
-};
-
 const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded }) => {
   const floatRef = useRef(null);
   const baseRef = useRef(null);
-  const orientationRef = useRef(null); // { start } once listening is set up
   const swipeRef = useRef(null);
-  const [showHint, setShowHint] = useState(false);
+  const targetRef = useRef({ x: 0, y: 0 }); // where the painting is heading, each in [-1, 1]
+  const [reduceMotion] = useState(prefersReducedMotion);
+
+  // phones: like a marble on a tray, the painting slides toward the lower edge
+  const { showHint, requestPermission } = useDeviceTilt((x, y) => {
+    targetRef.current.x = clamp(x / PHONE_TILT);
+    targetRef.current.y = clamp(y / PHONE_TILT);
+  }, !reduceMotion);
   // The painting on show only changes once the next one has fully
   // downloaded, so a half-loaded image never appears; until then the
   // previous one stays up, dimmed, with a loading readout.
@@ -87,23 +52,14 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
 
   const requestOrientation = (e) => {
     e.stopPropagation();
-    setShowHint(false);
-    window.DeviceOrientationEvent.requestPermission()
-      .then((state) => {
-        if (state === "granted" && orientationRef.current) orientationRef.current.start();
-      })
-      .catch(() => {
-        // denied or unavailable: the painting just keeps floating
-      });
+    requestPermission();
   };
 
   useEffect(() => {
-    const reduceMotion =
-      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return undefined;
 
     const touch = isTouchDevice();
-    const target = { x: 0, y: 0 };
+    const target = targetRef.current;
     const pos = { x: 0, y: 0 };
     const vel = { x: 0, y: 0 };
 
@@ -118,62 +74,6 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
     };
     window.addEventListener("pointermove", onPointerMove);
     document.addEventListener("pointerout", onPointerOut);
-
-    // --- phones: slide the way the phone tilts, relative to however it was
-    // held at first (slowly re-centring, so any comfortable angle works)
-    let seen = false;
-    let hintTimer = null;
-    const base = { x: 0, y: 0 };
-    const onOrientation = (e) => {
-      if (e.beta === null || e.beta === undefined || e.gamma === null || e.gamma === undefined) return;
-      const angle =
-        (window.screen && window.screen.orientation && window.screen.orientation.angle) || window.orientation || 0;
-      let x = e.gamma; // right edge down: +
-      let y = e.beta; // top edge up: +
-      switch (((angle % 360) + 360) % 360) {
-        case 90:
-          x = e.beta;
-          y = -e.gamma;
-          break;
-        case 180:
-          x = -e.gamma;
-          y = -e.beta;
-          break;
-        case 270:
-          x = -e.beta;
-          y = e.gamma;
-          break;
-        default:
-      }
-      if (!seen) {
-        // data is flowing: no need to ask for it
-        seen = true;
-        clearTimeout(hintTimer);
-        setShowHint(false);
-        base.x = x;
-        base.y = y;
-      }
-      base.x += (x - base.x) * 0.004;
-      base.y += (y - base.y) * 0.004;
-      // like a marble on a tray: it slides toward the lower edge
-      target.x = clamp((x - base.x) / PHONE_TILT);
-      target.y = clamp((y - base.y) / PHONE_TILT);
-    };
-    let listening = false;
-    const start = () => {
-      if (listening) return;
-      listening = true;
-      window.addEventListener("deviceorientation", onOrientation);
-    };
-    orientationRef.current = { start };
-    if (touch && typeof window.DeviceOrientationEvent !== "undefined") {
-      // Listen straight away: Android sends orientation without asking. If
-      // nothing arrives and the browser can ask (iPhone), offer the hint.
-      start();
-      hintTimer = setTimeout(() => {
-        if (!seen && canAskForOrientation()) setShowHint(true);
-      }, 1000);
-    }
 
     // --- loop
     let raf = null;
@@ -205,11 +105,8 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
 
     return () => {
       cancelAnimationFrame(raf);
-      clearTimeout(hintTimer);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("pointerout", onPointerOut);
-      window.removeEventListener("deviceorientation", onOrientation);
-      orientationRef.current = null;
     };
   }, []);
 
@@ -274,7 +171,10 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
       <div className="art-base" ref={baseRef}>
         <div className="art-beam" aria-hidden="true" />
         <div className="art-shadow" aria-hidden="true" />
-        <Platform spillSrc={spillSrc} />
+        <HoloPlatform className="art-platform">
+          {/* the painting's colours spilling onto the platform */}
+          <div className="art-platform-spill" style={{ backgroundImage: `url(${spillSrc})` }} />
+        </HoloPlatform>
         {showHint && (
           <button type="button" className="art-hint" onClick={requestOrientation}>
             <span className="art-hint-icon" aria-hidden="true" />
