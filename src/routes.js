@@ -3,6 +3,7 @@ import { withRouter, Switch, Route } from 'react-router-dom'
 import PrivateRoute from 'PrivateRoute'
 
 import Homepage from './pages/Homepage/Homepage'
+import Home from './pages/Home/Home'
 import ArtPage from './pages/Art/Art'
 import SoftwarePage from './pages/Software/Software'
 import AboutPage from './pages/About/About'
@@ -16,7 +17,8 @@ import GamePage from './pages/Game/Game'
 
 export const RoutesContainer = () => (
   <Switch>
-    <Route exact path={`/`} component={Homepage} />
+    <Route exact path={`/`} component={Home} />
+    <Route exact path={`/v1`} component={Homepage} />
     <Route exact path={`/art`} component={ArtPage} />
     <Route exact path={`/software`} component={SoftwarePage} />
     <Route exact path={`/journal`} component={JournalPage} />

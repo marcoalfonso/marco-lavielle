@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import { getClients, getPosts } from "actions/appActions";
 
 import styles from "./Homepage.module.css";
+import UiVersionToggle from "components/UiVersionToggle/UiVersionToggle";
 
 export class Homepage extends Component {
   state = {
@@ -296,6 +297,7 @@ export class Homepage extends Component {
             </a>
           </p>
         </div>
+        <UiVersionToggle current="v1" />
       </main>
     );
   }
