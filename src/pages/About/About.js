@@ -51,8 +51,12 @@ export class About extends Component {
                 <dl className="stats-1">
                   <dt>Name</dt>
                   <dd>Marco Lavielle</dd>
+                  <dt>Birthday</dt>
+                  <dd>October 13</dd>
                   <dt>Location</dt>
                   <dd>Little Bay, NSW, Sydney</dd>
+                  <dt>Telephone</dt>
+                  <dd><a href="tel:+61423478156">0423 478 156</a></dd>
                   <dt>Email</dt>
                   <dd><a href="mailto:marcoalfonso@gmail.com">marcoalfonso@gmail.com</a></dd>
                 </dl>

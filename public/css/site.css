@@ -2993,7 +2993,7 @@ form.ant-legacy-form .ant-legacy-form-item-label > label {
   display: grid;
   grid-template-columns: minmax(280px, 1.2fr) minmax(280px, 1fr) minmax(220px, 0.8fr);
   align-items: center;
-  column-gap: 56px;
+  column-gap: 35px;
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
