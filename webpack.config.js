@@ -39,9 +39,6 @@ module.exports = {
     filename: "bundle.js",
   },
   devtool: "source-map",
-  optimization: {
-    minimize: false,
-  },
   performance: {
     hints: false,
   },
