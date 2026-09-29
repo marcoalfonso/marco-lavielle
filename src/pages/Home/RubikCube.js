@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import useDeviceTilt, { isTouchDevice, prefersReducedMotion } from "components/motion/useDeviceTilt";
+import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
 import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss } from "./quat";
 
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
@@ -50,6 +50,10 @@ const RubikCube = ({ links, onHint }) => {
     select: null, // the pick animation in progress
     tilt: IDENTITY,
   }).current;
+  const release = () => {
+    state.focus = null;
+    state.tapped = -1;
+  };
   const [reduceMotion] = useState(prefersReducedMotion);
   const [collapsing, setCollapsing] = useState(false);
   const [active, setActive] = useState(-1);
@@ -81,7 +85,7 @@ const RubikCube = ({ links, onHint }) => {
         if (Math.hypot(e.clientX - d.x, e.clientY - d.y) < DRAG_SLOP) return;
         d.moved = true;
         state.dragged = true;
-        state.tapped = -1;
+        release();
         // only capture once it's a drag, so plain clicks still reach the links
         scene.setPointerCapture(e.pointerId);
         scene.classList.add("is-dragging");
@@ -112,9 +116,16 @@ const RubikCube = ({ links, onHint }) => {
     const onEnter = (e) => {
       if (e.pointerType === "mouse") state.near = true;
     };
-    const onLeave = () => {
+    const onLeave = (e) => {
       state.near = false;
+      // the mouse has moved on: let a face that was turned to the front go
+      if (e.pointerType === "mouse" && !state.select) release();
     };
+    // a click beside the cube lets a face that was turned to the front go
+    const onClick = (e) => {
+      if (!e.target.closest(".rc-face") && !state.dragged) release();
+    };
+    scene.addEventListener("click", onClick);
     scene.addEventListener("pointerenter", onEnter);
     scene.addEventListener("pointerleave", onLeave);
     scene.addEventListener("pointerdown", onDown);
@@ -124,6 +135,7 @@ const RubikCube = ({ links, onHint }) => {
     return () => {
       scene.removeEventListener("pointerenter", onEnter);
       scene.removeEventListener("pointerleave", onLeave);
+      scene.removeEventListener("click", onClick);
       scene.removeEventListener("pointerdown", onDown);
       scene.removeEventListener("pointermove", onMove);
       scene.removeEventListener("pointerup", onUp);
@@ -228,13 +240,17 @@ const RubikCube = ({ links, onHint }) => {
     return d < 0 ? to.map((v) => -v) : to;
   };
 
-  // phones: tapping a square shows its face's hologram and holds the cube
+  // Clicking (or tapping) any other square of a face turns that face to the
+  // front, upright, as a pick does before it folds away, and holds it there
+  // so its name reads straight; its hologram shows too. Dragging, clicking
+  // beside the cube or moving the mouse off it lets the cube tumble again.
   const look = (f) => {
     if (state.dragged) {
       state.dragged = false;
       return;
     }
-    if (isTouchDevice()) state.tapped = state.tapped === f ? -1 : f;
+    state.focus = facing(FACES[f]);
+    state.tapped = f;
   };
 
   const pick = (e, face, link) => {
