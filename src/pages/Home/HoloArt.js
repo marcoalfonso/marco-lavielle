@@ -10,30 +10,39 @@ const Holo = ({ children, className }) => (
   </svg>
 );
 
-// Software: the dotted world map, Sydney pulsing, links arcing out to the world
-const SYDNEY = [86.5, 71.8];
-const CITIES = [
-  [18.5, 41],
-  [47, 33.5],
-  [83, 43],
-  [30, 70],
+// Software: a circuit board, a chip framing the centre square and traces
+// running out to the edges, pulses of data travelling along them
+const TRACES = [
+  "M40 31 L40 18 L22 18 L22 8",
+  "M47 31 L47 6",
+  "M60 31 L60 14 L80 14 L80 6",
+  "M42 69 L42 84 L14 84",
+  "M52 69 L52 94",
+  "M60 69 L60 80 L86 80 L86 92",
+  "M31 42 L8 42",
+  "M31 56 L18 56 L18 70 L6 70",
+  "M69 40 L84 40 L84 24 L94 24",
+  "M69 58 L94 58",
 ];
+const PADS = [
+  [22, 8], [47, 6], [80, 6], [14, 84], [52, 94], [86, 92], [8, 42], [6, 70], [94, 24], [94, 58],
+];
+const PINS = [];
+for (let i = 0; i < 5; i++) {
+  const t = 38 + i * 6;
+  PINS.push(`M${t} 31 v-2`, `M${t} 69 v2`, `M31 ${t} h-2`, `M69 ${t} h2`);
+}
 export const SoftwareArt = () => (
   <Holo className="holo-software">
-    <image className="holo-map" href="/images/maps/250.png" x="2" y="20" width="96" height="61.4" preserveAspectRatio="none" />
-    {CITIES.map(([x, y], i) => {
-      const mx = (x + SYDNEY[0]) / 2;
-      const my = Math.min(y, SYDNEY[1]) - 18;
-      return (
-        <g key={i}>
-          <path className="holo-flow" style={{ animationDelay: `${i * 0.6}s` }} d={`M${SYDNEY[0]} ${SYDNEY[1]} Q${mx} ${my} ${x} ${y}`} />
-          <circle className="holo-node" cx={x} cy={y} r="0.9" />
-        </g>
-      );
-    })}
-    <circle className="holo-pulse" cx={SYDNEY[0]} cy={SYDNEY[1]} r="2" />
-    <circle className="holo-pulse" cx={SYDNEY[0]} cy={SYDNEY[1]} r="2" style={{ animationDelay: "1s" }} />
-    <circle className="holo-node is-bright" cx={SYDNEY[0]} cy={SYDNEY[1]} r="1.3" />
+    <path className="holo-line faint" d={TRACES.join(" ")} />
+    {TRACES.map((d, i) => (
+      <path key={i} className="holo-flow" pathLength="100" style={{ animationDelay: `${((i * 0.43) % 2.4).toFixed(2)}s` }} d={d} />
+    ))}
+    <path className="holo-line" d="M31 31 H69 V69 H31 Z M31 36 L36 31" />
+    <path className="holo-line" d={PINS.join(" ")} />
+    {PADS.map(([x, y], i) => (
+      <circle key={i} className="holo-pad" cx={x} cy={y} r="1.6" />
+    ))}
   </Holo>
 );
 
@@ -92,22 +101,42 @@ export const ThoughtsArt = () => (
   </Holo>
 );
 
-// About: an identity scan, fingerprint ridges under a sweeping scan line
-const ridges = [];
-for (let i = 0; i < 9; i++) {
-  const rx = 6 + i * 3.6;
-  const ry = 8 + i * 4.2;
-  // leave a gap in each ridge, like a fingerprint's breaks
-  const gap = 0.35 + (i % 3) * 0.25;
-  ridges.push(`M${(50 - rx * Math.sin(gap)).toFixed(2)} ${(54 - ry * Math.cos(gap)).toFixed(2)} A${rx} ${ry} 0 1 0 ${(50 + rx * Math.sin(gap)).toFixed(2)} ${(54 - ry * Math.cos(gap)).toFixed(2)}`);
+// About: a radar, a sweep turning round and contacts pinging back
+const BLIPS = [
+  [72, 30, 0.2],
+  [24, 64, 1.1],
+  [66, 76, 1.9],
+  [30, 26, 2.7],
+];
+const radarTicks = [];
+for (let i = 0; i < 48; i++) {
+  const a = (i / 48) * Math.PI * 2;
+  const r1 = i % 4 === 0 ? 43 : 45;
+  radarTicks.push(`M${(50 + Math.cos(a) * 47).toFixed(2)} ${(50 + Math.sin(a) * 47).toFixed(2)} L${(50 + Math.cos(a) * r1).toFixed(2)} ${(50 + Math.sin(a) * r1).toFixed(2)}`);
 }
 export const AboutArt = () => (
   <Holo className="holo-about">
-    {ridges.map((d, i) => (
-      <path key={i} className="holo-line" d={d} />
+    <defs>
+      <linearGradient id="holo-sweep" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stopColor="#6ff5ee" stopOpacity="0" />
+        <stop offset="100%" stopColor="#6ff5ee" stopOpacity="0.45" />
+      </linearGradient>
+    </defs>
+    <circle className="holo-line faint" cx="50" cy="50" r="22" />
+    <circle className="holo-line faint" cx="50" cy="50" r="32" />
+    <circle className="holo-line" cx="50" cy="50" r="42" />
+    <path className="holo-line faint" d="M50 4 V28 M50 72 V96 M4 50 H28 M72 50 H96" />
+    <path className="holo-line faint" d={radarTicks.join(" ")} />
+    <g className="holo-radar-sweep">
+      <path d="M50 50 L92 50 A42 42 0 0 0 82.2 23 Z" fill="url(#holo-sweep)" />
+      <path className="holo-line" d="M50 50 L92 50" />
+    </g>
+    {BLIPS.map(([x, y, delay], i) => (
+      <g key={i}>
+        <circle className="holo-pulse" style={{ animationDelay: `${delay}s` }} cx={x} cy={y} r="1.6" />
+        <circle className="holo-node twinkle" style={{ animationDelay: `${delay}s` }} cx={x} cy={y} r="1.2" />
+      </g>
     ))}
-    <path className="holo-line faint" d="M10 10 h10 M10 10 v10 M90 10 h-10 M90 10 v10 M10 90 h10 M10 90 v-10 M90 90 h-10 M90 90 v-10" />
-    <rect className="holo-scanbar" x="8" y="0" width="84" height="0.6" />
   </Holo>
 );
 

@@ -260,14 +260,21 @@ body.home-v2-body {
 .home-v2 .rc-link:focus-visible {
   outline: none;
   background: rgba(111, 245, 238, 0.14);
-  /* pressed in: shrinks with a deep inner glow (moving it back in z would
-     tuck it behind its own face, which then steals the hover) */
-  box-shadow: 0 0 22px rgba(111, 245, 238, 0.9), inset 0 0 26px rgba(111, 245, 238, 0.55);
-  transform: scale(0.9);
+  /* pressed in: a deep inner glow and its name sinks a little. The square
+     itself keeps its size: shrinking it would slip it out from under the
+     cursor at its edges, and the hover (and cursor) would flicker. */
+  box-shadow: 0 0 22px rgba(111, 245, 238, 0.9), inset 0 0 30px rgba(111, 245, 238, 0.6),
+    inset 0 0 0 3px rgba(111, 245, 238, 0.25);
+}
+
+.home-v2 .rc-link:hover .rc-link-text,
+.home-v2 .rc-link:focus-visible .rc-link-text {
+  transform: translateZ(2px) scale(0.92);
 }
 
 .home-v2 .rc-link:active {
-  transform: scale(0.84);
+  box-shadow: 0 0 26px rgba(111, 245, 238, 1), inset 0 0 40px rgba(111, 245, 238, 0.8),
+    inset 0 0 0 5px rgba(111, 245, 238, 0.35);
 }
 
 .home-v2 .rc-link:focus:not(:focus-visible) {
@@ -279,15 +286,17 @@ body.home-v2-body {
 .rc-link-text {
   position: relative;
   z-index: 2;
-  padding-left: 0.08em;
-  color: #f2fbff;
-  font: 700 calc(var(--rc-size) * 0.062) / 1 var(--home-font);
-  letter-spacing: 0.08em;
+  padding-left: 0.1em;
+  color: #effdff;
+  /* squared-off display face, in the cube's light */
+  font: 600 calc(var(--rc-size) * 0.05) / 1 "Orbitron", var(--home-font);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-shadow: 0 0 6px rgba(0, 0, 0, 0.9), 0 0 12px rgba(111, 245, 238, 0.7);
+  text-shadow: 0 0 4px rgba(0, 0, 0, 0.95), 0 0 10px rgba(111, 245, 238, 0.85), 0 0 22px rgba(0, 191, 243, 0.5);
   pointer-events: none;
   transform: translateZ(2px);
+  transition: transform 220ms cubic-bezier(0.3, 0, 0.2, 1);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
@@ -382,11 +391,20 @@ body.home-v2-body {
 }
 
 .holo-software .holo-flow {
+  stroke-dasharray: 12 88;
+  animation-duration: 2.4s;
+}
+
+.holo-pad {
+  fill: #02070f;
   stroke: var(--home-holo);
-  stroke-width: 0.5;
-  stroke-dasharray: 1.5 1.5;
-  opacity: 0.85;
-  animation: holo-march 1.6s linear infinite;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.holo-radar-sweep {
+  transform-origin: 50px 50px;
+  animation: holo-spin 4s linear infinite;
 }
 
 @keyframes holo-flow {
@@ -398,20 +416,10 @@ body.home-v2-body {
   }
 }
 
-@keyframes holo-march {
-  to {
-    stroke-dashoffset: -6;
-  }
-}
-
 .holo-node,
 .holo-dot,
 .holo-commit {
   fill: var(--home-holo);
-}
-
-.holo-node.is-bright {
-  fill: #fff;
 }
 
 .holo-node.twinkle {
@@ -442,11 +450,6 @@ body.home-v2-body {
     opacity: 0;
     transform: scale(4);
   }
-}
-
-.holo-map {
-  opacity: 0.9;
-  filter: hue-rotate(-35deg) saturate(1.3) brightness(2.2);
 }
 
 .holo-dot {
@@ -491,21 +494,6 @@ body.home-v2-body {
   100% {
     stroke-dashoffset: 0;
     opacity: 0;
-  }
-}
-
-.holo-scanbar {
-  fill: #fff;
-  opacity: 0.75;
-  animation: holo-scanbar 2.6s ease-in-out infinite alternate;
-}
-
-@keyframes holo-scanbar {
-  from {
-    transform: translateY(10px);
-  }
-  to {
-    transform: translateY(90px);
   }
 }
 
@@ -700,6 +688,12 @@ body.home-v2-body {
   /* clear of the UI version toggle in the corner */
   .home-v2-hints {
     bottom: 74px;
+  }
+
+  .home-v2 .home-v2-hint {
+    padding: 8px 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
   }
 }
 

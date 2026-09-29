@@ -133,7 +133,6 @@ const RubikCube = ({ links, onHint }) => {
 
   // --- the animation loop
   useEffect(() => {
-    const touch = isTouchDevice();
     let raf = null;
     let last = performance.now();
     const loop = (now) => {
@@ -148,13 +147,11 @@ const RubikCube = ({ links, onHint }) => {
       } else if (state.focus) {
         state.q = slerp(state.q, state.focus, 1 - Math.exp(-dt * 8));
       }
-      // the face being looked at: hovered (read from :hover rather than
-      // enter/leave events, which flicker as squares press in), or tapped
-      let hovered = -1;
-      if (!touch) {
-        const el = sceneRef.current.querySelector(".rc-face:hover");
-        hovered = el ? Number(el.dataset.face) : state.tapped;
-      } else hovered = state.tapped;
+      // the face being looked at: hovered, else tapped (phones) or focused.
+      // Checked every frame rather than fixed at load, so it keeps working
+      // when a window switches between touch and mouse.
+      const el = sceneRef.current.querySelector(".rc-face:hover");
+      const hovered = el ? Number(el.dataset.face) : state.tapped;
       const nextActive = state.select ? state.active : hovered;
       if (nextActive !== state.active) {
         state.active = nextActive;
@@ -166,7 +163,9 @@ const RubikCube = ({ links, onHint }) => {
         // tumble about a slowly wandering axis; a flick's spin eases into it
         const speed = reduceMotion || paused ? 0 : state.near ? AUTO_SPEED * 0.25 : AUTO_SPEED;
         const axis = normalize([Math.sin(t * 0.13 + 0.5), Math.cos(t * 0.09), 0.6 * Math.sin(t * 0.07 + 1.3), 0]);
-        const k = 1 - Math.exp(-dt * (paused ? 6 : 1.1));
+        // stop dead under the mouse: easing to a stop would slide the square
+        // being aimed at out from under the cursor
+        const k = paused ? 1 : 1 - Math.exp(-dt * 1.1);
         state.omega = state.omega.map((v, i) => v + (axis[i] * speed - v) * k);
         const w = Math.hypot(...state.omega);
         if (w > 1e-5) state.q = normalize(multiply(fromAxisAngle(...state.omega, w * dt), state.q));

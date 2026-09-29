@@ -26,6 +26,14 @@ const Home = () => {
   const [touch] = useState(isTouchDevice);
 
   useEffect(() => {
+    // the cube's lettering; loaded here so it travels with this page
+    if (!document.getElementById("home-v2-font")) {
+      const link = document.createElement("link");
+      link.id = "home-v2-font";
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap";
+      document.head.appendChild(link);
+    }
     document.body.classList.add("home-v2-body");
     return () => document.body.classList.remove("home-v2-body");
   }, []);
@@ -56,7 +64,7 @@ const Home = () => {
         ) : (
           <p className="home-v2-hint" aria-hidden="true">
             <span className="home-v2-hint-icon" aria-hidden="true" />
-            {touch ? "Swipe to turn, tap a face, then its centre" : "Drag to turn, click a centre square"}
+            {touch ? "Swipe to spin, tap to open" : "Drag to turn, click a centre square"}
           </p>
         )}
       </div>
