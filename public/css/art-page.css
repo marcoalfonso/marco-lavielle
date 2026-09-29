@@ -235,6 +235,71 @@ body {
   animation: art-materialise 900ms ease-out both;
 }
 
+/* before the first painting has loaded: a frame-sized placeholder */
+.art-painting-placeholder {
+  display: block;
+  width: min(36vw, 520px);
+  aspect-ratio: 4 / 3;
+  background: linear-gradient(170deg, rgba(61, 139, 255, 0.06), rgba(111, 245, 238, 0.02));
+}
+
+/* the next painting is on its way: dim the current one */
+.art-painting-img,
+.art-painting-placeholder {
+  transition: opacity 300ms ease, filter 300ms ease;
+}
+
+.art-painting.is-loading .art-painting-img {
+  opacity: 0.35;
+  filter: saturate(0.4);
+}
+
+.art-loading {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 16px;
+  border: 1px solid var(--art-line);
+  border-radius: 999px;
+  background: rgba(3, 10, 20, 0.7);
+  color: var(--art-holo);
+  font: 600 11px/1 var(--art-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  animation: art-loading-in 300ms ease-out 250ms both;
+}
+
+.art-loading-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 10px currentColor;
+  animation: art-loading-pulse 900ms ease-in-out infinite alternate;
+}
+
+@keyframes art-loading-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes art-loading-pulse {
+  from {
+    opacity: 0.25;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* each painting materialises from the bottom up, behind a scan line */
 @keyframes art-materialise {
   from {
@@ -461,12 +526,13 @@ body {
   }
 }
 
-/* iPhone only: orientation access must be requested from a tap */
+/* iPhone only: orientation access must be requested from a tap. It sits
+   on the platform, clear of the footer. */
 .art-hint {
   position: absolute;
   z-index: 2;
   left: 50%;
-  top: calc(100% + 6px);
+  top: 50%;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -480,7 +546,7 @@ body {
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   animation: art-hint-in 600ms ease-out 1s both;
 }
 
@@ -506,11 +572,11 @@ body {
 @keyframes art-hint-in {
   from {
     opacity: 0;
-    transform: translate(-50%, 6px);
+    transform: translate(-50%, calc(-50% + 6px));
   }
   to {
     opacity: 1;
-    transform: translate(-50%, 0);
+    transform: translate(-50%, -50%);
   }
 }
 
@@ -681,6 +747,10 @@ body {
 
   .art-stage {
     padding: 16px 0 8px;
+  }
+
+  .art-painting-placeholder {
+    width: 80vw;
   }
 
   .art-painting-img {
