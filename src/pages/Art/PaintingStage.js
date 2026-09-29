@@ -26,7 +26,7 @@ const SWIPE = 45; // px
 const desktopMove = { x: 18, y: 12, turn: 14, tip: 10 };
 const phoneMove = () => ({ x: window.innerWidth * 0.08, y: window.innerHeight * 0.05, turn: 12, tip: 9 });
 
-const Platform = ({ painting }) => {
+const Platform = ({ spillSrc }) => {
   const ticks = [];
   for (let i = 0; i < 72; i++) {
     const a = (i / 72) * Math.PI * 2;
@@ -37,7 +37,7 @@ const Platform = ({ painting }) => {
     <div className="art-platform" aria-hidden="true">
       <div className="art-platform-disc">
         {/* the painting's colours spilling onto the platform */}
-        <div className="art-platform-spill" style={{ backgroundImage: `url(${painting.link})` }} />
+        <div className="art-platform-spill" style={{ backgroundImage: `url(${spillSrc})` }} />
         <svg viewBox="-72 -72 144 144">
           <defs>
             <radialGradient id="art-platform-glow">
@@ -59,12 +59,31 @@ const Platform = ({ painting }) => {
   );
 };
 
-const PaintingStage = ({ painting, name, index, onNext, onPrev }) => {
+const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded }) => {
   const floatRef = useRef(null);
   const baseRef = useRef(null);
   const orientationRef = useRef(null); // { start } once listening is set up
   const swipeRef = useRef(null);
   const [showHint, setShowHint] = useState(false);
+  // The painting on show only changes once the next one has fully
+  // downloaded, so a half-loaded image never appears; until then the
+  // previous one stays up, dimmed, with a loading readout.
+  const [shown, setShown] = useState(null); // { src, name, index }
+  const loading = !shown || shown.src !== src;
+
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+    img.onload = img.onerror = () => {
+      if (cancelled) return;
+      setShown({ src, name, index });
+      if (onLoaded) onLoaded();
+    };
+    img.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [src]);
 
   const requestOrientation = (e) => {
     e.stopPropagation();
@@ -223,9 +242,27 @@ const PaintingStage = ({ painting, name, index, onNext, onPrev }) => {
       <div className="art-float-wrap">
         <div className="art-float" ref={floatRef}>
           <div className="art-bob">
-            <button type="button" className="art-painting" onClick={onClick} aria-label="Next painting">
-              <img key={index} className="art-painting-img" src={painting.link} alt={name} />
-              <span key={`scan-${index}`} className="art-scan" aria-hidden="true" />
+            <button
+              type="button"
+              className={loading ? "art-painting is-loading" : "art-painting"}
+              onClick={onClick}
+              aria-label="Next painting"
+              aria-busy={loading}
+            >
+              {shown ? (
+                <>
+                  <img key={shown.index} className="art-painting-img" src={shown.src} alt={shown.name} />
+                  <span key={`scan-${shown.index}`} className="art-scan" aria-hidden="true" />
+                </>
+              ) : (
+                <span className="art-painting-placeholder" />
+              )}
+              {loading && (
+                <span className="art-loading" aria-hidden="true">
+                  <span className="art-loading-dot" />
+                  Loading
+                </span>
+              )}
             </button>
             <span className="art-corner art-corner-tl" aria-hidden="true" />
             <span className="art-corner art-corner-tr" aria-hidden="true" />
@@ -237,7 +274,7 @@ const PaintingStage = ({ painting, name, index, onNext, onPrev }) => {
       <div className="art-base" ref={baseRef}>
         <div className="art-beam" aria-hidden="true" />
         <div className="art-shadow" aria-hidden="true" />
-        <Platform painting={painting} />
+        <Platform spillSrc={spillSrc} />
         {showHint && (
           <button type="button" className="art-hint" onClick={requestOrientation}>
             <span className="art-hint-icon" aria-hidden="true" />

@@ -13,9 +13,17 @@ const paintingName = (painting) => {
 
 const NAV = [
   { href: '/', label: 'Home' },
+  { href: '/software', label: 'Software' },
   { href: '/art', label: 'Paintings', active: true },
+  { href: '/journal', label: 'Thoughts' },
   { href: '/about', label: 'Contact' },
 ]
+
+// Every painting also has a 960px-wide copy ("name-960.jpg"): phones get it
+// in place of the full-size image, and the platform's blurred colour spill
+// always uses it.
+const smallSrc = (painting) => painting.link.replace(/\.jpg$/, '-960.jpg')
+const isSmallScreen = () => window.matchMedia && window.matchMedia('(max-width: 700px)').matches
 
 // a fresh order on every page load
 const shuffle = (list) => {
@@ -30,25 +38,25 @@ const shuffle = (list) => {
 export class Art extends Component {
   state = { index: 0, paintings: shuffle(this.props.paintings) }
 
+  small = isSmallScreen()
+
+  imageSrc = (painting) => (this.small ? smallSrc(painting) : painting.link)
+
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown)
-    this.preloadAround(0)
   }
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
   }
 
-  componentDidUpdate(prevProps, prevState) {
-    if (prevState.index !== this.state.index) this.preloadAround(this.state.index)
-  }
-
-  // fetch the neighbours so switching paintings doesn't wait on the network
-  preloadAround = (index) => {
-    const { paintings } = this.state
+  // Once the painting on show has loaded, fetch its neighbours so switching
+  // doesn't wait on the network (not before: they'd compete with it).
+  preloadAround = () => {
+    const { index, paintings } = this.state
     ;[1, -1].forEach((step) => {
       const img = new Image()
-      img.src = paintings[(index + step + paintings.length) % paintings.length].link
+      img.src = this.imageSrc(paintings[(index + step + paintings.length) % paintings.length])
     })
   }
 
@@ -92,9 +100,11 @@ export class Art extends Component {
         </header>
 
         <PaintingStage
-          painting={painting}
+          src={this.imageSrc(painting)}
+          spillSrc={smallSrc(painting)}
           name={paintingName(painting)}
           index={index}
+          onLoaded={this.preloadAround}
           onNext={this.onClickForward}
           onPrev={this.onClickBack}
         />
