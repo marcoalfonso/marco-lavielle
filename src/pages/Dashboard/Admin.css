@@ -511,4 +511,25 @@ body.admin-body {
     min-height: 240px;
     padding: 14px;
   }
+
+  /* the panels' brackets sit closer, clear of the screen's edges */
+  .admin .holo-corner.is-tl,
+  .admin .holo-corner.is-tr {
+    top: -9px;
+  }
+
+  .admin .holo-corner.is-bl,
+  .admin .holo-corner.is-br {
+    bottom: -9px;
+  }
+
+  .admin .holo-corner.is-tl,
+  .admin .holo-corner.is-bl {
+    left: -9px;
+  }
+
+  .admin .holo-corner.is-tr,
+  .admin .holo-corner.is-br {
+    right: -9px;
+  }
 }

@@ -86,6 +86,26 @@ body.signin-v2-body {
   transform: translateZ(18px);
 }
 
+.signin-v2-panel .holo-corner.is-tl,
+.signin-v2-panel .holo-corner.is-tr {
+  top: -14px;
+}
+
+.signin-v2-panel .holo-corner.is-bl,
+.signin-v2-panel .holo-corner.is-br {
+  bottom: -14px;
+}
+
+.signin-v2-panel .holo-corner.is-tl,
+.signin-v2-panel .holo-corner.is-bl {
+  left: -14px;
+}
+
+.signin-v2-panel .holo-corner.is-tr,
+.signin-v2-panel .holo-corner.is-br {
+  right: -14px;
+}
+
 .signin-v2-form {
   position: relative;
   display: flex;
@@ -164,12 +184,6 @@ body.signin-v2-body {
 
   .signin-v2 .signin-v2-title {
     font-size: 24px;
-  }
-
-  /* brackets stand only a little off the glass, so they stay clear of the
-     screen's edges */
-  .signin-v2-panel .holo-corner {
-    transform: translateZ(8px);
   }
 
   /* a gentler resting lean on a narrow screen */

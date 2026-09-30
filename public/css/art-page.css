@@ -793,27 +793,6 @@ body {
     margin-left: auto;
   }
 
-  /* the painting's brackets hug it more closely on a narrow screen */
-  .art-corner-tl,
-  .art-corner-tr {
-    top: -8px;
-  }
-
-  .art-corner-bl,
-  .art-corner-br {
-    bottom: -8px;
-  }
-
-  .art-corner-tl,
-  .art-corner-bl {
-    left: -8px;
-  }
-
-  .art-corner-tr,
-  .art-corner-br {
-    right: -8px;
-  }
-
   .art-stage {
     padding: 16px 0 8px;
   }
