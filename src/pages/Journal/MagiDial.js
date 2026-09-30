@@ -2,7 +2,7 @@ import React from "react";
 
 // The journal's dial, after the MAGI screens: concentric rings of maze-like
 // segments turning slowly (two sets, opposite ways), an outer band of glyph
-// blocks, and a three-armed core whose arms hold the posts. Each ring set is
+// blocks, and a three-armed core whose arms are social channels. Each ring set is
 // its own <svg> so its turning is a cheap layer rotation.
 
 // seeded, so the maze is the same on every visit
@@ -72,9 +72,32 @@ const TICKS = Array.from({ length: 180 }, (_, i) => {
 }).join("");
 
 const ARM_ANGLES = [0, -120, 120]; // right, upper left, lower left
-const pad = (n) => String(n).padStart(3, "0");
 
-const MagiDial = ({ arms, selected, onSelect }) => (
+// line icons, drawn in the dial's light
+const ICONS = {
+  linkedin: (
+    <>
+      <rect x="2" y="2" width="20" height="20" rx="4" />
+      <path d="M7 10v7M7 7v.01M11 17v-7M11 13.5c0-2 1.2-3.5 3-3.5s3 1.2 3 3.5V17" />
+    </>
+  ),
+  instagram: (
+    <>
+      <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
+      <circle cx="12" cy="12" r="4.5" />
+      <path d="M17.5 6.5v.01" />
+    </>
+  ),
+  twitter: <path d="M4 4l16 16M20 4L4 20" />,
+};
+
+const SocialIcon = ({ name }) => (
+  <svg className="magi-social-icon" viewBox="0 0 24 24" aria-hidden="true">
+    {ICONS[name]}
+  </svg>
+);
+
+const MagiDial = ({ channels }) => (
   <div className="magi">
     <svg className="magi-layer magi-static" viewBox="-300 -300 600 600" aria-hidden="true">
       <circle className="magi-line is-faint" r="72" />
@@ -93,52 +116,56 @@ const MagiDial = ({ arms, selected, onSelect }) => (
       <circle className="magi-glyphs is-fine" r="284" />
     </svg>
 
-    {arms.map((arm, a) => {
+    {/* the three arms: one social channel each, a single link made of four
+        slanted rows (header, identity, a ticker of what's there, and a call
+        to action with a live signal) */}
+    {channels.map((ch, a) => {
       const angle = ARM_ANGLES[a];
       const flipped = Math.abs(angle) > 90;
       return (
         <div
-          key={arm.name}
+          key={ch.id}
           className={flipped ? "magi-arm is-flipped" : "magi-arm"}
-          style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)` }}
+          style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)`, "--arm": a }}
         >
-          <div className="magi-arm-stack">
-            {/* a link to a profile: a signal light, a scanning sweep and a
-                ticker cycling through lines about it */}
-            <a
-              className="magi-arm-head"
-              style={{ "--arm": a }}
-              href={arm.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${arm.name}: ${arm.info.slice(1, -1).join(", ")} (opens in a new tab)`}
-            >
-              <span className="magi-arm-signal" aria-hidden="true" />
-              <span className="magi-ticker" aria-hidden="true">
-                <span className="magi-ticker-track" style={{ "--lines": arm.info.length }}>
-                  {arm.info.concat(arm.info[0]).map((line, i) => (
+          <a
+            className="magi-social"
+            href={ch.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`${ch.name}, ${ch.handle} (opens in a new tab)`}
+          >
+            <span className="magi-social-row is-head" style={{ "--build": 0 }}>
+              <span className="magi-social-signal" aria-hidden="true" />
+              <SocialIcon name={ch.id} />
+              <span className="magi-social-name">{ch.name}</span>
+              <span className="magi-social-channel">{ch.channel}</span>
+            </span>
+            <span className="magi-social-row is-handle" style={{ "--build": 1 }}>
+              {ch.handle}
+            </span>
+            <span className="magi-social-row is-ticker" style={{ "--build": 2 }} aria-hidden="true">
+              <span className="magi-ticker">
+                <span className="magi-ticker-track">
+                  {ch.feed.concat(ch.feed[0]).map((line, i) => (
                     <span key={i} className="magi-ticker-line">
                       {line}
                     </span>
                   ))}
                 </span>
               </span>
-            </a>
-            {arm.entries.map(({ post, index, number }, row) => (
-              <a
-                key={post.slug}
-                style={{ "--build": a * 4 + row + 1 }}
-                href={`/journal/${post.slug}`}
-                className={index === selected ? "magi-arm-row is-selected" : "magi-arm-row"}
-                onPointerEnter={(e) => e.pointerType === "mouse" && onSelect(index)}
-                onFocus={() => onSelect(index)}
-                tabIndex={-1}
-              >
-                <span className="magi-arm-num">{pad(number)}</span>
-                <span className="magi-arm-title">{post.title}</span>
-              </a>
-            ))}
-          </div>
+            </span>
+            <span className="magi-social-row is-action" style={{ "--build": 3 }}>
+              <span className="magi-social-bars" aria-hidden="true">
+                <span />
+                <span />
+                <span />
+                <span />
+                <span />
+              </span>
+              <span className="magi-social-cta">{ch.action}</span>
+            </span>
+          </a>
         </div>
       );
     })}

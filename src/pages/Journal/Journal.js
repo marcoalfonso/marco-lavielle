@@ -8,10 +8,9 @@ import MagiDial from "./MagiDial";
 import "components/holo/holo.css";
 import "./Journal.css";
 
-// Journal: the post index as a MAGI-style screen in the site's light. The
-// dial's three arms hold the posts (newest first, in three archive groups),
-// corner readouts give the count and two live counters, and the entry log
-// below lists every post. Pointing at a post in either lights it in both.
+// Journal: a MAGI-style screen in the site's light. The dial's three arms
+// are channels to the social profiles, corner readouts give the entry count
+// and two live counters, and the entry log below lists every post.
 
 const pad = (n, width = 3) => String(n).padStart(width, "0");
 const withCommas = (n) => pad(n, 9).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -20,31 +19,37 @@ const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).ge
 // "2020-12-01T..." -> "2020.12.01"
 const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
 
-// the arms' heads: a link to each profile, with a ticker rolling through
-// five lines about it
-const SOCIALS = [
+// the dial's three arms: a channel per social profile; the ticker rolls
+// through five lines about what's there
+const CHANNELS = [
   {
+    id: "linkedin",
     name: "LinkedIn",
+    channel: "CH-01",
+    handle: "Marco Lavielle",
     href: "https://www.linkedin.com/in/marcolavielle/",
-    info: ["LinkedIn", "Marco Lavielle", "Software engineer", "Sydney, Australia", "Connect ›"],
+    feed: ["Software engineer", "Sydney, Australia", "Work history", "Projects", "Recommendations"],
+    action: "Connect ›",
   },
   {
+    id: "instagram",
     name: "Instagram",
+    channel: "CH-02",
+    handle: "@cuban_papi_chulo",
     href: "http://instagram.com/cuban_papi_chulo",
-    info: ["Instagram", "@cuban_papi_chulo", "Paintings & life", "Behind the canvas", "Follow ›"],
+    feed: ["Paintings", "Works in progress", "Studio life", "Sydney", "Behind the canvas"],
+    action: "Follow ›",
   },
   {
-    name: "Twitter",
+    id: "twitter",
+    name: "Twitter / X",
+    channel: "CH-03",
+    handle: "@marcolavielle",
     href: "https://twitter.com/marcolavielle",
-    info: ["Twitter / X", "@marcolavielle", "Code & thoughts", "Short-form notes", "Follow ›"],
+    feed: ["Code", "Thoughts", "Short-form notes", "Tech links", "Replies"],
+    action: "Follow ›",
   },
 ];
-
-// the posts, newest first, split across the three arms
-const toArms = (posts) => {
-  const size = Math.ceil(posts.length / 3);
-  return SOCIALS.map((social, a) => ({ ...social, entries: posts.slice(a * size, (a + 1) * size) }));
-};
 
 const HudBox = ({ className, label, value, unit, note }) => (
   <div className={`magi-hud ${className}`}>
@@ -116,7 +121,7 @@ export class Journal extends Component {
             value={first ? withCommas(seconds(first.published)) : "···,···,···"}
             unit="sec."
           />
-          <MagiDial arms={toArms(entries)} selected={selected} onSelect={this.select} />
+          <MagiDial channels={CHANNELS} />
         </section>
 
         <section className="magi-log" aria-label="All entries">
