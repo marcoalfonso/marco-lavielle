@@ -95,14 +95,44 @@ export class Journal extends Component {
   // and browsers only allow a new tab straight from the click.
   onClickCapture = (e) => {
     const link = e.target.closest && e.target.closest("a[href]");
-    if (!link || this.state.leaving) return;
+    if (!link || this.state.leaving || this.centring) return;
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
-    this.setState({ leaving: true });
-    this.leaveTimer = setTimeout(() => window.location.assign(link.href), LEAVE_MS);
+    // from further down the page (the entry log), bring the dial to the
+    // middle of the screen first, so the compress can be seen
+    this.centring = true;
+    this.centreDial().then(() => {
+      this.centring = false;
+      this.setState({ leaving: true });
+      this.leaveTimer = setTimeout(() => window.location.assign(link.href), LEAVE_MS);
+    });
   };
+
+  // smooth-scroll the dial to the middle of the screen; resolves once there
+  // (or straight away if it already is)
+  centreDial = () =>
+    new Promise((done) => {
+      const dial = document.querySelector(".magi");
+      if (!dial) return done();
+      const r = dial.getBoundingClientRect();
+      const target = Math.max(0, Math.round(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2));
+      if (Math.abs(target - window.scrollY) < 40) return done();
+      window.scrollTo({ top: target, behavior: "smooth" });
+      // wait until the page stops moving (scrollend isn't everywhere yet)
+      const started = Date.now();
+      let last = window.scrollY;
+      let still = 0;
+      const check = () => {
+        const y = window.scrollY;
+        still = Math.abs(y - last) < 1 ? still + 1 : 0;
+        last = y;
+        if (still >= 4 || Date.now() - started > 1200) done();
+        else requestAnimationFrame(check);
+      };
+      requestAnimationFrame(check);
+    });
 
   // back to this page from the next one: undo the compress if the browser
   // restored it as it was left
