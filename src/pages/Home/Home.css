@@ -560,63 +560,99 @@ body.home-v2-body {
   transition: opacity 600ms ease;
 }
 
-/* --- all colours: the cube's light cycles through the spectrum -------- */
-/* The cyan is turned through every hue; each face starts at a different
-   point of the cycle, so the cube is never one colour. The filter goes on
-   the faces (they're flat), never on the cube, which would flatten it. */
+/* --- all colours ------------------------------------------------------ */
+/* Every square has its own colour (--cell-hue, random per square) and the
+   whole face turns through the spectrum, so each square keeps changing
+   colour while staying different from its neighbours. Squares rise and
+   sink on their own random timing (--rise-* set per square from script). Everything that moves is a transform or an
+   opacity, which the graphics card handles without repainting; the faces
+   stay flat layers (Safari needs that), so a square "rises" by growing and
+   brightening. */
 .home-v2.is-spectrum .rc-face {
   animation: rc-spectrum 9s linear infinite;
-  animation-delay: var(--rc-hue-delay, 0s);
-}
-
-.home-v2.is-spectrum .rc-face-right {
-  --rc-hue-delay: -1.5s;
-}
-
-.home-v2.is-spectrum .rc-face-back {
-  --rc-hue-delay: -3s;
-}
-
-.home-v2.is-spectrum .rc-face-left {
-  --rc-hue-delay: -4.5s;
-}
-
-.home-v2.is-spectrum .rc-face-top {
-  --rc-hue-delay: -6s;
-}
-
-.home-v2.is-spectrum .rc-face-bottom {
-  --rc-hue-delay: -7.5s;
 }
 
 @keyframes rc-spectrum {
   from {
-    filter: hue-rotate(0deg) saturate(1.6) brightness(1.15);
+    filter: hue-rotate(0deg) saturate(1.5) brightness(1.1);
   }
   to {
-    filter: hue-rotate(360deg) saturate(1.6) brightness(1.15);
+    filter: hue-rotate(360deg) saturate(1.5) brightness(1.1);
   }
 }
 
-/* and glowing more: brighter edges, wider halos, faster light waves */
 .home-v2.is-spectrum .rc-cell {
-  border-color: rgba(111, 245, 238, 0.85);
-  box-shadow: 0 0 14px rgba(0, 191, 243, 0.8), 0 0 28px rgba(0, 191, 243, 0.35),
-    inset 0 0 16px rgba(0, 191, 243, 0.3);
+  border-color: hsl(var(--cell-hue, 183) 100% 68%);
+  background: hsl(var(--cell-hue, 183) 90% 45% / 0.06);
+  box-shadow: 0 0 12px hsl(var(--cell-hue, 183) 100% 58% / 0.75), 0 0 26px hsl(var(--cell-hue, 183) 100% 55% / 0.3),
+    inset 0 0 14px hsl(var(--cell-hue, 183) 100% 60% / 0.35);
+  animation: rc-rise var(--rise-dur, 2s) ease-in-out var(--rise-delay, 0s) infinite alternate;
 }
 
+/* mostly resting, now and then lifting right up */
+@keyframes rc-rise {
+  0%,
+  35% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(1.13);
+  }
+}
+
+/* the extra glow of a raised square: drawn once, faded in as it rises */
+.rc-cell-glow {
+  display: none;
+}
+
+.home-v2.is-spectrum .rc-cell-glow {
+  position: absolute;
+  inset: -1px;
+  display: block;
+  border: 1px solid hsl(var(--cell-hue, 183) 100% 80%);
+  border-radius: inherit;
+  background: hsl(var(--cell-hue, 183) 100% 55% / 0.14);
+  box-shadow: 0 0 30px hsl(var(--cell-hue, 183) 100% 60% / 0.95), 0 0 56px hsl(var(--cell-hue, 183) 100% 55% / 0.45),
+    inset 0 0 22px hsl(var(--cell-hue, 183) 100% 65% / 0.45);
+  opacity: 0;
+  pointer-events: none;
+  animation: rc-lift-glow var(--rise-dur, 2s) ease-in-out var(--rise-delay, 0s) infinite alternate;
+}
+
+@keyframes rc-lift-glow {
+  0%,
+  35% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* the light waves across the squares take each square's colour */
 .home-v2.is-spectrum .rc-cell::after {
-  box-shadow: 0 0 24px rgba(111, 245, 238, 1), inset 0 0 18px rgba(111, 245, 238, 0.4);
+  border-color: hsl(var(--cell-hue, 183) 100% 75%);
+  box-shadow: 0 0 24px hsl(var(--cell-hue, 183) 100% 60%), inset 0 0 18px hsl(var(--cell-hue, 183) 100% 60% / 0.4);
   animation-duration: 2.6s;
 }
 
 .home-v2.is-spectrum .rc-link {
-  box-shadow: 0 0 20px rgba(111, 245, 238, 0.95), 0 0 36px rgba(0, 191, 243, 0.45),
-    inset 0 0 20px rgba(111, 245, 238, 0.35);
+  border-color: hsl(var(--cell-hue, 183) 100% 75%);
+}
+
+/* hold a square still under the mouse, so it doesn't slip away */
+.home-v2.is-spectrum .rc-cell:hover,
+.home-v2.is-spectrum .rc-cell:hover .rc-cell-glow {
+  animation-play-state: paused;
 }
 
 .home-v2.is-spectrum .rc-link-text {
-  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(111, 245, 238, 1), 0 0 28px rgba(0, 191, 243, 0.7);
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.8), 0 0 12px hsl(var(--cell-hue, 183) 100% 65%), 0 0 26px hsl(var(--cell-hue, 183) 100% 55% / 0.7);
+}
+
+/* the folding pick: every edge flares in its own colour */
+.home-v2.is-spectrum .rc-scene.is-collapsing .rc-cell {
+  border-color: hsl(var(--cell-hue, 183) 100% 75%);
 }
 
 /* the switch itself: bottom left, a black swatch and a spectrum swatch */
@@ -826,10 +862,7 @@ body.home-v2-body {
     animation: none !important;
   }
 
-  /* all colours without the cycling: each face keeps its own hue */
-  .home-v2.is-spectrum .rc-face {
-    filter: hue-rotate(calc(var(--rc-hue-delay, 0s) / -9s * 360deg)) saturate(1.6) brightness(1.15);
-  }
+  /* all colours without the motion: each square simply keeps its colour */
 
   .flash-letter {
     opacity: 1;
