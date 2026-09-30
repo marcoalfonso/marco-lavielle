@@ -35,6 +35,28 @@ const DOT_MS = 460;
 // Colours mode: every square has its own colour, rises and sinks and sends
 // light up on its own random timing (fixed for the visit).
 const rand = (min, max) => min + Math.random() * (max - min);
+// Colours mode: flares bursting straight out of the faces, like the sun's.
+// Each sits on a random square of a face and stands along the face's normal
+// (they live in the cube's 3D space, not in the flat faces).
+const CELL_OFFSETS = [-0.32, 0, 0.32]; // square centres, as a share of the face
+const FLARES_PER_FACE = 5;
+const makeFlares = () =>
+  FACES.flatMap((face, f) => {
+    const cells = [0, 1, 2, 3, 4, 5, 6, 7, 8].sort(() => Math.random() - 0.5).slice(0, FLARES_PER_FACE);
+    return cells.map((cell) => ({
+      key: `${f}-${cell}`,
+      face,
+      x: CELL_OFFSETS[cell % 3],
+      y: CELL_OFFSETS[Math.floor(cell / 3)],
+      style: {
+        "--flare-len": rand(0.45, 1.15).toFixed(2),
+        "--flare-hue": Math.round(rand(0, 360)),
+        "--flare-dur": `${rand(1.6, 3.4).toFixed(2)}s`,
+        "--flare-delay": `${rand(-3.4, 0).toFixed(2)}s`,
+      },
+    }));
+  });
+
 const makeCellTimings = () =>
   FACES.map(() =>
     Array.from({ length: 9 }, () => ({
@@ -73,6 +95,7 @@ const RubikCube = ({ links, onHint }) => {
   const [collapsing, setCollapsing] = useState(false);
   const [active, setActive] = useState(-1);
   const [timings] = useState(makeCellTimings);
+  const [flares] = useState(makeFlares);
 
   // phones: the cube follows the phone's tilt, on top of its own tumbling
   const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
@@ -348,8 +371,25 @@ const RubikCube = ({ links, onHint }) => {
               </div>
             );
           })}
+          {/* colours mode: flares standing straight out of the faces */}
+          {flares.map((flare) => (
+            <div
+              key={flare.key}
+              className="rc-flare"
+              aria-hidden="true"
+              style={{
+                ...flare.style,
+                // a hair off the face: planes meeting it exactly leave dark seams
+                transform: `${flare.face.rotate} translateZ(calc(var(--rc-half) + 8px)) translate(calc(var(--rc-size) * ${flare.x}), calc(var(--rc-size) * ${flare.y}))`,
+              }}
+            >
+              <span className="rc-flare-plane" />
+              <span className="rc-flare-plane is-crossed" />
+            </div>
+          ))}
         </div>
       </div>
+      <span className="rc-corona" aria-hidden="true" />
       <span className="rc-dot" ref={dotRef} aria-hidden="true" />
     </div>
   );
