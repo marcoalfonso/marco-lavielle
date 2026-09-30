@@ -258,17 +258,29 @@ html.journal-html body {
 .magi-arm-head {
   --lh: calc(var(--d) * 0.038);
   position: relative;
-  width: 70%;
+  width: 100%;
   overflow: hidden;
   border-width: 1px;
   border-color: rgba(111, 245, 238, 0.45);
   background: rgba(2, 14, 22, 0.92) repeating-linear-gradient(90deg, rgba(0, 191, 243, 0.1) 0 2px, transparent 2px 5px);
   color: var(--holo-light);
   text-shadow: 0 0 8px rgba(111, 245, 238, 0.7);
-  cursor: default;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
   font: 700 calc(var(--d) * 0.015) / 1 var(--holo-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.journal-magi .magi-arm-head:hover,
+.journal-magi .magi-arm-head:focus-visible {
+  border-color: var(--holo-light);
+  background-color: rgba(111, 245, 238, 0.18);
+  box-shadow: 0 0 16px rgba(111, 245, 238, 0.7);
+  color: #fff;
+  outline: none;
+  text-decoration: none;
 }
 
 /* signal light */

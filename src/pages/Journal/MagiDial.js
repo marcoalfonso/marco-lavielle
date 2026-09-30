@@ -103,9 +103,16 @@ const MagiDial = ({ arms, selected, onSelect }) => (
           style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)` }}
         >
           <div className="magi-arm-stack">
-            {/* a status readout, not a link: a signal light, a scanning sweep
-                and a ticker cycling through facts about this archive */}
-            <span className="magi-arm-head" style={{ "--arm": a }} aria-label={arm.info.join(", ")}>
+            {/* a link to a profile: a signal light, a scanning sweep and a
+                ticker cycling through lines about it */}
+            <a
+              className="magi-arm-head"
+              style={{ "--arm": a }}
+              href={arm.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${arm.name}: ${arm.info.slice(1, -1).join(", ")} (opens in a new tab)`}
+            >
               <span className="magi-arm-signal" aria-hidden="true" />
               <span className="magi-ticker" aria-hidden="true">
                 <span className="magi-ticker-track" style={{ "--lines": arm.info.length }}>
@@ -116,7 +123,7 @@ const MagiDial = ({ arms, selected, onSelect }) => (
                   ))}
                 </span>
               </span>
-            </span>
+            </a>
             {arm.entries.map(({ post, index, number }, row) => (
               <a
                 key={post.slug}

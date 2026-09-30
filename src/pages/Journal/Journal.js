@@ -20,34 +20,30 @@ const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).ge
 // "2020-12-01T..." -> "2020.12.01"
 const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
 
-const wordCount = (html) => ((html || "").replace(/<[^>]*>/g, " ").match(/\S+/g) || []).length;
-const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+// the arms' heads: a link to each profile, with a ticker rolling through
+// five lines about it
+const SOCIALS = [
+  {
+    name: "LinkedIn",
+    href: "https://www.linkedin.com/in/marcolavielle/",
+    info: ["LinkedIn", "Marco Lavielle", "Software engineer", "Sydney, Australia", "Connect ›"],
+  },
+  {
+    name: "Instagram",
+    href: "http://instagram.com/cuban_papi_chulo",
+    info: ["Instagram", "@cuban_papi_chulo", "Paintings & life", "Behind the canvas", "Follow ›"],
+  },
+  {
+    name: "Twitter",
+    href: "https://twitter.com/marcolavielle",
+    info: ["Twitter / X", "@marcolavielle", "Code & thoughts", "Short-form notes", "Follow ›"],
+  },
+];
 
-// split into three archive arms of near-equal size, newest first; each arm's
-// head reads out facts about its group
+// the posts, newest first, split across the three arms
 const toArms = (posts) => {
   const size = Math.ceil(posts.length / 3);
-  return [0, 1, 2]
-    .map((a) => {
-      const entries = posts.slice(a * size, (a + 1) * size);
-      if (!entries.length) return null;
-      const newest = entries[0].post.published.slice(0, 4);
-      const oldest = entries[entries.length - 1].post.published.slice(0, 4);
-      const years = newest === oldest ? newest : `${newest}–${oldest}`;
-      const words = entries.reduce((sum, { post }) => sum + wordCount(post.body), 0);
-      return {
-        name: `Archive-${a + 1}`,
-        info: [
-          `Archive-${a + 1}`,
-          `${pad(entries.length, 2)} entries`,
-          years,
-          `Last ${stamp(entries[0].post.published)}`,
-          `${thousands(words)} words`,
-        ],
-        entries,
-      };
-    })
-    .filter(Boolean);
+  return SOCIALS.map((social, a) => ({ ...social, entries: posts.slice(a * size, (a + 1) * size) }));
 };
 
 const HudBox = ({ className, label, value, unit, note }) => (
