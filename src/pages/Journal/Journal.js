@@ -20,7 +20,11 @@ const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).ge
 // "2020-12-01T..." -> "2020.12.01"
 const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
 
-// split into three archive arms of near-equal size, newest first
+const wordCount = (html) => ((html || "").replace(/<[^>]*>/g, " ").match(/\S+/g) || []).length;
+const thousands = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+// split into three archive arms of near-equal size, newest first; each arm's
+// head reads out facts about its group
 const toArms = (posts) => {
   const size = Math.ceil(posts.length / 3);
   return [0, 1, 2]
@@ -29,7 +33,19 @@ const toArms = (posts) => {
       if (!entries.length) return null;
       const newest = entries[0].post.published.slice(0, 4);
       const oldest = entries[entries.length - 1].post.published.slice(0, 4);
-      return { name: `Archive-${a + 1} · ${newest === oldest ? newest : `${newest}–${oldest}`}`, entries };
+      const years = newest === oldest ? newest : `${newest}–${oldest}`;
+      const words = entries.reduce((sum, { post }) => sum + wordCount(post.body), 0);
+      return {
+        name: `Archive-${a + 1}`,
+        info: [
+          `Archive-${a + 1}`,
+          `${pad(entries.length, 2)} entries`,
+          years,
+          `Last ${stamp(entries[0].post.published)}`,
+          `${thousands(words)} words`,
+        ],
+        entries,
+      };
     })
     .filter(Boolean);
 };
@@ -114,7 +130,7 @@ export class Journal extends Component {
           </h2>
           <ol className="magi-log-list">
             {entries.map(({ post, index, number }) => (
-              <li key={post.slug}>
+              <li key={post.slug} style={{ "--i": index }}>
                 <a
                   href={`/journal/${post.slug}`}
                   className={index === selected ? "magi-entry is-selected" : "magi-entry"}

@@ -103,10 +103,24 @@ const MagiDial = ({ arms, selected, onSelect }) => (
           style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)` }}
         >
           <div className="magi-arm-stack">
-            <span className="magi-arm-head">{arm.name}</span>
-            {arm.entries.map(({ post, index, number }) => (
+            {/* a status readout, not a link: a signal light, a scanning sweep
+                and a ticker cycling through facts about this archive */}
+            <span className="magi-arm-head" style={{ "--arm": a }} aria-label={arm.info.join(", ")}>
+              <span className="magi-arm-signal" aria-hidden="true" />
+              <span className="magi-ticker" aria-hidden="true">
+                <span className="magi-ticker-track" style={{ "--lines": arm.info.length }}>
+                  {arm.info.concat(arm.info[0]).map((line, i) => (
+                    <span key={i} className="magi-ticker-line">
+                      {line}
+                    </span>
+                  ))}
+                </span>
+              </span>
+            </span>
+            {arm.entries.map(({ post, index, number }, row) => (
               <a
                 key={post.slug}
+                style={{ "--build": a * 4 + row + 1 }}
                 href={`/journal/${post.slug}`}
                 className={index === selected ? "magi-arm-row is-selected" : "magi-arm-row"}
                 onPointerEnter={(e) => e.pointerType === "mouse" && onSelect(index)}

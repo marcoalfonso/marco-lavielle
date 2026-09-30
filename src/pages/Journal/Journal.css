@@ -208,15 +208,6 @@ html.journal-html body {
   animation: magi-spin 200s linear infinite;
 }
 
-.magi-spin.is-b {
-  animation-duration: 260s;
-  animation-direction: reverse;
-}
-
-.magi-spin.is-glyphs {
-  animation-duration: 90s;
-}
-
 @keyframes magi-spin {
   to {
     transform: rotate(360deg);
@@ -265,11 +256,119 @@ html.journal-html body {
 }
 
 .magi-arm-head {
+  --lh: calc(var(--d) * 0.038);
+  position: relative;
   width: 70%;
-  color: var(--holo-cyan);
-  font: 700 calc(var(--d) * 0.016) / 1 var(--holo-display);
+  overflow: hidden;
+  border-width: 1px;
+  border-color: rgba(111, 245, 238, 0.45);
+  background: rgba(2, 14, 22, 0.92) repeating-linear-gradient(90deg, rgba(0, 191, 243, 0.1) 0 2px, transparent 2px 5px);
+  color: var(--holo-light);
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.7);
+  cursor: default;
+  font: 700 calc(var(--d) * 0.015) / 1 var(--holo-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* signal light */
+.magi-arm-signal {
+  position: relative;
+  flex: 0 0 auto;
+  width: calc(var(--d) * 0.009);
+  height: calc(var(--d) * 0.009);
+  border-radius: 50%;
+  background: var(--holo-light);
+  box-shadow: 0 0 6px var(--holo-light);
+  animation: magi-signal 1.4s steps(2, jump-none) infinite;
+  animation-delay: calc(var(--arm) * -0.45s);
+}
+
+@keyframes magi-signal {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.15;
+  }
+}
+
+/* scanning sweep */
+.magi-arm-head::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(111, 245, 238, 0.22), transparent);
+  animation: magi-sweep 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--arm) * -0.9s);
+}
+
+@keyframes magi-sweep {
+  0% {
+    left: -30%;
+  }
+  60%,
+  100% {
+    left: 100%;
+  }
+}
+
+/* a one-line window onto the archive's facts, rolling from one to the next */
+.magi-arm-signal,
+.magi-ticker {
+  z-index: 1;
+}
+
+.magi-ticker {
+  position: relative;
+  flex: 1 1 auto;
+  height: var(--lh);
+  overflow: hidden;
+}
+
+.magi-ticker-track {
+  display: flex;
+  flex-direction: column;
+  animation: magi-tick 12.5s ease-in-out infinite;
+  animation-delay: calc(var(--arm) * -4.1s);
+}
+
+.magi-ticker-line {
+  display: flex;
+  align-items: center;
+  height: var(--lh);
+  flex: 0 0 auto;
+}
+
+/* five facts, then the first again for a seamless loop */
+@keyframes magi-tick {
+  0%,
+  16% {
+    transform: translateY(0);
+  }
+  20%,
+  36% {
+    transform: translateY(calc(var(--lh) * -1));
+  }
+  40%,
+  56% {
+    transform: translateY(calc(var(--lh) * -2));
+  }
+  60%,
+  76% {
+    transform: translateY(calc(var(--lh) * -3));
+  }
+  80%,
+  96% {
+    transform: translateY(calc(var(--lh) * -4));
+  }
+  100% {
+    transform: translateY(calc(var(--lh) * -5));
+  }
 }
 
 .journal-magi .magi-arm-row {
@@ -571,8 +670,215 @@ html.journal-html body {
   }
 }
 
+/* --- start: the screen assembles, decompressing out of its core -------- */
+.magi-top {
+  animation: magi-fade 600ms ease-out both;
+}
+
+@keyframes magi-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 1. the core flickers on */
+.magi-core {
+  animation: magi-core-in 700ms ease-out 100ms both;
+}
+
+@keyframes magi-core-in {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  35% {
+    opacity: 1;
+    scale: 1.18;
+  }
+  48% {
+    opacity: 0.25;
+  }
+  62% {
+    opacity: 1;
+    scale: 1;
+  }
+  75% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* 2. the rings decompress outward from it, one layer after another */
+.magi-static {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 350ms both;
+}
+
+.magi-spin.is-a {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 450ms both, magi-spin 200s linear infinite;
+}
+
+.magi-spin.is-b {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms both, magi-spin 260s linear infinite reverse;
+}
+
+.magi-spin.is-glyphs {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 750ms both, magi-spin 90s linear infinite;
+}
+
+@keyframes magi-decompress {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+    clip-path: circle(0% at 50% 50%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+
+/* 3. the arms extend out of the core, readout first, then label by label */
+.magi-arm-head,
+.magi-arm-row {
+  transform-origin: 0 50%;
+}
+
+.magi-arm.is-flipped .magi-arm-head,
+.magi-arm.is-flipped .magi-arm-row {
+  transform-origin: 100% 50%;
+}
+
+.magi-arm-head {
+  animation: magi-extend 420ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(1250ms + var(--arm) * 360ms) both;
+}
+
+.journal-magi .magi-arm-row {
+  animation: magi-extend 380ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(1250ms + var(--build) * 90ms) both;
+}
+
+@keyframes magi-extend {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+/* 4. the corner readouts power up */
+.magi-hud-bar {
+  animation: magi-bar-in 400ms ease-out calc(1900ms + var(--hud) * 120ms) both;
+}
+
+.magi-hud-box {
+  animation: magi-hud-in 600ms steps(1, end) calc(2000ms + var(--hud) * 120ms) both, magi-hud-open 450ms ease-out calc(2000ms + var(--hud) * 120ms) both;
+}
+
+.magi-hud.is-tl {
+  --hud: 0;
+}
+
+.magi-hud.is-tr {
+  --hud: 1;
+}
+
+.magi-hud.is-bl {
+  --hud: 2;
+}
+
+.magi-hud.is-br {
+  --hud: 3;
+}
+
+@keyframes magi-bar-in {
+  from {
+    opacity: 0;
+    scale: 1 0;
+  }
+  to {
+    opacity: 0.8;
+    scale: 1 1;
+  }
+}
+
+@keyframes magi-hud-open {
+  from {
+    clip-path: inset(0 50% 0 50%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* a flicker as it powers up */
+@keyframes magi-hud-in {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.3;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 5. the log comes in beneath */
+.magi-log-title {
+  animation: magi-rise 500ms ease-out 2200ms both;
+}
+
+.magi-log-list li {
+  animation: magi-rise 500ms ease-out calc(2300ms + var(--i, 0) * 70ms) both;
+}
+
+@keyframes magi-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .magi-spin {
+  .magi-spin,
+  .magi-spin.is-a,
+  .magi-spin.is-b,
+  .magi-spin.is-glyphs,
+  .magi-static,
+  .magi-core,
+  .magi-top,
+  .magi-arm-head,
+  .journal-magi .magi-arm-row,
+  .magi-hud-bar,
+  .magi-hud-box,
+  .magi-log-title,
+  .magi-log-list li,
+  .magi-ticker-track,
+  .magi-arm-signal,
+  .magi-arm-head::after {
     animation: none;
   }
 }
