@@ -3,306 +3,149 @@ import { withRouter } from "react-router-dom";
 import { connect } from "react-redux";
 
 import { getClients, getPosts } from "actions/appActions";
-
-import styles from "./Homepage.module.css";
 import UiVersionToggle from "components/UiVersionToggle/UiVersionToggle";
+import loadOrbitron from "components/fonts/loadOrbitron";
+import { prefersReducedMotion } from "components/motion/useDeviceTilt";
+import Orbital from "./Orbital";
+import "components/holo/holo.css";
+import "./Homepage.css";
+
+// Homepage V1: the three sections on an orbital instrument drawn in light.
+// Pointing at a section (or tapping it) turns the orbit to bring its node to
+// the top and shows its details in the centre; left alone, it cycles through
+// them.
+
+const CYCLE_MS = 6500;
+const IDLE_MS = 15000; // after an interaction, before cycling resumes
+
+const pad = (n) => String(n).padStart(2, "0");
+const plural = (n, one, many) => (n === 1 ? one : many);
 
 export class Homepage extends Component {
-  state = {
-    section: "preview-section-1",
-  };
+  state = { selected: 0, cycleStart: Date.now() };
 
   componentDidMount() {
-    this.props.getClients();
-    this.props.getPosts();
-    // same black as the V2 homepage
+    loadOrbitron();
+    if (!this.props.clients) this.props.getClients();
+    if (!this.props.posts) this.props.getPosts();
+    // on the site's black, like V2
     document.documentElement.classList.add("home-v1");
+    this.lastInteraction = 0;
+    if (!prefersReducedMotion()) this.timer = setInterval(this.tick, 250);
   }
 
   componentWillUnmount() {
+    clearInterval(this.timer);
     document.documentElement.classList.remove("home-v1");
   }
 
-  toggleHoverSection = (section) => {
-    this.setState({ section: section });
+  tick = () => {
+    const now = Date.now();
+    if (now - this.lastInteraction < IDLE_MS || document.hidden) return;
+    if (now - this.state.cycleStart >= CYCLE_MS) {
+      this.setState(({ selected }) => ({ selected: (selected + 1) % 3, cycleStart: now }));
+    }
   };
 
+  select = (index) => {
+    this.lastInteraction = Date.now();
+    if (index !== this.state.selected) this.setState({ selected: index, cycleStart: Date.now() });
+  };
+
+  // first tap on a phone picks the section; the next one goes there
+  onSectionClick = (e, index) => {
+    if (index !== this.state.selected) {
+      e.preventDefault();
+      this.select(index);
+    }
+  };
+
+  sections() {
+    const { clients, posts, paintings } = this.props;
+    const latest = posts && posts.length ? posts[posts.length - 1] : null;
+    return [
+      {
+        label: "Software",
+        sub: "Portfolio",
+        href: "/software",
+        count: clients ? clients.length : null,
+        unit: clients ? plural(clients.length, "Client", "Clients") : "Clients",
+        title: "Coding portfolio",
+        detail: "Software and companies",
+        action: "See work",
+      },
+      {
+        label: "Paintings",
+        sub: "Gallery",
+        href: "/art",
+        count: paintings ? paintings.length : null,
+        unit: paintings ? plural(paintings.length, "Painting", "Paintings") : "Paintings",
+        title: "Painting portfolio",
+        detail: "Gallery",
+        action: "See gallery",
+      },
+      {
+        label: "Thoughts",
+        sub: "Blog",
+        href: latest ? `/journal/${latest.slug}` : "/journal",
+        listHref: "/journal",
+        count: posts ? posts.length : null,
+        unit: posts ? plural(posts.length, "Post", "Posts") : "Posts",
+        title: latest ? latest.title : "Journal",
+        detail: latest ? latest.subtitle : "Notes and write-ups",
+        action: "Read",
+      },
+    ];
+  }
+
   render() {
+    const { selected, cycleStart } = this.state;
+    const sections = this.sections();
+    const current = sections[selected];
     return (
-      <main
-        className={`page loaded ${this.props.device} detected ${this.state.section} homepage`}
-        id="page"
-      >
-        <h1 className="logo home-logo">
-          <span className="m">M</span>
-          <span className="a">A</span>
-          <span className="r">R</span>
-          <span className="c">C</span>
-          <span className="o">O</span>
-          <span className="space"> </span>
-          <span className="l">L</span>
-          <span className="a2">A</span>
-          <span className="v">V</span>
-          <span className="i">I</span>
-          <span className="e">E</span>
-          <span className="l2">L</span>
-          <span className="l3">L</span>
-          <span className="e2">E</span>
-        </h1>
-        <ul className="sections-nav">
-          <span className="selection cursor-only"></span>
-          <li
-            className="section-1"
-            onMouseEnter={(e) => this.toggleHoverSection("preview-section-1")}
-          >
-            <a href="/software" target="_self">
-              <strong>Software</strong>
-              <span className="alive icon section-1-icon">
-                <span className="bar one"></span>
-                <span className="bar two"></span>
-                <span className="bar three"></span>
-              </span>
-              <small>Portfolio</small>
-            </a>
-          </li>
-          <li
-            className="section-2"
-            onMouseEnter={(e) => this.toggleHoverSection("preview-section-2")}
-          >
-            <a href="/art" target="_self">
-              <strong>Paintings</strong>
-              <small>Gallery</small>
-            </a>
-          </li>
-          <li
-            className="section-3"
-            onMouseEnter={(e) => this.toggleHoverSection("preview-section-3")}
-          >
-            <a href="/journal" data-section="journal">
-              <strong>Thoughts</strong>
-              <small>Blog</small>
-            </a>
-          </li>
-        </ul>
-        <div className="spinner stationary desktop-only">
-          <div className="section-1-spinner-content content-preview">
-            <div className="map-container">
-              <div className="map-goes-here" id="map-goes-here">
-                <div className="the-map"></div>
-                <span
-                  className="blip location-coordinates positioned showing"
-                  style={{ left: "220px", top: "136px" }}
-                >
-                  <span className="blip-ring one"></span>
-                  <span className="blip-ring two"></span>
-                  <span className="blip-ring three"></span>
-                  <span className="center">
-                    <span></span>
-                  </span>
+      <main className="home-v1-page holo-ui">
+        <aside className="v1-side">
+          <header className="v1-brand">
+            <h1 className="v1-name">Marco Lavielle</h1>
+            <p className="v1-tagline">Coder &middot; Painter &middot; Sydney</p>
+          </header>
+
+          <nav className="v1-sections" aria-label="Sections">
+            {sections.map((section, i) => (
+              <a
+                key={section.label}
+                href={section.listHref || section.href}
+                className={i === selected ? "v1-section is-selected" : "v1-section"}
+                aria-current={i === selected ? "true" : undefined}
+                onPointerEnter={(e) => e.pointerType === "mouse" && this.select(i)}
+                onFocus={(e) => e.target.matches(":focus-visible") && this.select(i)}
+                onClick={(e) => this.onSectionClick(e, i)}
+              >
+                <span className="v1-section-index">{pad(i + 1)}</span>
+                <span className="v1-section-text">
+                  <strong>{section.label}</strong>
+                  <small>{section.sub}</small>
                 </span>
-              </div>
-            </div>
-            <div className="run-details run-card">
-              <div className="details">
-                <h3>Coding portfolio</h3>
-                <h4>Software and Companies</h4>
-                <a className="pjax all" href="/software" target="_self">
-                  See Work
-                </a>
-              </div>
-            </div>
-          </div>
-          <div className="section-2-spinner-content content-preview">
-            <div className="map-container">
-              <div className="map-goes-here" id="map-goes-here">
-                <div className="the-map"></div>
-                <span
-                  className="blip location-coordinates positioned showing"
-                  style={{ left: "220px", top: "136px" }}
-                >
-                  <span className="blip-ring one"></span>
-                  <span className="blip-ring two"></span>
-                  <span className="blip-ring three"></span>
-                  <span className="center">
-                    <span></span>
-                  </span>
-                </span>
-              </div>
-            </div>
-            {/* <div className="location-details">
-              <h3 className="location-city">Sydney, NSW</h3>
-              <h4 className="location-time-ago">Australia</h4>
-            </div> */}
-            <div className="details">
-              <h3>Painting Portfolio</h3>
-              <h4>Gallery and Shop</h4>
-              <a className="pjax all" href="/art" target="_self">
-                See Gallery
               </a>
-            </div>
-          </div>
-          <div className="section-2 top-circle-contents">
-            {/* <small>Currently In</small>
-            <span className="location-name">Sydney</span>
-            <span className="location-icon">
-              <img src="../images/home_32.png"/>
-            </span> */}
-            <strong>
-              {this.props.paintings && this.props.paintings.length}
-            </strong>
-            <small>
-              {this.props.paintings && this.props.paintings.length === 1
-                ? "Painting"
-                : "Paintings"}
-            </small>
-          </div>
-          <div className="section-3-spinner-content content-preview">
-            <h2>
-              {this.props.posts &&
-                this.props.posts[this.props.posts.length - 1].title}
-            </h2>
-            <p>
-              {this.props.posts &&
-                this.props.posts[this.props.posts.length - 1].subtitle}
-            </p>
-            <a
-              className="all"
-              href={`/journal/${
-                this.props.posts &&
-                this.props.posts[this.props.posts.length - 1].slug
-              }`}
-              data-section="journal"
-            >
-              Read More
-            </a>
-          </div>
-          <div className="section-3 top-circle-contents">
-            <strong>{this.props.posts && this.props.posts.length}</strong>
-            <small>
-              {this.props.posts && this.props.posts.length === 1
-                ? "Post"
-                : "Posts"}
-            </small>
-          </div>
-        </div>
-        <div className="spinner spinning desktop-only">
-          <span className="rings">
-            <span className="group-1">
-              <span className="ring zero"></span>
-            </span>
-            <span className="ring one"></span>
-            <span className="group-2">
-              <span className="ring two"></span>
-            </span>
-            <span className="group-3">
-              <span className="ring three"></span>
-              <span className="ring four"></span>
-            </span>
-          </span>
-          <div className="section-1-preview desktop-only">
-            <span className="mini-preview">
-              <span className="symbol">
-                <span className="text">Software</span>
-              </span>
-            </span>
-            <a
-              className="full-preview section-1 section-1-circles"
-              href="/software"
-              target="_self"
-            >
-              <span className="circle-a circle backdrop"></span>
-              <span className="circle-b circle backdrop"></span>
-              <span className="circle-a full circle">
-                <span className="the-circle"></span>
-                <strong>
-                  {this.props.clients && this.props.clients.length}
-                </strong>
-                <small>
-                  {this.props.clients && this.props.clients.length === 1
-                    ? "Client"
-                    : "Clients"}
-                </small>
-              </span>
-              {/* <span className="circle-b full circle">
-                <span className="the-circle"></span>
-                <strong>2</strong>
-                <small>Cities</small>
-              </span> */}
-            </a>
-          </div>
-          <div className="section-2-preview desktop-only">
-            <span className="mini-preview">
-              <span className="symbol">
-                <span className="text">Paintings</span>
-              </span>
-            </span>
-            <a
-              className="full-preview section-2"
-              href="/art"
-              data-section="section-2"
-            >
-              <span className="big-circle backdrop"></span>
-              <span className="big-circle actual"></span>
-            </a>
-          </div>
-          <div className="section-3-preview desktop-only">
-            <span className="mini-preview">
-              <span className="symbol">
-                <span className="text">Journal</span>
-              </span>
-            </span>
-            <a
-              className="full-preview section-3"
-              href="/journal"
-              data-section="section-3"
-            >
-              <span className="big-circle backdrop"></span>
-              <span className="big-circle actual"></span>
-            </a>
-          </div>
-        </div>
-        <div className="spinner spinning mobile-only">
-          <span className="rings">
-            <span className="group-1">
-              <span className="ring zero"></span>
-            </span>
-            <span className="ring one"></span>
-            <span className="group-2">
-              <span className="ring two"></span>
-            </span>
-            <span className="group-3">
-              <span className="ring three"></span>
-              <span className="ring four"></span>
-            </span>
-          </span>
-        </div>
-        <div className="home-last-location mobile-only">
-          <h3>Coder/Painter</h3>
-          <section className="location-details">
-            <h1 className="location-name long">
-              <a className="transitioned">
-                <span className="name">Location</span>
-                <span className="location-icon"></span>
-              </a>
-            </h1>
-            <small>
-              <span className="location-city">Sydney, Australia</span>
-            </small>
-          </section>
-        </div>
-        <span className="spinner-cover mobile-only"></span>
-        <div className="footer home-footer">
-          <p className="copyright">
-            <a href="/about" data-section="about">
-              About and Contact
-            </a>
-          </p>
-          <p className="copyright">
-            <a href="/game" data-section="game">
-              Play Game
-            </a>
-          </p>
-        </div>
+            ))}
+          </nav>
+
+          <nav className="v1-more" aria-label="More">
+            <a href="/about">About &amp; contact</a>
+            <a href="/game">Play the game</a>
+          </nav>
+        </aside>
+
+        <section className="v1-stage" aria-label={`${current.label} preview`}>
+          <Orbital
+            sections={sections}
+            selected={selected}
+            cycleStart={cycleStart}
+            cycleMs={CYCLE_MS}
+            onSelect={this.select}
+          />
+        </section>
+
         <UiVersionToggle current="v1" />
       </main>
     );
@@ -310,10 +153,8 @@ export class Homepage extends Component {
 }
 
 const mapStateToProps = (state) => ({
-  loading: state.app.loading,
   clients: state.app.clients,
   posts: state.app.posts,
-  device: state.app.device,
   paintings: state.app.paintings,
 });
 
@@ -322,7 +163,4 @@ const mapDispatchToProps = (dispatch) => ({
   getPosts: () => dispatch(getPosts()),
 });
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps
-)(withRouter(Homepage));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Homepage));
