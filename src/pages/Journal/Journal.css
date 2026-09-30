@@ -1,0 +1,1107 @@
+/* ---------------------------------------------------------------------
+   Journal: a MAGI-style index screen in the site's cyan light, and an
+   entry log beneath it.
+   --------------------------------------------------------------------- */
+html.journal-html,
+html.journal-html body {
+  background: #000;
+}
+
+.journal-magi {
+  --magi-line: #3fd6e6;
+  --d: min(640px, 76vh, 92vw); /* the dial's size */
+  min-height: 100vh;
+  /* plain black: a fixed gradient showed a hard seam while layers animated */
+  background: #010207;
+  color: #ccd4de;
+  font-family: var(--holo-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- top bar ------------------------------------------------------------ */
+.magi-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px 0;
+  box-sizing: border-box;
+}
+
+.journal-magi .magi-home {
+  color: var(--holo-muted);
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.3em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.journal-magi .magi-home:hover,
+.journal-magi .magi-home:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.journal-magi .magi-title {
+  margin: 0;
+  color: #effdff;
+  font: 600 13px/1 var(--holo-display);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
+}
+
+/* --- the screen: dial in the middle, readouts in the corners ------------- */
+.magi-screen {
+  position: relative;
+  display: grid;
+  place-items: center;
+  max-width: 1280px;
+  min-height: calc(var(--d) + 80px);
+  margin: 0 auto;
+  padding: 24px 32px;
+  box-sizing: border-box;
+}
+
+/* corner readouts: an outlined box beside a thick bar, as on the MAGI */
+.magi-hud {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.magi-hud.is-tl {
+  top: 24px;
+  left: 32px;
+}
+
+.magi-hud.is-tr {
+  top: 24px;
+  right: 32px;
+  flex-direction: row-reverse;
+}
+
+.magi-hud.is-bl {
+  bottom: 24px;
+  left: 32px;
+}
+
+.magi-hud.is-br {
+  bottom: 24px;
+  right: 32px;
+  flex-direction: row-reverse;
+}
+
+.magi-hud-bar {
+  width: 7px;
+  border-radius: 2px;
+  background: var(--holo-light);
+  box-shadow: 0 0 12px rgba(111, 245, 238, 0.7);
+  opacity: 0.8;
+}
+
+.magi-hud-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 2px solid rgba(111, 245, 238, 0.75);
+  border-radius: 6px;
+  background: rgba(2, 10, 18, 0.85);
+  box-shadow: 0 0 14px rgba(0, 191, 243, 0.35), inset 0 0 14px rgba(0, 191, 243, 0.12);
+}
+
+.magi-hud.is-tr .magi-hud-box,
+.magi-hud.is-br .magi-hud-box {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.magi-hud-label {
+  color: #effdff;
+  font: 700 15px/1.1 var(--holo-display);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.6);
+}
+
+.magi-hud-value {
+  color: var(--holo-light);
+  font: 700 26px/1 var(--holo-display);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px rgba(111, 245, 238, 0.8);
+  white-space: nowrap;
+}
+
+.magi-hud-value small {
+  font-size: 14px;
+}
+
+.magi-hud-note {
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* --- the dial ------------------------------------------------------------ */
+.magi {
+  position: relative;
+  width: var(--d);
+  height: var(--d);
+}
+
+.magi-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.magi-line {
+  fill: none;
+  stroke: var(--magi-line);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+
+.magi-line.is-faint {
+  stroke-opacity: 0.3;
+}
+
+.magi-maze {
+  fill: none;
+  stroke: var(--magi-line);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-opacity: 0.55;
+}
+
+.magi-maze.is-dim {
+  stroke-opacity: 0.32;
+}
+
+/* the outer band of blocky glyphs */
+.magi-glyphs {
+  fill: none;
+  stroke: var(--magi-line);
+  stroke-width: 9;
+  stroke-dasharray: 2.5 3.5 6 3.5;
+  stroke-opacity: 0.45;
+}
+
+.magi-glyphs.is-fine {
+  stroke-width: 5;
+  stroke-dasharray: 1.5 4;
+  stroke-opacity: 0.3;
+}
+
+/* each ring set turns as a whole layer; the glow is drawn once with it */
+.magi-spin {
+  filter: drop-shadow(0 0 3px rgba(63, 214, 230, 0.55));
+  animation: magi-spin 200s linear infinite;
+}
+
+@keyframes magi-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --- the three arms: a social channel each ------------------------------- */
+/* they turn together, counter-clockwise against the outer rings (which turn
+   clockwise); the core, drawn above them, stays still */
+.magi-arms {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  animation: magi-spin 150s linear infinite reverse;
+}
+
+.magi-arm {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  width: 0;
+  height: 0;
+}
+
+/* one link: four slanted rows stacked across the arm */
+.journal-magi .magi-social {
+  --row: calc(var(--d) * 0.042);
+  --lh: var(--row);
+  position: absolute;
+  top: 0;
+  left: calc(var(--d) * 0.145);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--d) * 0.006);
+  width: calc(var(--d) * 0.31);
+  color: var(--holo-light);
+  text-decoration: none;
+  transform: translateY(-50%);
+}
+
+.magi-arm.is-flipped .magi-social {
+  left: auto;
+  right: calc(var(--d) * 0.145);
+}
+
+.magi-social-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: calc(var(--d) * 0.011);
+  box-sizing: border-box;
+  height: var(--row);
+  padding: 0 calc(var(--d) * 0.016);
+  overflow: hidden;
+  border: 1.5px solid rgba(111, 245, 238, 0.55);
+  background: rgba(2, 12, 20, 0.92);
+  transform: skewX(-18deg);
+  transform-origin: 0 50%;
+  white-space: nowrap;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
+}
+
+.magi-arm.is-flipped .magi-social-row {
+  transform-origin: 100% 50%;
+}
+
+/* a stepped edge: each row a little shorter, like the MAGI's bands */
+.magi-social-row.is-head {
+  width: 100%;
+  border-width: 2px;
+  border-color: rgba(111, 245, 238, 0.85);
+  background: rgba(111, 245, 238, 0.12);
+}
+
+.magi-social-row.is-handle {
+  width: 96%;
+}
+
+.magi-social-row.is-ticker {
+  width: 90%;
+  background: rgba(2, 14, 22, 0.92) repeating-linear-gradient(90deg, rgba(0, 191, 243, 0.1) 0 2px, transparent 2px 5px);
+}
+
+.magi-social-row.is-action {
+  width: 72%;
+}
+
+.magi-arm.is-flipped .magi-social-row {
+  align-self: flex-end;
+}
+
+.magi-social-signal {
+  flex: 0 0 auto;
+  width: calc(var(--d) * 0.01);
+  height: calc(var(--d) * 0.01);
+  border-radius: 50%;
+  background: var(--holo-light);
+  box-shadow: 0 0 8px var(--holo-light);
+  animation: magi-signal 1.4s ease-in-out infinite;
+  animation-delay: calc(var(--arm) * -0.45s);
+}
+
+@keyframes magi-signal {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 8px var(--holo-light);
+  }
+  50% {
+    opacity: 0.2;
+    box-shadow: 0 0 0 transparent;
+  }
+}
+
+.magi-social-icon {
+  flex: 0 0 auto;
+  width: calc(var(--d) * 0.024);
+  height: calc(var(--d) * 0.024);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.7));
+}
+
+.magi-social-name {
+  flex: 1 1 auto;
+  color: #fff;
+  font: 700 calc(var(--d) * 0.018) / 1 var(--holo-display);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.8);
+}
+
+.magi-social-channel {
+  color: var(--holo-cyan);
+  font: 700 calc(var(--d) * 0.013) / 1 var(--holo-display);
+  letter-spacing: 0.1em;
+}
+
+.magi-social-row.is-handle {
+  color: #eaf8ff;
+  font: 600 calc(var(--d) * 0.019) / 1 var(--holo-display);
+  letter-spacing: 0.04em;
+}
+
+.magi-social-row.is-ticker {
+  color: var(--holo-light);
+  font: 700 calc(var(--d) * 0.014) / 1 var(--holo-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* live signal bars, bouncing */
+.magi-social-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: calc(var(--d) * 0.003);
+  height: 55%;
+}
+
+.magi-social-bars span {
+  width: calc(var(--d) * 0.005);
+  height: 100%;
+  background: var(--holo-light);
+  box-shadow: 0 0 4px var(--holo-light);
+  transform-origin: 50% 100%;
+  animation: magi-bars 1.1s ease-in-out infinite alternate;
+}
+
+.magi-social-bars span:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.magi-social-bars span:nth-child(3) {
+  animation-delay: -0.7s;
+}
+
+.magi-social-bars span:nth-child(4) {
+  animation-delay: -0.15s;
+}
+
+.magi-social-bars span:nth-child(5) {
+  animation-delay: -0.5s;
+}
+
+@keyframes magi-bars {
+  from {
+    transform: scaleY(0.25);
+  }
+  to {
+    transform: scaleY(1);
+  }
+}
+
+.magi-social-cta {
+  color: var(--holo-cyan);
+  font: 700 calc(var(--d) * 0.015) / 1 var(--holo-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+
+/* scanning sweep over the whole channel */
+.magi-social-row.is-head::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -30%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
+  animation: magi-sweep 3.2s ease-in-out infinite;
+  animation-delay: calc(var(--arm) * -1s);
+}
+
+@keyframes magi-sweep {
+  0% {
+    left: -30%;
+  }
+  55%,
+  100% {
+    left: 100%;
+  }
+}
+
+/* pointing at a channel lights all of it */
+.journal-magi .magi-social:hover .magi-social-row,
+.journal-magi .magi-social:focus-visible .magi-social-row {
+  border-color: var(--holo-light);
+  box-shadow: 0 0 14px rgba(111, 245, 238, 0.6);
+}
+
+.journal-magi .magi-social:hover .magi-social-row.is-action,
+.journal-magi .magi-social:focus-visible .magi-social-row.is-action {
+  background: rgba(111, 245, 238, 0.2);
+}
+
+.journal-magi .magi-social:hover .magi-social-cta,
+.journal-magi .magi-social:focus-visible .magi-social-cta {
+  color: #fff;
+}
+
+.journal-magi .magi-social:focus-visible {
+  outline: none;
+}
+
+/* the ticker: a one-line window rolling through five lines, then the first
+   again for a seamless loop */
+.magi-ticker {
+  position: relative;
+  flex: 1 1 auto;
+  height: var(--lh);
+  overflow: hidden;
+}
+
+.magi-ticker-track {
+  display: flex;
+  flex-direction: column;
+  animation: magi-tick 12.5s ease-in-out infinite;
+  animation-delay: calc(var(--arm) * -4.1s);
+}
+
+.magi-ticker-line {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  height: var(--lh);
+}
+
+@keyframes magi-tick {
+  0%,
+  16% {
+    transform: translateY(0);
+  }
+  20%,
+  36% {
+    transform: translateY(calc(var(--lh) * -1));
+  }
+  40%,
+  56% {
+    transform: translateY(calc(var(--lh) * -2));
+  }
+  60%,
+  76% {
+    transform: translateY(calc(var(--lh) * -3));
+  }
+  80%,
+  96% {
+    transform: translateY(calc(var(--lh) * -4));
+  }
+  100% {
+    transform: translateY(calc(var(--lh) * -5));
+  }
+}
+
+/* the core: MAGI 01's box, as ML 01 */
+.magi-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(var(--d) * 0.19);
+  padding: calc(var(--d) * 0.012) 0;
+  border: 2px solid var(--holo-light);
+  background: rgba(2, 12, 20, 0.95);
+  box-shadow: 0 0 20px rgba(111, 245, 238, 0.55), inset 0 0 16px rgba(111, 245, 238, 0.2);
+  transform: translate(-50%, -50%);
+  clip-path: polygon(12% 0, 88% 0, 100% 22%, 100% 78%, 88% 100%, 12% 100%, 0 78%, 0 22%);
+}
+
+.magi-core strong {
+  color: #fff;
+  font: 700 calc(var(--d) * 0.034) / 1.05 var(--holo-display);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.8);
+}
+
+.magi-core-kicker,
+.magi-core-sub {
+  color: var(--holo-cyan);
+  font: 700 calc(var(--d) * 0.014) / 1.4 var(--holo-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+/* --- entry log ------------------------------------------------------------ */
+.magi-log {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 24px 32px 96px;
+  box-sizing: border-box;
+}
+
+.journal-magi .magi-log-title {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(111, 245, 238, 0.25);
+}
+
+.magi-log-title span {
+  color: #effdff;
+  font: 600 16px/1 var(--holo-display);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.magi-log-title small {
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.journal-magi .magi-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.journal-magi .magi-entry {
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 24px;
+  padding: 16px 20px;
+  border: 1px solid rgba(111, 245, 238, 0.2);
+  border-left: 3px solid rgba(111, 245, 238, 0.35);
+  border-radius: 4px;
+  background: rgba(2, 8, 16, 0.7);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+}
+
+.journal-magi .magi-entry.is-selected,
+.journal-magi .magi-entry:hover,
+.journal-magi .magi-entry:focus-visible {
+  border-color: rgba(111, 245, 238, 0.6);
+  border-left-color: var(--holo-light);
+  background: rgba(8, 26, 38, 0.8);
+  box-shadow: 0 0 18px rgba(111, 245, 238, 0.25), inset 0 0 18px rgba(111, 245, 238, 0.06);
+  outline: none;
+  text-decoration: none;
+}
+
+.magi-entry-id {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.magi-entry-id small {
+  color: var(--holo-dim);
+  font: 600 9px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.magi-entry-id strong {
+  color: var(--holo-light);
+  font: 700 22px/1 var(--holo-display);
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.55);
+}
+
+.magi-entry-main {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.magi-entry-title {
+  color: #eef8ff;
+  font: 500 18px/1.3 var(--holo-font);
+}
+
+.magi-entry-sub {
+  color: var(--holo-muted);
+  font: 400 14px/1.4 var(--holo-font);
+}
+
+.magi-entry-date {
+  color: var(--holo-cyan);
+  font: 600 12px/1 var(--holo-display);
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
+
+.magi-entry-go {
+  color: var(--holo-muted);
+  font: 600 10px/1 var(--holo-display);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  transition: color 200ms ease;
+}
+
+.magi-entry.is-selected .magi-entry-go,
+.magi-entry:hover .magi-entry-go {
+  color: var(--holo-light);
+}
+
+/* --- smaller screens ------------------------------------------------------ */
+@media (max-width: 1100px) {
+  .magi-hud-box {
+    min-width: 170px;
+  }
+
+  .magi-hud-label {
+    font-size: 12px;
+  }
+
+  .magi-hud-value {
+    font-size: 19px;
+  }
+}
+
+@media (max-width: 800px) {
+  .journal-magi {
+    --d: min(94vw, 440px);
+  }
+
+  .magi-top {
+    padding: 20px 16px 0;
+  }
+
+  /* the readouts become a 2 x 2 grid above the dial */
+  .magi-screen {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    min-height: 0;
+    padding: 20px 12px 8px;
+  }
+
+  .magi-hud {
+    position: static;
+  }
+
+  .magi-hud-bar {
+    width: 4px;
+  }
+
+  .magi-hud-box {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .magi-hud-label {
+    font-size: 9px;
+  }
+
+  .magi-hud-value {
+    font-size: 13px;
+  }
+
+  .magi-hud-value small {
+    font-size: 9px;
+  }
+
+  .magi-hud-note {
+    font-size: 8px;
+  }
+
+  /* two readouts above the dial, two below, like its corners */
+  .magi {
+    grid-column: 1 / -1;
+    order: 1;
+    margin: 6px 0;
+  }
+
+  .magi-hud.is-bl,
+  .magi-hud.is-br {
+    order: 2;
+  }
+
+  .magi-log {
+    padding: 16px 12px 72px;
+  }
+
+  .journal-magi .magi-entry {
+    grid-template-columns: 52px minmax(0, 1fr);
+    gap: 6px 14px;
+    padding: 14px;
+  }
+
+  .magi-entry-id {
+    grid-row: span 2;
+  }
+
+  .magi-entry-id strong {
+    font-size: 18px;
+  }
+
+  .magi-entry-title {
+    font-size: 16px;
+  }
+
+  .magi-entry-sub {
+    font-size: 13px;
+  }
+
+  .magi-entry-date {
+    grid-column: 2;
+    font-size: 11px;
+  }
+
+  .magi-entry-go {
+    display: none;
+  }
+}
+
+/* --- start: the screen assembles, decompressing out of its core -------- */
+.magi-top {
+  animation: magi-fade 600ms ease-out both;
+}
+
+@keyframes magi-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* 1. the core flickers on */
+.magi-core {
+  animation: magi-core-in 700ms ease-out 100ms both;
+}
+
+@keyframes magi-core-in {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+  }
+  35% {
+    opacity: 1;
+    scale: 1.18;
+  }
+  48% {
+    opacity: 0.25;
+  }
+  62% {
+    opacity: 1;
+    scale: 1;
+  }
+  75% {
+    opacity: 0.6;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* 2. the rings decompress outward from it, one layer after another */
+.magi-static {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 350ms both;
+}
+
+.magi-spin.is-a {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 450ms both, magi-spin 200s linear infinite;
+}
+
+.magi-spin.is-b {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms both, magi-spin 260s linear infinite reverse;
+}
+
+.magi-spin.is-glyphs {
+  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 750ms both, magi-spin 90s linear infinite;
+}
+
+@keyframes magi-decompress {
+  0% {
+    opacity: 0;
+    scale: 0.3;
+    clip-path: circle(0% at 50% 50%);
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    clip-path: circle(75% at 50% 50%);
+  }
+}
+
+/* 3. the channels extend out of the core, row by row */
+.magi-social-row {
+  animation: magi-extend 400ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(1250ms + var(--arm) * 260ms + var(--build) * 90ms) both;
+}
+
+@keyframes magi-extend {
+  0% {
+    opacity: 0;
+    scale: 0 1;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    scale: 1 1;
+  }
+}
+
+/* 4. the corner readouts power up */
+.magi-hud-bar {
+  animation: magi-bar-in 400ms ease-out calc(1900ms + var(--hud) * 120ms) both;
+}
+
+.magi-hud-box {
+  animation: magi-hud-in 600ms steps(1, end) calc(2000ms + var(--hud) * 120ms) both, magi-hud-open 450ms ease-out calc(2000ms + var(--hud) * 120ms) both;
+}
+
+.magi-hud.is-tl {
+  --hud: 0;
+}
+
+.magi-hud.is-tr {
+  --hud: 1;
+}
+
+.magi-hud.is-bl {
+  --hud: 2;
+}
+
+.magi-hud.is-br {
+  --hud: 3;
+}
+
+@keyframes magi-bar-in {
+  from {
+    opacity: 0;
+    scale: 1 0;
+  }
+  to {
+    opacity: 0.8;
+    scale: 1 1;
+  }
+}
+
+@keyframes magi-hud-open {
+  from {
+    clip-path: inset(0 50% 0 50%);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* a flicker as it powers up */
+@keyframes magi-hud-in {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.3;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* 5. the log comes in beneath */
+.magi-log-title {
+  animation: magi-rise 500ms ease-out 2200ms both;
+}
+
+.magi-log-list li {
+  animation: magi-rise 500ms ease-out calc(2300ms + var(--i, 0) * 70ms) both;
+}
+
+@keyframes magi-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- leaving: the opening in reverse, everything compressing into the core --- */
+/* the log sinks away, the readouts power down, the channels retract, the
+   ring layers compress inward (outermost first) and the core flickers out;
+   the link is followed as it goes (LEAVE_MS in Journal.js) */
+.is-leaving .magi-log-list li {
+  animation: magi-sink 320ms ease-in calc(var(--i, 0) * 25ms) both;
+}
+
+.is-leaving .magi-log-title,
+.is-leaving .magi-top {
+  animation: magi-sink 320ms ease-in both;
+}
+
+@keyframes magi-sink {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.is-leaving .magi-hud-box {
+  animation: magi-hud-shut 300ms ease-in calc(120ms + var(--hud) * 50ms) both;
+}
+
+.is-leaving .magi-hud-bar {
+  animation: magi-bar-out 260ms ease-in calc(260ms + var(--hud) * 50ms) both;
+}
+
+@keyframes magi-hud-shut {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  30% {
+    opacity: 0.3;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 50% 0 50%);
+  }
+}
+
+@keyframes magi-bar-out {
+  from {
+    opacity: 0.8;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1 0;
+  }
+}
+
+.is-leaving .magi-social-row {
+  animation: magi-retract 300ms cubic-bezier(0.6, 0, 0.8, 0.2) calc(260ms + (3 - var(--build)) * 60ms) both;
+}
+
+@keyframes magi-retract {
+  from {
+    opacity: 1;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0 1;
+  }
+}
+
+/* the turning carries on underneath (same name, same place in the list) */
+.is-leaving .magi-spin.is-glyphs {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 480ms both, magi-spin 90s linear infinite;
+}
+
+.is-leaving .magi-spin.is-b {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 580ms both, magi-spin 260s linear infinite reverse;
+}
+
+.is-leaving .magi-spin.is-a {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 680ms both, magi-spin 200s linear infinite;
+}
+
+.is-leaving .magi-static {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 780ms both;
+}
+
+@keyframes magi-compress {
+  0% {
+    opacity: 1;
+    scale: 1;
+    clip-path: circle(75% at 50% 50%);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.3;
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+.is-leaving .magi-core {
+  animation: magi-core-out 380ms ease-in 1060ms both;
+}
+
+@keyframes magi-core-out {
+  0% {
+    opacity: 1;
+    scale: 1;
+  }
+  25% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+    scale: 1.12;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.05;
+  }
+}
+
+.is-leaving {
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .magi-arms,
+  .magi-spin,
+  .magi-spin.is-a,
+  .magi-spin.is-b,
+  .magi-spin.is-glyphs,
+  .magi-static,
+  .magi-core,
+  .magi-top,
+  .magi-social-row,
+  .magi-social-row.is-head::after,
+  .magi-social-signal,
+  .magi-social-bars span,
+  .magi-hud-bar,
+  .magi-hud-box,
+  .magi-log-title,
+  .magi-log-list li,
+  .magi-ticker-track {
+    animation: none;
+  }
+}
