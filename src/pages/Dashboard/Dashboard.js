@@ -1,143 +1,155 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
-import { connect } from 'react-redux'
+import React, { Component } from "react";
+import { Link, withRouter } from "react-router-dom";
+import { connect } from "react-redux";
 
-import { getPosts, getClients, deleteClient, deletePost, setPost, setClient } from 'actions/appActions'
+import { getPosts, getClients, deleteClient, deletePost } from "actions/appActions";
+import HoloPanel from "components/holo/HoloPanel";
+import AdminLayout, { describeError, formatDate } from "./AdminLayout";
 
-import styles from './Dashboard.module.css'
+const newestFirst = (list) =>
+  (list || []).slice().sort((a, b) => new Date(b.published || 0) - new Date(a.published || 0));
 
-export class Dashboard extends Component {
-  componentDidMount() {
-    document.body.classList.add('level-0')
-    this.props.getPosts()
-    this.props.getClients()
+const pad = (n) => String(n).padStart(2, "0");
+
+// Delete asks twice: the first click arms it ("Confirm"), a second within a
+// few seconds deletes.
+class DeleteButton extends Component {
+  state = { armed: false, busy: false };
+
+  componentWillUnmount() {
+    clearTimeout(this.timer);
   }
 
+  onClick = () => {
+    if (!this.state.armed) {
+      this.setState({ armed: true });
+      this.timer = setTimeout(() => this.setState({ armed: false }), 3500);
+      return;
+    }
+    clearTimeout(this.timer);
+    this.setState({ busy: true });
+    this.props.onDelete().catch(() => this.setState({ busy: false, armed: false }));
+  };
+
   render() {
+    const { armed, busy } = this.state;
     return (
-      <main className="page loaded desktop dashboard detected preview-section-1" id="page">
-        <div className="column-2 backdrop"></div>
-        <div className="column-1">
-          <a className="uplevel pjax" href="/" data-section="homepage">
-            <span className="arrow">‹</span>
-            <strong className="logo">
-              <span className="m">M</span>
-              <span className="a">A</span>
-              <span className="r">R</span>
-              <span className="c">C</span>
-              <span className="o">O</span>
-              <br/>
-              <span className="l">L</span>
-              <span className="a2">A</span>
-              <span className="v">V</span>
-              <span className="i">I</span>
-              <span className="e">E</span>
-              <span className="l2">L</span>
-              <span className="l3">L</span>
-              <span className="e2">E</span>
-            </strong>
-          </a>
-          <dl>
-            <dt onClick={e => this.props.history.push(`/admin/dashboard`)}>Dashboard</dt>
-            <dd>
-              <span className="value"></span>
-              <span className="low bar">
-                <span className="fill" style={{width: '100%'}}></span>
-              </span>
-              <span className="critical low alert">
-                <span className="icon"></span>
-              </span>
-            </dd>
-            <dt 
-              onClick={e => {
-                this.props.setPost(null)
-                this.props.history.push(`/admin/post`)
-              }}
-            >
-              Create A Post
-            </dt>
-            <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
-            <dt 
-              onClick={e => {
-                this.props.setClient(null)
-                this.props.history.push(`/admin/client`)
-              }}
-            >
-              Create A Client
-            </dt>
-            <dd><span className="value"></span><span className="low bar"><span className="fill" style={{width: '100%'}}></span></span><span className="critical low alert"><span className="icon"></span></span></dd>
-          </dl>
-        </div>
-        <div className="level-1-container">
-          <div className="container" ng-show="!createPostVisible">
-            <div className="well post-list">
-              <legend>Posts</legend>
-              <table className="table table-hover table-striped table-condensed">
-                <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Publish Date</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.props.posts && this.props.posts.map((post, index) => {
-                    return (
-                      <tr key={index}>
-                        <td><a href={`/journal/${post.slug}`}>{post.title}</a></td>
-                        <td>{post.published}</td>
-                        <td><a className="btn btn-small btn-primary" onClick={e => this.props.history.push(`/admin/post/${post._id}`)}>Edit</a></td>
-                        <td><a className="btn btn-small btn-danger" onClick={e => this.props.deletePost(post._id)}>Delete</a></td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-              <legend>Clients</legend>
-              <table className="table table-hover table-striped table-condensed">
-                <thead>
-                  <tr>
-                    <th>Name</th>
-                    <th>Publish Date</th>
-                    <th></th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.props.clients && this.props.clients.map((client, index) => {
-                    return (
-                      <tr key={index}>
-                        <td><a href={`/software`}>{client.name}</a></td>
-                        <td>{client.published}</td>
-                        <td><a className="btn btn-small btn-primary" onClick={e => this.props.history.push(`/admin/client/${client._id}`)}>Edit</a></td>
-                        <td><a className="btn btn-small btn-danger" onClick={e => this.props.deleteClient(client._id)}>Delete</a></td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </main>
-    )
+      <button
+        type="button"
+        className={`holo-button is-danger is-small${armed ? " is-armed" : ""}${busy ? " is-busy" : ""}`}
+        onClick={this.onClick}
+        disabled={busy}
+        aria-label={armed ? `Confirm delete ${this.props.name}` : `Delete ${this.props.name}`}
+      >
+        {armed ? "Confirm" : "Delete"}
+      </button>
+    );
   }
 }
 
-const mapStateToProps = state => ({
-  loading: state.app.loading,
-  posts: state.app.posts,
-  clients: state.app.clients
-})
+const ItemList = ({ items, empty, viewHref, editHref, onDelete, nameOf }) => {
+  if (!items) return <p className="admin-empty">Loading…</p>;
+  if (!items.length) return <p className="admin-empty">{empty}</p>;
+  return (
+    <ul className="admin-list">
+      {items.map((item) => (
+        <li key={item._id} className="admin-row">
+          <div className="admin-row-main">
+            <a className="admin-row-title" href={viewHref(item)}>
+              {nameOf(item)}
+            </a>
+            <span className="admin-row-date">{formatDate(item.published)}</span>
+          </div>
+          <div className="admin-row-actions">
+            <Link className="holo-button is-quiet is-small" to={editHref(item)}>
+              Edit
+            </Link>
+            <DeleteButton name={nameOf(item)} onDelete={() => onDelete(item)} />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+};
 
-const mapDispatchToProps = dispatch => ({
+export class Dashboard extends Component {
+  state = { message: null };
+
+  componentDidMount() {
+    this.props.getPosts();
+    this.props.getClients();
+  }
+
+  remove = (action, item) =>
+    action(item._id).catch((err) => {
+      this.setState({ message: describeError(err) });
+      throw err;
+    });
+
+  render() {
+    const { posts, clients } = this.props;
+    const { message } = this.state;
+    return (
+      <AdminLayout kicker="Admin" title="Dashboard">
+        {message && (
+          <p className="admin-message" role="alert">
+            {message}
+          </p>
+        )}
+        <div className="admin-grid">
+          <HoloPanel className="admin-panel">
+            <header className="admin-panel-head">
+              <h2 className="admin-panel-title">
+                Posts <span className="admin-count">{posts ? pad(posts.length) : "··"}</span>
+              </h2>
+              <Link className="holo-button is-small" to="/admin/post">
+                New post
+              </Link>
+            </header>
+            <ItemList
+              items={posts && newestFirst(posts)}
+              empty="No posts yet."
+              nameOf={(post) => post.title}
+              viewHref={(post) => `/journal/${post.slug}`}
+              editHref={(post) => `/admin/post/${post._id}`}
+              onDelete={(post) => this.remove(this.props.deletePost, post)}
+            />
+          </HoloPanel>
+
+          <HoloPanel className="admin-panel">
+            <header className="admin-panel-head">
+              <h2 className="admin-panel-title">
+                Clients <span className="admin-count">{clients ? pad(clients.length) : "··"}</span>
+              </h2>
+              <Link className="holo-button is-small" to="/admin/client">
+                New client
+              </Link>
+            </header>
+            <ItemList
+              items={clients && newestFirst(clients)}
+              empty="No clients yet."
+              nameOf={(client) => client.name}
+              viewHref={() => "/software"}
+              editHref={(client) => `/admin/client/${client._id}`}
+              onDelete={(client) => this.remove(this.props.deleteClient, client)}
+            />
+          </HoloPanel>
+        </div>
+      </AdminLayout>
+    );
+  }
+}
+
+const mapStateToProps = (state) => ({
+  posts: state.app.posts,
+  clients: state.app.clients,
+});
+
+const mapDispatchToProps = (dispatch) => ({
   getPosts: () => dispatch(getPosts()),
   getClients: () => dispatch(getClients()),
-  deletePost: id => dispatch(deletePost(id)),
-  deleteClient: id => dispatch(deleteClient(id)),
-  setPost: post => dispatch(setPost(post)),
-  setClient: client => dispatch(setClient(client))
-})
+  deletePost: (id) => dispatch(deletePost(id)),
+  deleteClient: (id) => dispatch(deleteClient(id)),
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Dashboard))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Dashboard));

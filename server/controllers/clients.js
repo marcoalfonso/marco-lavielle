@@ -39,16 +39,25 @@ exports.createClient = function(req, res, next) {
 	});
 };
 
+// Updates an existing client. It used to never reply on success (so saves
+// hung in the browser) and would create a client for an unknown id.
 exports.updateClient = function(req, res) {
 	var obj = req.body;
 	var id = obj._id;
 	delete obj._id;
-	if (id) {
-		Client.update({_id: id}, obj, {upsert: true}, function(err) {
-			if(err) {
-				res.status(400);
-				return res.send({reason:err.toString()});
-			}
-		});
+	if (!id) {
+		res.status(400);
+		return res.send({reason:'Missing _id'});
 	}
+	Client.updateOne({_id: id}, obj, function(err, result) {
+		if(err) {
+			res.status(400);
+			return res.send({reason:err.toString()});
+		}
+		if (!result.matchedCount) {
+			res.status(404);
+			return res.send({reason:'Not found'});
+		}
+		res.send({success:true});
+	});
 };

@@ -36,7 +36,9 @@ const shuffle = (list) => {
 }
 
 export class Art extends Component {
-  state = { index: 0, paintings: shuffle(this.props.paintings) }
+  state = { index: 0, paintings: shuffle(this.props.paintings), menuOpen: false }
+
+  menuRef = React.createRef()
 
   small = isSmallScreen()
 
@@ -44,16 +46,27 @@ export class Art extends Component {
 
   componentDidMount() {
     window.addEventListener('keydown', this.onKeyDown)
+    document.addEventListener('pointerdown', this.onOutside)
   }
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.onKeyDown)
+    document.removeEventListener('pointerdown', this.onOutside)
+  }
+
+  // phones: the menu is a pill that drops the links down over the page
+  toggleMenu = () => this.setState(({ menuOpen }) => ({ menuOpen: !menuOpen }))
+
+  closeMenu = () => this.setState({ menuOpen: false })
+
+  onOutside = (e) => {
+    if (this.state.menuOpen && this.menuRef.current && !this.menuRef.current.contains(e.target)) this.closeMenu()
   }
 
   // Once the painting on show has loaded, fetch its neighbours so switching
   // doesn't wait on the network (not before: they'd compete with it).
   preloadAround = () => {
-    const { index, paintings } = this.state
+    const { index, paintings, menuOpen } = this.state
     ;[1, -1].forEach((step) => {
       const img = new Image()
       img.src = this.imageSrc(paintings[(index + step + paintings.length) % paintings.length])
@@ -61,7 +74,8 @@ export class Art extends Component {
   }
 
   onKeyDown = (e) => {
-    if (e.key === 'ArrowRight') this.onClickForward()
+    if (e.key === 'Escape') this.closeMenu()
+    else if (e.key === 'ArrowRight') this.onClickForward()
     else if (e.key === 'ArrowLeft') this.onClickBack()
   }
 
@@ -74,7 +88,7 @@ export class Art extends Component {
   }
 
   render() {
-    const { index, paintings } = this.state
+    const { index, paintings, menuOpen } = this.state
     const painting = paintings[index]
     const forSale = painting.status === 'For Sale'
 
@@ -84,19 +98,35 @@ export class Art extends Component {
           <a href="/" className="art-name" aria-label="Marco Lavielle, home">
             <BrushName className="art-name-svg" />
           </a>
-          <nav className="art-nav">
-            {NAV.map((item, i) => (
-              <a
-                key={item.href}
-                href={item.href}
-                className={item.active ? 'active' : undefined}
-                aria-current={item.active ? 'page' : undefined}
-              >
-                <span className="art-nav-index">{pad(i + 1)}</span>
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          <div className={menuOpen ? 'art-menu-drop is-open' : 'art-menu-drop'} ref={this.menuRef}>
+            <button
+              type="button"
+              className="art-menu-toggle"
+              aria-expanded={menuOpen}
+              aria-controls="art-nav"
+              onClick={this.toggleMenu}
+            >
+              <span className="art-menu-toggle-icon" aria-hidden="true">
+                <span />
+                <span />
+              </span>
+              {menuOpen ? 'Close' : 'Menu'}
+            </button>
+            <nav className="art-nav" id="art-nav">
+              {NAV.map((item, i) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className={item.active ? 'active' : undefined}
+                  aria-current={item.active ? 'page' : undefined}
+                  onClick={this.closeMenu}
+                >
+                  <span className="art-nav-index">{pad(i + 1)}</span>
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </div>
         </header>
 
         <PaintingStage

@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import { withCookies } from "react-cookie";
 import { signin } from "actions/appActions";
 import HoloPlatform from "components/HoloPlatform/HoloPlatform";
+import HoloPanel from "components/holo/HoloPanel";
 import loadOrbitron from "components/fonts/loadOrbitron";
 import { isTouchDevice, prefersReducedMotion } from "components/motion/useDeviceTilt";
 import "./Signin.css";
@@ -83,31 +84,25 @@ export class Signin extends Component {
   render() {
     const { username, password, errors, message, busy } = this.state;
     return (
-      <main className="signin-v2">
+      <main className="signin-v2 holo-ui">
         <a className="signin-v2-home" href="/">
           <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
         </a>
 
         <div className="signin-v2-stage">
           <div className="signin-v2-float">
-            <div className="signin-v2-panel" ref={this.panelRef}>
-              <div className="signin-v2-frame" aria-hidden="true">
-                <span className="signin-v2-corner is-tl" />
-                <span className="signin-v2-corner is-tr" />
-                <span className="signin-v2-corner is-bl" />
-                <span className="signin-v2-corner is-br" />
-              </div>
-
+            <HoloPanel as="div" className="signin-v2-panel" ref={this.panelRef}>
               <form className="signin-v2-form" onSubmit={this.onSubmit} noValidate>
                 <header className="signin-v2-heading">
-                  <p className="signin-v2-kicker">Restricted access</p>
-                  <h1 className="signin-v2-title">Sign in</h1>
+                  <p className="holo-kicker">Restricted access</p>
+                  <h1 className="holo-title signin-v2-title">Sign in</h1>
                   <p className="signin-v2-legend">Only the best make it this far</p>
                 </header>
 
-                <label className={errors.username ? "signin-v2-field has-error" : "signin-v2-field"}>
-                  <span className="signin-v2-label">Username</span>
+                <label className={errors.username ? "holo-field signin-v2-field has-error" : "holo-field signin-v2-field"}>
+                  <span className="holo-label">Username</span>
                   <input
+                    className="holo-input"
                     name="username"
                     type="text"
                     autoComplete="username"
@@ -117,12 +112,13 @@ export class Signin extends Component {
                     onChange={this.onChange}
                     aria-invalid={!!errors.username}
                   />
-                  {errors.username && <span className="signin-v2-error">{errors.username}</span>}
+                  {errors.username && <span className="holo-error">{errors.username}</span>}
                 </label>
 
-                <label className={errors.password ? "signin-v2-field has-error" : "signin-v2-field"}>
-                  <span className="signin-v2-label">Password</span>
+                <label className={errors.password ? "holo-field signin-v2-field has-error" : "holo-field signin-v2-field"}>
+                  <span className="holo-label">Password</span>
                   <input
+                    className="holo-input"
                     name="password"
                     type="password"
                     autoComplete="current-password"
@@ -130,10 +126,14 @@ export class Signin extends Component {
                     onChange={this.onChange}
                     aria-invalid={!!errors.password}
                   />
-                  {errors.password && <span className="signin-v2-error">{errors.password}</span>}
+                  {errors.password && <span className="holo-error">{errors.password}</span>}
                 </label>
 
-                <button type="submit" className={busy ? "signin-v2-submit is-busy" : "signin-v2-submit"} disabled={busy}>
+                <button
+                  type="submit"
+                  className={busy ? "holo-button signin-v2-submit is-busy" : "holo-button signin-v2-submit"}
+                  disabled={busy}
+                >
                   {busy ? "Authenticating" : "Sign in"}
                 </button>
 
@@ -141,7 +141,7 @@ export class Signin extends Component {
                   {message}
                 </p>
               </form>
-            </div>
+            </HoloPanel>
           </div>
           <HoloPlatform className="signin-v2-platform" />
         </div>

@@ -27,10 +27,11 @@ export const RoutesContainer = () => (
     <Route exact path={`/game`} component={GamePage} />
     <Route exact path={`/signin`} component={SigninPage} />
     <PrivateRoute exact path="/admin/dashboard" component={Dashboard} />
-    <PrivateRoute exact path="/admin/post" component={EditPost} />
-    <PrivateRoute exact path="/admin/post/:id" component={EditPost} />
-    <PrivateRoute exact path="/admin/client" component={EditClient} />
-    <PrivateRoute exact path="/admin/client/:id" component={EditClient} />
+    {/* keys: moving between "new" and "edit" starts a fresh form */}
+    <PrivateRoute key="new-post" exact path="/admin/post" component={EditPost} />
+    <PrivateRoute key="edit-post" exact path="/admin/post/:id" component={EditPost} />
+    <PrivateRoute key="new-client" exact path="/admin/client" component={EditClient} />
+    <PrivateRoute key="edit-client" exact path="/admin/client/:id" component={EditClient} />
   </Switch>
 )
 
