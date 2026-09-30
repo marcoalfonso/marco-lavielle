@@ -3,7 +3,8 @@ import React, { useEffect, useRef } from "react";
 // A wireframe globe drawn in dots of light, after the Evangelion star-chart
 // screens: an outer sphere of dotted meridians and parallels turning on a
 // tilted axis, a smaller inner sphere turning the other way, bright bands
-// sweeping round it, and labelled axes. Lines on the far side are dimmer.
+// sweeping round it, and three axes reaching out. Lines on the far side are
+// dimmer.
 // Drawn on a canvas each frame (a few thousand dots is cheap there).
 //
 // It assembles out of a point when the page opens, and collapses back into
@@ -19,12 +20,14 @@ const LEAVE_MS = 760;
 
 const CANVAS_SCALE = 1.5; // canvas size / globe box size; keep in step with Journal.css
 
-// the axes' directions on screen (x right, y down) and their labels' alignment
-const AXES = [
-  [-0.62, -0.78, "right"],
-  [0.7, -0.71, "left"],
-  [-0.25, 0.97, "right"],
+// the axes' directions on screen (x right, y down); the social channels
+// sit at their ends (StarChart.js, .chart-channel-slot in Journal.css)
+export const AXES = [
+  [-0.5, -0.866],
+  [0.5, -0.866],
+  [-0.2, 0.98],
 ];
+export const AXIS_LENGTH = 1.3; // times the globe's radius
 
 const easeOut = (t) => 1 - Math.pow(1 - t, 3);
 const easeIn = (t) => t * t * t;
@@ -52,7 +55,7 @@ const project = (lat, lon, spin, tiltX, tiltZ) => {
 
 export { CANVAS_SCALE };
 
-const Globe = ({ leaving, className, labels }) => {
+const Globe = ({ leaving, className }) => {
   const canvasRef = useRef(null);
   const leaveAt = useRef(null);
 
@@ -124,7 +127,7 @@ const Globe = ({ leaving, className, labels }) => {
       const cx = size / 2;
       const cy = size / 2;
       // the canvas reaches past the globe's box (see .chart-globe-canvas), so
-      // the axes and their labels have room: the globe is 0.37 of the box
+      // the axes have room: the globe is 0.37 of the box
       const R = (size / CANVAS_SCALE) * 0.37 * k;
       const spin = reduceMotion ? 0.6 : t * 0.22;
       const tiltX = -0.38;
@@ -154,7 +157,7 @@ const Globe = ({ leaving, className, labels }) => {
       ctx.beginPath();
       AXES.forEach(([dx, dy]) => {
         ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + dx * R * 1.45, cy + dy * R * 1.45);
+        ctx.lineTo(cx + dx * R * AXIS_LENGTH, cy + dy * R * AXIS_LENGTH);
       });
       ctx.stroke();
 
@@ -205,21 +208,6 @@ const Globe = ({ leaving, className, labels }) => {
         line(pts, R * 1.015, cx, cy, band.w, white(0.9 * k), true);
       });
       ctx.lineCap = "butt";
-
-      // axis labels at the ends (not on small screens, where they'd run off
-      // the edges)
-      if (labels && k > 0.95 && size / CANVAS_SCALE > 480) {
-        ctx.font = `600 ${Math.max(9, size * 0.018)}px Orbitron, "DINWeb", sans-serif`;
-        ctx.fillStyle = cyan(0.85);
-        ctx.textBaseline = "middle";
-        AXES.forEach(([dx, dy, align], i) => {
-          const text = labels[i];
-          ctx.textAlign = align;
-          const x = cx + dx * R * 1.48;
-          const y = cy + dy * R * 1.48;
-          text.split("\n").forEach((row, i) => ctx.fillText(row.toUpperCase(), x + (align === "left" ? 4 : -4), y + i * size * 0.024));
-        });
-      }
     };
 
     const loop = (now) => {

@@ -59,9 +59,11 @@ html.journal-html body {
   display: grid;
   place-items: center;
   max-width: 1440px;
-  min-height: calc(var(--d) + 80px);
+  min-height: calc(var(--d) + 196px);
   margin: 0 auto;
-  padding: 24px 32px;
+  /* the globe sits low enough for the callouts on its upper axes to clear
+     the corner readouts */
+  padding: 116px 32px 24px;
   box-sizing: border-box;
 }
 
@@ -159,11 +161,54 @@ html.journal-html body {
   width: 100%;
 }
 
-.chart-globe {
+.chart-globe-wrap {
   position: relative;
   z-index: 1;
+  /* room for the callout at the foot of the Z axis */
+  margin-bottom: 70px;
+}
+
+.chart-globe {
+  position: relative;
   width: var(--d);
   height: var(--d);
+}
+
+/* the social channels, each at the end of an axis (the axis is its leader
+   line): the globe's radius is 37% of its box and the axes reach 1.3 radii,
+   so the ends are 48.1% of the box from its centre (see Globe.js) */
+.chart-channels {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.chart-channel-slot {
+  position: absolute;
+  left: calc(50% + var(--ax) * 48.1%);
+  top: calc(50% + var(--ay) * 48.1%);
+  width: 250px;
+  pointer-events: auto;
+}
+
+/* Y, up and left: the callout ends at the axis */
+.chart-channel-slot.is-axis-0 {
+  transform: translate(-100%, -100%);
+}
+
+/* X, up and right: it starts at the axis */
+.chart-channel-slot.is-axis-1 {
+  transform: translate(0, -100%);
+}
+
+/* Z, down: it hangs from the axis */
+.chart-channel-slot.is-axis-2 {
+  transform: translate(-50%, 4px);
+}
+
+.chart-channel-slot .chart-channel {
+  width: 100%;
 }
 
 .chart-globe-canvas {
@@ -176,46 +221,6 @@ html.journal-html body {
   height: 150%;
   pointer-events: none;
   filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.55));
-}
-
-/* leader lines, drawn over the whole chart from each callout to the globe */
-.chart-leaders {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.chart-leader {
-  fill: none;
-  stroke: var(--holo-light);
-  stroke-width: 1.2;
-  stroke-opacity: 0.75;
-  stroke-dasharray: 1;
-  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.8));
-}
-
-.chart-leader-dot {
-  fill: #fff;
-  filter: drop-shadow(0 0 4px var(--holo-light));
-  animation: chart-ping 1.8s ease-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes chart-ping {
-  0%,
-  100% {
-    opacity: 1;
-    scale: 1;
-  }
-  50% {
-    opacity: 0.4;
-    scale: 1.6;
-  }
 }
 
 .chart-side {
@@ -587,11 +592,9 @@ html.journal-html body {
 }
 
 /* --- smaller screens ------------------------------------------------------ */
-/* narrower: the call to action shrinks to its arrow */
-@media (max-width: 1280px) {
-  .chart-channel-cta-word {
-    display: none;
-  }
+/* the callouts on the axes keep to an arrow for their call to action */
+.chart-channel-cta-word {
+  display: none;
 }
 
 @media (max-width: 1100px) {
@@ -671,42 +674,97 @@ html.journal-html body {
     order: 2;
   }
 
-  /* the chart stacks: globe, then its callouts and panels in a column */
-  .chart {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+  /* One column, in this order: the top two readouts, the globe, the entry
+     log, then the rest (bottom readouts, activity, gauge, time), and the
+     social channels last. The wrappers step aside (display: contents) so
+     their parts can be ordered on the page's own grid. */
+  .journal-magi {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0 12px 64px;
+    box-sizing: border-box;
   }
 
-  .chart-leaders {
-    display: none;
-  }
-
+  .magi-screen,
+  .chart,
   .chart-side,
-  .chart-side.is-left,
-  .chart-side.is-right {
-    align-items: stretch;
-    gap: 12px;
-    width: 100%;
-    padding: 0;
+  .chart-globe-wrap {
+    display: contents;
   }
 
-  .chart-side.is-left {
-    order: 2;
+  .magi-top,
+  .chart-globe,
+  .magi-log,
+  .chart-panel,
+  .chart-readout,
+  .chart-channels {
+    grid-column: 1 / -1;
   }
 
-  .chart-side.is-right {
-    order: 3;
+  .magi-top {
+    order: 0;
+    gap: 16px;
+    padding: 20px 4px 4px;
+  }
+
+  .journal-magi .magi-home,
+  .journal-magi .magi-title {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+
+  .magi-hud.is-tl,
+  .magi-hud.is-tr {
+    order: 1;
   }
 
   .chart-globe {
-    order: 1;
-    align-self: center;
+    order: 2;
+    justify-self: center;
+    margin: 8px 0;
+  }
+
+  .magi-log {
+    order: 3;
+  }
+
+  .magi-hud.is-bl,
+  .magi-hud.is-br {
+    order: 4;
   }
 
   .chart-panel,
-  .journal-magi .chart-channel {
+  .chart-readout {
+    order: 5;
     width: 100%;
+  }
+
+  .chart-readout {
+    align-items: center;
+    margin: 8px 0;
+  }
+
+  .chart-readout-row {
+    font-size: 22px;
+  }
+
+  .chart-channels {
+    order: 6;
+    position: static;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .chart-channel-slot,
+  .chart-channel-slot.is-axis-0,
+  .chart-channel-slot.is-axis-1,
+  .chart-channel-slot.is-axis-2 {
+    position: static;
+    width: 100%;
+    transform: none;
   }
 
   .journal-magi .chart-channel.is-left {
@@ -715,20 +773,12 @@ html.journal-html body {
     text-align: left;
   }
 
-  .chart-readout {
-    align-items: center;
-  }
-
   .chart-channel-cta-word {
     display: inline;
   }
 
-  .chart-readout-row {
-    font-size: 22px;
-  }
-
   .magi-log {
-    padding: 16px 12px 72px;
+    padding: 12px 0 8px;
   }
 
   .journal-magi .magi-entry {
@@ -779,23 +829,6 @@ html.journal-html body {
   }
 }
 
-.chart-leader {
-  animation: chart-draw 500ms ease-out 1250ms both;
-}
-
-.chart-leader-dot {
-  animation: magi-fade 300ms ease-out 1650ms both, chart-ping 1.8s ease-out 1950ms infinite;
-}
-
-@keyframes chart-draw {
-  from {
-    stroke-dashoffset: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-
 .journal-magi .chart-channel {
   animation: chart-extend 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 1550ms both;
 }
@@ -808,8 +841,16 @@ html.journal-html body {
   transform-origin: 0 50%;
 }
 
-.chart-channel + .chart-channel {
-  animation-delay: 1680ms;
+.chart-channel-slot.is-axis-2 .chart-channel {
+  transform-origin: 50% 0;
+}
+
+.chart-channel-slot.is-axis-1 .chart-channel {
+  animation-delay: 1650ms;
+}
+
+.chart-channel-slot.is-axis-2 .chart-channel {
+  animation-delay: 1750ms;
 }
 
 @keyframes chart-extend {
@@ -994,31 +1035,12 @@ html.journal-html body {
   }
 }
 
-.is-leaving .chart-leader {
-  animation: chart-withdraw 280ms ease-in 380ms both;
-}
-
-.is-leaving .chart-leader-dot {
-  animation: magi-sink 200ms ease-in 420ms both;
-}
-
-@keyframes chart-withdraw {
-  from {
-    stroke-dashoffset: 0;
-  }
-  to {
-    stroke-dashoffset: 1;
-  }
-}
-
 .is-leaving {
   pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .magi-top,
-  .chart-leader,
-  .chart-leader-dot,
   .journal-magi .chart-channel,
   .chart-channel-marker,
   .chart-panel,
