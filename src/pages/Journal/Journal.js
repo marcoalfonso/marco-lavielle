@@ -4,13 +4,14 @@ import { connect } from "react-redux";
 
 import { getPosts } from "actions/appActions";
 import loadOrbitron from "components/fonts/loadOrbitron";
-import MagiDial from "./MagiDial";
+import StarChart from "./StarChart";
 import "components/holo/holo.css";
 import "./Journal.css";
 
-// Journal: a MAGI-style screen in the site's light. The dial's three arms
-// are channels to the social profiles, corner readouts give the entry count
-// and two live counters, and the entry log below lists every post.
+// Journal: an Evangelion-style star chart in the site's light. A wireframe
+// globe with the social channels as callouts, corner readouts giving the
+// entry count and two live counters, and the entry log below listing every
+// post.
 
 const LEAVE_MS = 1450; // keep in step with the .is-leaving timings in Journal.css
 
@@ -21,35 +22,31 @@ const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).ge
 // "2020-12-01T..." -> "2020.12.01"
 const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
 
-// the dial's three arms: a channel per social profile; the ticker rolls
-// through five lines about what's there
+// the social channels, shown as callouts around the globe
 const CHANNELS = [
   {
     id: "linkedin",
     name: "LinkedIn",
-    channel: "CH-01",
+    side: "right",
     handle: "Marco Lavielle",
     href: "https://www.linkedin.com/in/marcolavielle/",
-    feed: ["Software engineer", "Sydney, Australia", "Work history", "Projects", "Recommendations"],
-    action: "Connect ›",
+    action: "Connect",
   },
   {
     id: "instagram",
     name: "Instagram",
-    channel: "CH-02",
+    side: "left",
     handle: "@cuban_papi_chulo",
     href: "http://instagram.com/cuban_papi_chulo",
-    feed: ["Paintings", "Works in progress", "Studio life", "Sydney", "Behind the canvas"],
-    action: "Follow ›",
+    action: "Follow",
   },
   {
     id: "twitter",
-    name: "Twitter / X",
-    channel: "CH-03",
+    name: "X / Twitter",
+    side: "right",
     handle: "@marcolavielle",
     href: "https://twitter.com/marcolavielle",
-    feed: ["Code", "Thoughts", "Short-form notes", "Tech links", "Replies"],
-    action: "Follow ›",
+    action: "Follow",
   },
 ];
 
@@ -100,23 +97,23 @@ export class Journal extends Component {
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
-    // from further down the page (the entry log), bring the dial to the
+    // from further down the page (the entry log), bring the globe to the
     // middle of the screen first, so the compress can be seen
     this.centring = true;
-    this.centreDial().then(() => {
+    this.centreGlobe().then(() => {
       this.centring = false;
       this.setState({ leaving: true });
       this.leaveTimer = setTimeout(() => window.location.assign(link.href), LEAVE_MS);
     });
   };
 
-  // smooth-scroll the dial to the middle of the screen; resolves once there
+  // smooth-scroll the globe to the middle of the screen; resolves once there
   // (or straight away if it already is)
-  centreDial = () =>
+  centreGlobe = () =>
     new Promise((done) => {
-      const dial = document.querySelector(".magi");
-      if (!dial) return done();
-      const r = dial.getBoundingClientRect();
+      const globe = document.querySelector(".chart-globe");
+      if (!globe) return done();
+      const r = globe.getBoundingClientRect();
       const target = Math.max(0, Math.round(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2));
       if (Math.abs(target - window.scrollY) < 40) return done();
       window.scrollTo({ top: target, behavior: "smooth" });
@@ -177,7 +174,7 @@ export class Journal extends Component {
             value={first ? withCommas(seconds(first.published)) : "···,···,···"}
             unit="sec."
           />
-          <MagiDial channels={CHANNELS} />
+          <StarChart channels={CHANNELS} posts={sorted} now={this.state.now} leaving={this.state.leaving} />
         </section>
 
         <section className="magi-log" aria-label="All entries">

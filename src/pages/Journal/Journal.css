@@ -1,6 +1,7 @@
 /* ---------------------------------------------------------------------
-   Journal: a MAGI-style index screen in the site's cyan light, and an
-   entry log beneath it.
+   Journal: an Evangelion-style star chart in the site's cyan light (a
+   wireframe globe with callouts, corner readouts), and an entry log
+   beneath it.
    --------------------------------------------------------------------- */
 html.journal-html,
 html.journal-html body {
@@ -8,8 +9,7 @@ html.journal-html body {
 }
 
 .journal-magi {
-  --magi-line: #3fd6e6;
-  --d: min(640px, 76vh, 92vw); /* the dial's size */
+  --d: min(600px, 72vh, 42vw); /* the globe's size */
   min-height: 100vh;
   /* plain black: a fixed gradient showed a hard seam while layers animated */
   background: #010207;
@@ -53,19 +53,19 @@ html.journal-html body {
   text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
 }
 
-/* --- the screen: dial in the middle, readouts in the corners ------------- */
+/* --- the screen: star chart in the middle, readouts in the corners ------- */
 .magi-screen {
   position: relative;
   display: grid;
   place-items: center;
-  max-width: 1280px;
+  max-width: 1440px;
   min-height: calc(var(--d) + 80px);
   margin: 0 auto;
   padding: 24px 32px;
   box-sizing: border-box;
 }
 
-/* corner readouts: an outlined box beside a thick bar, as on the MAGI */
+/* corner readouts: an outlined box beside a thick bar */
 .magi-hud {
   position: absolute;
   z-index: 3;
@@ -150,394 +150,318 @@ html.journal-html body {
   text-transform: uppercase;
 }
 
-/* --- the dial ------------------------------------------------------------ */
-.magi {
+/* --- the star chart ------------------------------------------------------ */
+.chart {
   position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--d) minmax(0, 1fr);
+  align-items: center;
+  width: 100%;
+}
+
+.chart-globe {
+  position: relative;
+  z-index: 1;
   width: var(--d);
   height: var(--d);
 }
 
-.magi-layer {
+.chart-globe-canvas {
+  /* 1.5x the globe's box (CANVAS_SCALE in Globe.js), for the axes' labels */
+  position: absolute;
+  left: -25%;
+  top: -25%;
+  display: block;
+  width: 150%;
+  height: 150%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.55));
+}
+
+/* leader lines, drawn over the whole chart from each callout to the globe */
+.chart-leaders {
   position: absolute;
   inset: 0;
+  z-index: 2;
   width: 100%;
   height: 100%;
   overflow: visible;
+  pointer-events: none;
 }
 
-.magi-line {
+.chart-leader {
   fill: none;
-  stroke: var(--magi-line);
+  stroke: var(--holo-light);
   stroke-width: 1.2;
-  vector-effect: non-scaling-stroke;
+  stroke-opacity: 0.75;
+  stroke-dasharray: 1;
+  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.8));
 }
 
-.magi-line.is-faint {
-  stroke-opacity: 0.3;
+.chart-leader-dot {
+  fill: #fff;
+  filter: drop-shadow(0 0 4px var(--holo-light));
+  animation: chart-ping 1.8s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 
-.magi-maze {
-  fill: none;
-  stroke: var(--magi-line);
-  stroke-width: 3.2;
-  stroke-linecap: round;
-  stroke-opacity: 0.55;
-}
-
-.magi-maze.is-dim {
-  stroke-opacity: 0.32;
-}
-
-/* the outer band of blocky glyphs */
-.magi-glyphs {
-  fill: none;
-  stroke: var(--magi-line);
-  stroke-width: 9;
-  stroke-dasharray: 2.5 3.5 6 3.5;
-  stroke-opacity: 0.45;
-}
-
-.magi-glyphs.is-fine {
-  stroke-width: 5;
-  stroke-dasharray: 1.5 4;
-  stroke-opacity: 0.3;
-}
-
-/* each ring set turns as a whole layer; the glow is drawn once with it */
-.magi-spin {
-  filter: drop-shadow(0 0 3px rgba(63, 214, 230, 0.55));
-  animation: magi-spin 200s linear infinite;
-}
-
-@keyframes magi-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* --- the three arms: a social channel each ------------------------------- */
-/* they turn together, counter-clockwise against the outer rings (which turn
-   clockwise); the core, drawn above them, stays still */
-.magi-arms {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  animation: magi-spin 150s linear infinite reverse;
-}
-
-.magi-arm {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 2;
-  width: 0;
-  height: 0;
-}
-
-/* one link: four slanted rows stacked across the arm */
-.journal-magi .magi-social {
-  --row: calc(var(--d) * 0.042);
-  --lh: var(--row);
-  position: absolute;
-  top: 0;
-  left: calc(var(--d) * 0.145);
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--d) * 0.006);
-  width: calc(var(--d) * 0.31);
-  color: var(--holo-light);
-  text-decoration: none;
-  transform: translateY(-50%);
-}
-
-.magi-arm.is-flipped .magi-social {
-  left: auto;
-  right: calc(var(--d) * 0.145);
-}
-
-.magi-social-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: calc(var(--d) * 0.011);
-  box-sizing: border-box;
-  height: var(--row);
-  padding: 0 calc(var(--d) * 0.016);
-  overflow: hidden;
-  border: 1.5px solid rgba(111, 245, 238, 0.55);
-  background: rgba(2, 12, 20, 0.92);
-  transform: skewX(-18deg);
-  transform-origin: 0 50%;
-  white-space: nowrap;
-  transition: border-color 200ms ease, box-shadow 200ms ease, background-color 200ms ease;
-}
-
-.magi-arm.is-flipped .magi-social-row {
-  transform-origin: 100% 50%;
-}
-
-/* a stepped edge: each row a little shorter, like the MAGI's bands */
-.magi-social-row.is-head {
-  width: 100%;
-  border-width: 2px;
-  border-color: rgba(111, 245, 238, 0.85);
-  background: rgba(111, 245, 238, 0.12);
-}
-
-.magi-social-row.is-handle {
-  width: 96%;
-}
-
-.magi-social-row.is-ticker {
-  width: 90%;
-  background: rgba(2, 14, 22, 0.92) repeating-linear-gradient(90deg, rgba(0, 191, 243, 0.1) 0 2px, transparent 2px 5px);
-}
-
-.magi-social-row.is-action {
-  width: 72%;
-}
-
-.magi-arm.is-flipped .magi-social-row {
-  align-self: flex-end;
-}
-
-.magi-social-signal {
-  flex: 0 0 auto;
-  width: calc(var(--d) * 0.01);
-  height: calc(var(--d) * 0.01);
-  border-radius: 50%;
-  background: var(--holo-light);
-  box-shadow: 0 0 8px var(--holo-light);
-  animation: magi-signal 1.4s ease-in-out infinite;
-  animation-delay: calc(var(--arm) * -0.45s);
-}
-
-@keyframes magi-signal {
+@keyframes chart-ping {
   0%,
   100% {
     opacity: 1;
-    box-shadow: 0 0 8px var(--holo-light);
+    scale: 1;
   }
   50% {
-    opacity: 0.2;
-    box-shadow: 0 0 0 transparent;
+    opacity: 0.4;
+    scale: 1.6;
   }
 }
 
-.magi-social-icon {
+.chart-side {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 0 10px;
+}
+
+.chart-side.is-left {
+  align-items: flex-end;
+}
+
+.chart-side.is-right {
+  align-items: flex-start;
+}
+
+/* --- panels: activity chart, gauge ---------------------------------------- */
+.chart-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-sizing: border-box;
+  width: min(260px, 100%);
+  padding: 12px 14px;
+  border: 1px solid rgba(111, 245, 238, 0.45);
+  border-radius: 4px;
+  background: rgba(2, 10, 18, 0.8);
+}
+
+.chart-panel-label {
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.chart-activity svg {
+  width: 100%;
+  height: 72px;
+}
+
+.chart-area {
+  fill: rgba(111, 245, 238, 0.35);
+  stroke: var(--holo-light);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.6));
+}
+
+.chart-tick {
+  stroke: rgba(111, 245, 238, 0.15);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart-axis {
+  display: flex;
+  justify-content: space-between;
+  color: var(--holo-muted);
+  font: 600 10px/1 var(--holo-display);
+  letter-spacing: 0.08em;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* graph paper, a scan line crossing it */
+.chart-gauge {
+  height: 86px;
+  overflow: hidden;
+  background:
+    linear-gradient(rgba(111, 245, 238, 0.14) 1px, transparent 1px) 0 0 / 100% 10px,
+    linear-gradient(90deg, rgba(111, 245, 238, 0.14) 1px, transparent 1px) 0 0 / 10px 100%,
+    rgba(2, 10, 18, 0.8);
+}
+
+.chart-gauge-scan {
+  position: absolute;
+  top: 0;
+  bottom: 22px;
+  left: 0;
+  width: 2px;
+  background: var(--holo-light);
+  box-shadow: 0 0 10px 2px rgba(111, 245, 238, 0.6);
+  animation: chart-scan 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes chart-scan {
+  from {
+    left: 4%;
+  }
+  to {
+    left: 96%;
+  }
+}
+
+.chart-gauge-scale {
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--holo-muted);
+  font: 600 9px/1 var(--holo-display);
+}
+
+/* --- live readout: Sydney's time and coordinates -------------------------- */
+.chart-readout {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chart-readout-row {
+  color: var(--holo-light);
+  font: 700 26px/1.05 var(--holo-display);
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 12px rgba(111, 245, 238, 0.7);
+  white-space: nowrap;
+}
+
+.chart-readout-row small {
+  font-size: 16px;
+}
+
+.chart-readout .chart-panel-label {
+  margin-top: 6px;
+}
+
+/* --- social channels: rounded callouts with a ring marker ----------------- */
+.journal-magi .chart-channel {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: min(310px, 100%);
+  padding: 10px 18px 10px 12px;
+  border: 1.5px solid rgba(111, 245, 238, 0.75);
+  border-radius: 999px;
+  background: rgba(2, 12, 20, 0.9);
+  box-shadow: 0 0 12px rgba(0, 191, 243, 0.3), inset 0 0 14px rgba(0, 191, 243, 0.12);
+  color: #eaf8ff;
+  text-decoration: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.journal-magi .chart-channel.is-left {
+  flex-direction: row-reverse;
+  padding: 10px 12px 10px 18px;
+  text-align: right;
+}
+
+.journal-magi .chart-channel:hover,
+.journal-magi .chart-channel:focus-visible {
+  border-color: var(--holo-light);
+  background: rgba(111, 245, 238, 0.14);
+  box-shadow: 0 0 20px rgba(111, 245, 238, 0.65), inset 0 0 18px rgba(111, 245, 238, 0.25);
+  color: #fff;
+  outline: none;
+  text-decoration: none;
+}
+
+/* a ring marker, like the chart screens' */
+.chart-channel-marker {
   flex: 0 0 auto;
-  width: calc(var(--d) * 0.024);
-  height: calc(var(--d) * 0.024);
+  width: 26px;
+  height: 26px;
+  box-sizing: border-box;
+  border: 2px solid var(--holo-light);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--holo-light) 0 3px, transparent 4px);
+  box-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
+  animation: chart-marker 2.4s ease-in-out infinite;
+}
+
+@keyframes chart-marker {
+  50% {
+    box-shadow: 0 0 18px rgba(111, 245, 238, 0.95), inset 0 0 8px rgba(111, 245, 238, 0.5);
+  }
+}
+
+.chart-channel-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
   fill: none;
-  stroke: currentColor;
+  stroke: var(--holo-light);
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
   filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.7));
 }
 
-.magi-social-name {
+.chart-channel-text {
+  display: flex;
   flex: 1 1 auto;
-  color: #fff;
-  font: 700 calc(var(--d) * 0.018) / 1 var(--holo-display);
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.chart-channel-text strong,
+.chart-channel-text small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-channel-text strong {
+  font: 700 13px/1 var(--holo-display);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(111, 245, 238, 0.8);
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.6);
 }
 
-.magi-social-channel {
-  color: var(--holo-cyan);
-  font: 700 calc(var(--d) * 0.013) / 1 var(--holo-display);
-  letter-spacing: 0.1em;
-}
-
-.magi-social-row.is-handle {
-  color: #eaf8ff;
-  font: 600 calc(var(--d) * 0.019) / 1 var(--holo-display);
+.chart-channel-text small {
+  overflow: hidden;
+  color: var(--holo-muted);
+  font: 500 12px/1 var(--holo-font);
   letter-spacing: 0.04em;
+  text-overflow: ellipsis;
 }
 
-.magi-social-row.is-ticker {
-  color: var(--holo-light);
-  font: 700 calc(var(--d) * 0.014) / 1 var(--holo-display);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* live signal bars, bouncing */
-.magi-social-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: calc(var(--d) * 0.003);
-  height: 55%;
-}
-
-.magi-social-bars span {
-  width: calc(var(--d) * 0.005);
-  height: 100%;
-  background: var(--holo-light);
-  box-shadow: 0 0 4px var(--holo-light);
-  transform-origin: 50% 100%;
-  animation: magi-bars 1.1s ease-in-out infinite alternate;
-}
-
-.magi-social-bars span:nth-child(2) {
-  animation-delay: -0.3s;
-}
-
-.magi-social-bars span:nth-child(3) {
-  animation-delay: -0.7s;
-}
-
-.magi-social-bars span:nth-child(4) {
-  animation-delay: -0.15s;
-}
-
-.magi-social-bars span:nth-child(5) {
-  animation-delay: -0.5s;
-}
-
-@keyframes magi-bars {
-  from {
-    transform: scaleY(0.25);
-  }
-  to {
-    transform: scaleY(1);
-  }
-}
-
-.magi-social-cta {
+.chart-channel-cta {
+  flex: 0 0 auto;
   color: var(--holo-cyan);
-  font: 700 calc(var(--d) * 0.015) / 1 var(--holo-display);
+  font: 700 10px/1 var(--holo-display);
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  transition: color 200ms ease;
 }
 
-/* scanning sweep over the whole channel */
-.magi-social-row.is-head::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: -30%;
-  width: 30%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.28), transparent);
-  animation: magi-sweep 3.2s ease-in-out infinite;
-  animation-delay: calc(var(--arm) * -1s);
-}
-
-@keyframes magi-sweep {
-  0% {
-    left: -30%;
-  }
-  55%,
-  100% {
-    left: 100%;
-  }
-}
-
-/* pointing at a channel lights all of it */
-.journal-magi .magi-social:hover .magi-social-row,
-.journal-magi .magi-social:focus-visible .magi-social-row {
-  border-color: var(--holo-light);
-  box-shadow: 0 0 14px rgba(111, 245, 238, 0.6);
-}
-
-.journal-magi .magi-social:hover .magi-social-row.is-action,
-.journal-magi .magi-social:focus-visible .magi-social-row.is-action {
-  background: rgba(111, 245, 238, 0.2);
-}
-
-.journal-magi .magi-social:hover .magi-social-cta,
-.journal-magi .magi-social:focus-visible .magi-social-cta {
+.chart-channel:hover .chart-channel-cta {
   color: #fff;
-}
-
-.journal-magi .magi-social:focus-visible {
-  outline: none;
-}
-
-/* the ticker: a one-line window rolling through five lines, then the first
-   again for a seamless loop */
-.magi-ticker {
-  position: relative;
-  flex: 1 1 auto;
-  height: var(--lh);
-  overflow: hidden;
-}
-
-.magi-ticker-track {
-  display: flex;
-  flex-direction: column;
-  animation: magi-tick 12.5s ease-in-out infinite;
-  animation-delay: calc(var(--arm) * -4.1s);
-}
-
-.magi-ticker-line {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
-  height: var(--lh);
-}
-
-@keyframes magi-tick {
-  0%,
-  16% {
-    transform: translateY(0);
-  }
-  20%,
-  36% {
-    transform: translateY(calc(var(--lh) * -1));
-  }
-  40%,
-  56% {
-    transform: translateY(calc(var(--lh) * -2));
-  }
-  60%,
-  76% {
-    transform: translateY(calc(var(--lh) * -3));
-  }
-  80%,
-  96% {
-    transform: translateY(calc(var(--lh) * -4));
-  }
-  100% {
-    transform: translateY(calc(var(--lh) * -5));
-  }
-}
-
-/* the core: MAGI 01's box, as ML 01 */
-.magi-core {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: calc(var(--d) * 0.19);
-  padding: calc(var(--d) * 0.012) 0;
-  border: 2px solid var(--holo-light);
-  background: rgba(2, 12, 20, 0.95);
-  box-shadow: 0 0 20px rgba(111, 245, 238, 0.55), inset 0 0 16px rgba(111, 245, 238, 0.2);
-  transform: translate(-50%, -50%);
-  clip-path: polygon(12% 0, 88% 0, 100% 22%, 100% 78%, 88% 100%, 12% 100%, 0 78%, 0 22%);
-}
-
-.magi-core strong {
-  color: #fff;
-  font: 700 calc(var(--d) * 0.034) / 1.05 var(--holo-display);
-  letter-spacing: 0.08em;
-  text-shadow: 0 0 10px rgba(111, 245, 238, 0.8);
-}
-
-.magi-core-kicker,
-.magi-core-sub {
-  color: var(--holo-cyan);
-  font: 700 calc(var(--d) * 0.014) / 1.4 var(--holo-display);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
 }
 
 /* --- entry log ------------------------------------------------------------ */
@@ -663,6 +587,13 @@ html.journal-html body {
 }
 
 /* --- smaller screens ------------------------------------------------------ */
+/* narrower: the call to action shrinks to its arrow */
+@media (max-width: 1280px) {
+  .chart-channel-cta-word {
+    display: none;
+  }
+}
+
 @media (max-width: 1100px) {
   .magi-hud-box {
     min-width: 170px;
@@ -680,6 +611,10 @@ html.journal-html body {
 @media (max-width: 800px) {
   .journal-magi {
     --d: min(94vw, 440px);
+  }
+
+  .journal-magi .magi-screen .magi-hud {
+    z-index: 3;
   }
 
   .magi-top {
@@ -724,8 +659,8 @@ html.journal-html body {
     font-size: 8px;
   }
 
-  /* two readouts above the dial, two below, like its corners */
-  .magi {
+  /* two readouts above the chart, two below, like its corners */
+  .chart {
     grid-column: 1 / -1;
     order: 1;
     margin: 6px 0;
@@ -734,6 +669,62 @@ html.journal-html body {
   .magi-hud.is-bl,
   .magi-hud.is-br {
     order: 2;
+  }
+
+  /* the chart stacks: globe, then its callouts and panels in a column */
+  .chart {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .chart-leaders {
+    display: none;
+  }
+
+  .chart-side,
+  .chart-side.is-left,
+  .chart-side.is-right {
+    align-items: stretch;
+    gap: 12px;
+    width: 100%;
+    padding: 0;
+  }
+
+  .chart-side.is-left {
+    order: 2;
+  }
+
+  .chart-side.is-right {
+    order: 3;
+  }
+
+  .chart-globe {
+    order: 1;
+    align-self: center;
+  }
+
+  .chart-panel,
+  .journal-magi .chart-channel {
+    width: 100%;
+  }
+
+  .journal-magi .chart-channel.is-left {
+    flex-direction: row;
+    padding: 10px 18px 10px 12px;
+    text-align: left;
+  }
+
+  .chart-readout {
+    align-items: center;
+  }
+
+  .chart-channel-cta-word {
+    display: inline;
+  }
+
+  .chart-readout-row {
+    font-size: 22px;
   }
 
   .magi-log {
@@ -772,7 +763,9 @@ html.journal-html body {
   }
 }
 
-/* --- start: the screen assembles, decompressing out of its core -------- */
+/* --- start: the globe assembles out of a point (Globe.js), then the
+   leader lines draw, the callouts and panels come in, the corner readouts
+   power up and the log rises ------------------------------------------------ */
 .magi-top {
   animation: magi-fade 600ms ease-out both;
 }
@@ -786,89 +779,60 @@ html.journal-html body {
   }
 }
 
-/* 1. the core flickers on */
-.magi-core {
-  animation: magi-core-in 700ms ease-out 100ms both;
+.chart-leader {
+  animation: chart-draw 500ms ease-out 1250ms both;
 }
 
-@keyframes magi-core-in {
-  0% {
-    opacity: 0;
-    scale: 0.3;
+.chart-leader-dot {
+  animation: magi-fade 300ms ease-out 1650ms both, chart-ping 1.8s ease-out 1950ms infinite;
+}
+
+@keyframes chart-draw {
+  from {
+    stroke-dashoffset: 1;
   }
-  35% {
-    opacity: 1;
-    scale: 1.18;
-  }
-  48% {
-    opacity: 0.25;
-  }
-  62% {
-    opacity: 1;
-    scale: 1;
-  }
-  75% {
-    opacity: 0.6;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
+  to {
+    stroke-dashoffset: 0;
   }
 }
 
-/* 2. the rings decompress outward from it, one layer after another */
-.magi-static {
-  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 350ms both;
+.journal-magi .chart-channel {
+  animation: chart-extend 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 1550ms both;
 }
 
-.magi-spin.is-a {
-  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 450ms both, magi-spin 200s linear infinite;
+.journal-magi .chart-channel.is-left {
+  transform-origin: 100% 50%;
 }
 
-.magi-spin.is-b {
-  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 600ms both, magi-spin 260s linear infinite reverse;
+.journal-magi .chart-channel.is-right {
+  transform-origin: 0 50%;
 }
 
-.magi-spin.is-glyphs {
-  animation: magi-decompress 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) 750ms both, magi-spin 90s linear infinite;
+.chart-channel + .chart-channel {
+  animation-delay: 1680ms;
 }
 
-@keyframes magi-decompress {
-  0% {
-    opacity: 0;
-    scale: 0.3;
-    clip-path: circle(0% at 50% 50%);
-  }
-  30% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-    clip-path: circle(75% at 50% 50%);
-  }
-}
-
-/* 3. the channels extend out of the core, row by row */
-.magi-social-row {
-  animation: magi-extend 400ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(1250ms + var(--arm) * 260ms + var(--build) * 90ms) both;
-}
-
-@keyframes magi-extend {
-  0% {
+@keyframes chart-extend {
+  from {
     opacity: 0;
     scale: 0 1;
   }
-  50% {
-    opacity: 1;
-  }
-  100% {
+  to {
     opacity: 1;
     scale: 1 1;
   }
 }
 
-/* 4. the corner readouts power up */
+.chart-panel,
+.chart-readout {
+  animation: magi-rise 500ms ease-out 1450ms both;
+}
+
+.chart-gauge {
+  animation-delay: 1700ms;
+}
+
+/* the corner readouts power up */
 .magi-hud-bar {
   animation: magi-bar-in 400ms ease-out calc(1900ms + var(--hud) * 120ms) both;
 }
@@ -913,7 +877,6 @@ html.journal-html body {
   }
 }
 
-/* a flicker as it powers up */
 @keyframes magi-hud-in {
   0% {
     opacity: 0;
@@ -930,7 +893,7 @@ html.journal-html body {
   }
 }
 
-/* 5. the log comes in beneath */
+/* the log comes in beneath */
 .magi-log-title {
   animation: magi-rise 500ms ease-out 2200ms both;
 }
@@ -950,10 +913,10 @@ html.journal-html body {
   }
 }
 
-/* --- leaving: the opening in reverse, everything compressing into the core --- */
-/* the log sinks away, the readouts power down, the channels retract, the
-   ring layers compress inward (outermost first) and the core flickers out;
-   the link is followed as it goes (LEAVE_MS in Journal.js) */
+/* --- leaving: the opening in reverse; the log sinks, the readouts power
+   down, the callouts retract, the lines withdraw and the globe collapses
+   into a point (Globe.js); the link is followed as it goes (LEAVE_MS in
+   Journal.js) ----------------------------------------------------------------- */
 .is-leaving .magi-log-list li {
   animation: magi-sink 320ms ease-in calc(var(--i, 0) * 25ms) both;
 }
@@ -1010,11 +973,17 @@ html.journal-html body {
   }
 }
 
-.is-leaving .magi-social-row {
-  animation: magi-retract 300ms cubic-bezier(0.6, 0, 0.8, 0.2) calc(260ms + (3 - var(--build)) * 60ms) both;
+.is-leaving .chart-panel,
+.is-leaving .chart-readout {
+  animation: magi-sink 300ms ease-in 200ms both;
 }
 
-@keyframes magi-retract {
+.is-leaving .journal-magi .chart-channel,
+.journal-magi.is-leaving .chart-channel {
+  animation: chart-retract 300ms cubic-bezier(0.6, 0, 0.8, 0.2) 250ms both;
+}
+
+@keyframes chart-retract {
   from {
     opacity: 1;
     scale: 1 1;
@@ -1025,58 +994,20 @@ html.journal-html body {
   }
 }
 
-/* the turning carries on underneath (same name, same place in the list) */
-.is-leaving .magi-spin.is-glyphs {
-  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 480ms both, magi-spin 90s linear infinite;
+.is-leaving .chart-leader {
+  animation: chart-withdraw 280ms ease-in 380ms both;
 }
 
-.is-leaving .magi-spin.is-b {
-  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 580ms both, magi-spin 260s linear infinite reverse;
+.is-leaving .chart-leader-dot {
+  animation: magi-sink 200ms ease-in 420ms both;
 }
 
-.is-leaving .magi-spin.is-a {
-  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 680ms both, magi-spin 200s linear infinite;
-}
-
-.is-leaving .magi-static {
-  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 780ms both;
-}
-
-@keyframes magi-compress {
-  0% {
-    opacity: 1;
-    scale: 1;
-    clip-path: circle(75% at 50% 50%);
+@keyframes chart-withdraw {
+  from {
+    stroke-dashoffset: 0;
   }
-  70% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    scale: 0.3;
-    clip-path: circle(0% at 50% 50%);
-  }
-}
-
-.is-leaving .magi-core {
-  animation: magi-core-out 380ms ease-in 1060ms both;
-}
-
-@keyframes magi-core-out {
-  0% {
-    opacity: 1;
-    scale: 1;
-  }
-  25% {
-    opacity: 0.3;
-  }
-  40% {
-    opacity: 1;
-    scale: 1.12;
-  }
-  100% {
-    opacity: 0;
-    scale: 0.05;
+  to {
+    stroke-dashoffset: 1;
   }
 }
 
@@ -1085,23 +1016,18 @@ html.journal-html body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .magi-arms,
-  .magi-spin,
-  .magi-spin.is-a,
-  .magi-spin.is-b,
-  .magi-spin.is-glyphs,
-  .magi-static,
-  .magi-core,
   .magi-top,
-  .magi-social-row,
-  .magi-social-row.is-head::after,
-  .magi-social-signal,
-  .magi-social-bars span,
+  .chart-leader,
+  .chart-leader-dot,
+  .journal-magi .chart-channel,
+  .chart-channel-marker,
+  .chart-panel,
+  .chart-readout,
+  .chart-gauge-scan,
   .magi-hud-bar,
   .magi-hud-box,
   .magi-log-title,
-  .magi-log-list li,
-  .magi-ticker-track {
+  .magi-log-list li {
     animation: none;
   }
 }
