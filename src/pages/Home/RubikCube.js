@@ -40,9 +40,7 @@ const makeCellTimings = () =>
     Array.from({ length: 9 }, () => ({
       "--rise-dur": `${rand(1.4, 3.2).toFixed(2)}s`,
       "--rise-delay": `${rand(-3.2, 0).toFixed(2)}s`,
-      // red to green; the faces then sweep them up to violet and back, so
-      // no square ever turns pink or magenta (see .is-spectrum in Home.css)
-      "--cell-hue": Math.round(rand(0, 110)),
+      "--cell-hue": Math.round(rand(0, 360)),
     })),
   );
 

@@ -568,32 +568,8 @@ body.home-v2-body {
    opacity, which the graphics card handles without repainting; the faces
    stay flat layers (Safari needs that), so a square "rises" by growing and
    brightening. */
-/* Each face sweeps its squares' colours 150deg up the spectrum and back
-   (not all the way round), on its own timing. With squares starting between
-   red and green, colours range from red through yellow, green, cyan and blue
-   to violet, and never reach pink or magenta. */
 .home-v2.is-spectrum .rc-face {
-  animation: rc-spectrum 5s ease-in-out infinite alternate;
-}
-
-.home-v2.is-spectrum .rc-face-right {
-  animation-delay: -1.7s;
-}
-
-.home-v2.is-spectrum .rc-face-back {
-  animation-delay: -3.4s;
-}
-
-.home-v2.is-spectrum .rc-face-left {
-  animation-delay: -5.1s;
-}
-
-.home-v2.is-spectrum .rc-face-top {
-  animation-delay: -6.8s;
-}
-
-.home-v2.is-spectrum .rc-face-bottom {
-  animation-delay: -8.5s;
+  animation: rc-spectrum 9s linear infinite;
 }
 
 @keyframes rc-spectrum {
@@ -601,7 +577,7 @@ body.home-v2-body {
     filter: hue-rotate(0deg) saturate(1.5) brightness(1.1);
   }
   to {
-    filter: hue-rotate(150deg) saturate(1.5) brightness(1.1);
+    filter: hue-rotate(360deg) saturate(1.5) brightness(1.1);
   }
 }
 
