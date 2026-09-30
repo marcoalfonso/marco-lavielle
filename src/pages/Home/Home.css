@@ -637,141 +637,39 @@ body.home-v2-body {
   animation-duration: 2.6s;
 }
 
-/* flares: bursts of light standing straight out of the faces, like the
-   sun's. Each is two crossed glowing planes along the face's normal (so it
-   looks solid from any angle), flaring up and dying away on its own random
-   timing. They live in the cube's 3D space, beside the flat faces. */
-.rc-flare {
-  display: none;
-}
-
-.home-v2.is-spectrum .rc-flare {
+/* a ray of light rising out of each square's top edge, up through the
+   gap above it */
+.home-v2.is-spectrum .rc-cell::before {
+  content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0;
-  height: 0;
-  display: block;
-  transform-style: preserve-3d;
-  pointer-events: none;
-}
-
-.rc-flare-plane {
-  --w: calc(var(--rc-size) * 0.2);
-  --l: calc(var(--rc-size) * var(--flare-len, 0.8));
-  position: absolute;
-  left: calc(var(--w) / -2);
-  top: calc(var(--l) * -1);
-  width: var(--w);
-  height: var(--l);
-  transform-origin: 50% 100%;
-  /* hot white-coloured core at the surface, fanning out and fading */
-  background:
-    radial-gradient(ellipse 18% 70% at 50% 100%, hsl(var(--flare-hue) 100% 92% / 0.95), transparent 70%),
-    radial-gradient(ellipse 50% 100% at 50% 100%, hsl(var(--flare-hue) 100% 62% / 0.75), hsl(var(--flare-hue) 100% 55% / 0.2) 55%, transparent 75%);
-  /* the base fades in, so a plane never shows a hard edge where it meets the face */
-  -webkit-mask-image: linear-gradient(to top, transparent, #000 12%);
-  mask-image: linear-gradient(to top, transparent, #000 12%);
+  left: calc(50% - 1.5px);
+  bottom: 100%;
+  width: 3px;
+  height: 75%;
+  border-radius: 2px;
+  background: linear-gradient(to top, hsl(var(--cell-hue, 183) 100% 80%), hsl(var(--cell-hue, 183) 100% 65% / 0.5) 45%, transparent);
+  box-shadow: 0 0 10px 2px hsl(var(--cell-hue, 183) 100% 60% / 0.55);
   opacity: 0;
-  transform: rotateX(-90deg) scale(0.4, 0.05);
-  animation: rc-flare var(--flare-dur, 2.4s) ease-out var(--flare-delay, 0s) infinite;
-}
-
-/* stood up along the normal; the second plane turned a quarter round it */
-.rc-flare-plane.is-crossed {
-  animation-name: rc-flare-crossed;
-}
-
-@keyframes rc-flare {
-  0% {
-    opacity: 0;
-    transform: rotateX(-90deg) scale(0.4, 0.05);
-  }
-  18% {
-    opacity: 1;
-    transform: rotateX(-90deg) scale(1, 0.75);
-  }
-  45% {
-    opacity: 0.55;
-    transform: rotateX(-90deg) scale(0.85, 1);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: rotateX(-90deg) scale(0.5, 1.1);
-  }
-}
-
-@keyframes rc-flare-crossed {
-  0% {
-    opacity: 0;
-    transform: rotateZ(90deg) rotateX(-90deg) scale(0.4, 0.05);
-  }
-  18% {
-    opacity: 1;
-    transform: rotateZ(90deg) rotateX(-90deg) scale(1, 0.75);
-  }
-  45% {
-    opacity: 0.55;
-    transform: rotateZ(90deg) rotateX(-90deg) scale(0.85, 1);
-  }
-  70%,
-  100% {
-    opacity: 0;
-    transform: rotateZ(90deg) rotateX(-90deg) scale(0.5, 1.1);
-  }
-}
-
-/* the corona: a slowly turning, pulsing halo of rays behind the cube */
-.rc-corona {
-  display: none;
-}
-
-.home-v2.is-spectrum .rc-corona {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: 0;
-  display: block;
-  width: calc(var(--rc-size) * 2.1);
-  height: calc(var(--rc-size) * 2.1);
-  margin: calc(var(--rc-size) * -1.05) 0 0 calc(var(--rc-size) * -1.05);
-  border-radius: 50%;
-  background: repeating-conic-gradient(from 0deg, hsl(0 100% 60% / 0.55) 0deg 2deg, transparent 2deg 9deg),
-    radial-gradient(closest-side, hsl(30 100% 60% / 0.35), transparent 75%);
-  -webkit-mask-image: radial-gradient(closest-side, transparent 30%, #000 42%, transparent 100%);
-  mask-image: radial-gradient(closest-side, transparent 30%, #000 42%, transparent 100%);
   pointer-events: none;
-  animation: rc-corona-spin 40s linear infinite, rc-corona-pulse 3.2s ease-in-out infinite, rc-spectrum 9s linear infinite;
+  transform-origin: 50% 100%;
+  animation: rc-beam var(--beam-dur, 2.4s) ease-out var(--beam-delay, 0s) infinite;
 }
 
-@keyframes rc-corona-spin {
-  to {
-    rotate: 360deg;
+@keyframes rc-beam {
+  0% {
+    opacity: 0;
+    transform: translateY(35%) scaleY(0.1);
   }
-}
-
-@keyframes rc-corona-pulse {
-  0%,
+  20% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 0.7;
+  }
   100% {
-    opacity: 0.45;
-    scale: 0.94;
+    opacity: 0;
+    transform: translateY(-45%) scaleY(1);
   }
-  50% {
-    opacity: 0.9;
-    scale: 1.04;
-  }
-}
-
-.home-v2.is-spectrum .rc-squash {
-  position: relative;
-  z-index: 1;
-}
-
-/* folding away: the flares and corona go out first */
-.home-v2.is-spectrum .rc-scene.is-collapsing .rc-flare,
-.home-v2.is-spectrum .rc-scene.is-collapsing .rc-corona {
-  display: none;
 }
 
 .home-v2.is-spectrum .rc-link {
