@@ -560,6 +560,115 @@ body.home-v2-body {
   transition: opacity 600ms ease;
 }
 
+/* --- all colours: the cube's light cycles through the spectrum -------- */
+/* The cyan is turned through every hue; each face starts at a different
+   point of the cycle, so the cube is never one colour. The filter goes on
+   the faces (they're flat), never on the cube, which would flatten it. */
+.home-v2.is-spectrum .rc-face {
+  animation: rc-spectrum 9s linear infinite;
+  animation-delay: var(--rc-hue-delay, 0s);
+}
+
+.home-v2.is-spectrum .rc-face-right {
+  --rc-hue-delay: -1.5s;
+}
+
+.home-v2.is-spectrum .rc-face-back {
+  --rc-hue-delay: -3s;
+}
+
+.home-v2.is-spectrum .rc-face-left {
+  --rc-hue-delay: -4.5s;
+}
+
+.home-v2.is-spectrum .rc-face-top {
+  --rc-hue-delay: -6s;
+}
+
+.home-v2.is-spectrum .rc-face-bottom {
+  --rc-hue-delay: -7.5s;
+}
+
+@keyframes rc-spectrum {
+  from {
+    filter: hue-rotate(0deg) saturate(1.6) brightness(1.15);
+  }
+  to {
+    filter: hue-rotate(360deg) saturate(1.6) brightness(1.15);
+  }
+}
+
+/* and glowing more: brighter edges, wider halos, faster light waves */
+.home-v2.is-spectrum .rc-cell {
+  border-color: rgba(111, 245, 238, 0.85);
+  box-shadow: 0 0 14px rgba(0, 191, 243, 0.8), 0 0 28px rgba(0, 191, 243, 0.35),
+    inset 0 0 16px rgba(0, 191, 243, 0.3);
+}
+
+.home-v2.is-spectrum .rc-cell::after {
+  box-shadow: 0 0 24px rgba(111, 245, 238, 1), inset 0 0 18px rgba(111, 245, 238, 0.4);
+  animation-duration: 2.6s;
+}
+
+.home-v2.is-spectrum .rc-link {
+  box-shadow: 0 0 20px rgba(111, 245, 238, 0.95), 0 0 36px rgba(0, 191, 243, 0.45),
+    inset 0 0 20px rgba(111, 245, 238, 0.35);
+}
+
+.home-v2.is-spectrum .rc-link-text {
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.7), 0 0 12px rgba(111, 245, 238, 1), 0 0 28px rgba(0, 191, 243, 0.7);
+}
+
+/* the switch itself: bottom left, a black swatch and a spectrum swatch */
+.colour-toggle {
+  right: auto;
+  left: 28px;
+}
+
+.colour-toggle.is-spectrum .ui-toggle-thumb {
+  transform: translateX(100%);
+}
+
+.colour-toggle .ui-toggle-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.colour-swatch {
+  display: block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  transition: box-shadow 250ms ease, opacity 250ms ease;
+}
+
+.colour-swatch.is-cyan {
+  background: #000;
+  box-shadow: 0 0 0 1px rgba(111, 245, 238, 0.7);
+}
+
+.colour-swatch.is-spectrum {
+  background: conic-gradient(#ff4d6d, #ffb84d, #f5ff4d, #4dff88, #4de8ff, #6d7bff, #d44dff, #ff4d6d);
+}
+
+.colour-toggle .ui-toggle-option:not(.is-active) .colour-swatch {
+  opacity: 0.55;
+}
+
+.colour-toggle .ui-toggle-option.is-active .colour-swatch.is-spectrum {
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 700px) {
+  .colour-toggle {
+    left: 16px;
+  }
+}
+
 /* --- platform ------------------------------------------------------- */
 .home-v2-base {
   position: relative;
@@ -715,6 +824,11 @@ body.home-v2-body {
   .home-v2 *::before,
   .home-v2 *::after {
     animation: none !important;
+  }
+
+  /* all colours without the cycling: each face keeps its own hue */
+  .home-v2.is-spectrum .rc-face {
+    filter: hue-rotate(calc(var(--rc-hue-delay, 0s) / -9s * 360deg)) saturate(1.6) brightness(1.15);
   }
 
   .flash-letter {
