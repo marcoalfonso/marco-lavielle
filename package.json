@@ -22,9 +22,7 @@
   "author": "Marco Lavielle",
   "license": "ISC",
   "dependencies": {
-    "@ant-design/compatible": "^5.1.5",
     "@babel/core": "^7.5.5",
-    "antd": "^5.29.3",
     "axios": "^1.20.0",
     "body-parser": "^1.19.0",
     "cannon-es": "^0.20.0",
@@ -42,7 +40,6 @@
     "react": "^16.14.0",
     "react-cookie": "^8.1.2",
     "react-dom": "^16.14.0",
-    "react-quill-new": "^3.8.3",
     "react-redux": "^7.1.1",
     "react-resize-detector": "^6.0.1-rc.5",
     "react-router": "^4.2.0",
