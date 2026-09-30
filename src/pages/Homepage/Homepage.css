@@ -1,0 +1,525 @@
+/* ---------------------------------------------------------------------
+   Homepage V1: sections on an orbital instrument drawn in lines of light,
+   on the site's black.
+   --------------------------------------------------------------------- */
+.home-v1-page {
+  --o: min(560px, 58vh, 52vw); /* the instrument's size */
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+  align-items: center;
+  gap: 40px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 48px 56px 80px;
+  box-sizing: border-box;
+  color: #ccd4de;
+  font-family: var(--holo-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- left: name, sections, more ------------------------------------ */
+.v1-side {
+  display: flex;
+  flex-direction: column;
+  gap: 56px;
+}
+
+.home-v1-page .v1-name {
+  margin: 0;
+  color: #effdff;
+  font: 600 22px/1.2 var(--holo-display);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  text-shadow: 0 0 12px rgba(111, 245, 238, 0.55), 0 0 26px rgba(0, 191, 243, 0.3);
+}
+
+/* a glow runs through the name from left to right, one letter at a time,
+   every few seconds (as on V2) */
+.v1-name-letter {
+  display: inline-block;
+  animation: v1-name-glow 5s ease-in-out var(--glow-delay, 0ms) infinite;
+}
+
+.v1-name-space {
+  display: inline-block;
+  width: 0.45em;
+}
+
+@keyframes v1-name-glow {
+  0%,
+  12%,
+  100% {
+    color: #effdff;
+    text-shadow: 0 0 12px rgba(111, 245, 238, 0.55), 0 0 26px rgba(0, 191, 243, 0.3);
+  }
+  5% {
+    color: #fff;
+    text-shadow: 0 0 12px #6ff5ee, 0 0 28px #00bff3, 0 0 44px rgba(0, 191, 243, 0.6);
+  }
+}
+
+.home-v1-page .v1-tagline {
+  margin: 14px 0 0;
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+.v1-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.home-v1-page .v1-section {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 14px 0 14px 22px;
+  color: inherit;
+  text-decoration: none;
+}
+
+/* a line of light beside the selected section */
+.home-v1-page .v1-section::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 14px;
+  bottom: 14px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--holo-light);
+  box-shadow: 0 0 10px var(--holo-light), 0 0 20px rgba(0, 191, 243, 0.6);
+  opacity: 0;
+  transform: scaleY(0.3);
+  transition: opacity 300ms ease, transform 300ms ease;
+}
+
+.home-v1-page .v1-section.is-selected::before {
+  opacity: 1;
+  transform: none;
+}
+
+.v1-section-index {
+  color: var(--holo-dim);
+  font: 600 11px/1 var(--holo-display);
+  letter-spacing: 0.1em;
+  transition: color 300ms ease;
+}
+
+.v1-section-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.v1-section-text strong {
+  color: #9fb0bf;
+  font: 500 24px/1 var(--holo-font);
+  letter-spacing: 0.02em;
+  transition: color 300ms ease, text-shadow 300ms ease;
+}
+
+.v1-section-text small {
+  color: var(--holo-dim);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  transition: color 300ms ease;
+}
+
+.home-v1-page .v1-section:hover,
+.home-v1-page .v1-section:focus {
+  text-decoration: none;
+}
+
+.home-v1-page .v1-section:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.v1-section.is-selected .v1-section-index {
+  color: var(--holo-light);
+}
+
+.v1-section.is-selected .v1-section-text strong {
+  color: #fff;
+  text-shadow: 0 0 14px rgba(111, 245, 238, 0.5);
+}
+
+.v1-section.is-selected .v1-section-text small {
+  color: var(--holo-cyan);
+}
+
+.v1-more {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 22px;
+}
+
+.home-v1-page .v1-more a {
+  color: var(--holo-muted);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.home-v1-page .v1-more a:hover,
+.home-v1-page .v1-more a:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* --- right: the instrument ------------------------------------------- */
+.v1-stage {
+  display: flex;
+  justify-content: center;
+}
+
+.orbital {
+  position: relative;
+  width: var(--o);
+  height: var(--o);
+}
+
+.orbital-rings {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.orbital-line {
+  fill: none;
+  stroke: #5fb4ff;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.orbital-line.is-faint {
+  stroke-opacity: 0.22;
+}
+
+.orbital-line.is-dashed {
+  stroke: #7cc8ff;
+  stroke-opacity: 0.4;
+  stroke-dasharray: 3 7;
+}
+
+.orbital-line.is-gyro {
+  stroke: var(--holo-light);
+  stroke-width: 2;
+  stroke-opacity: 0.55;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.7));
+}
+
+.orbital-line.is-orbit {
+  stroke: var(--holo-light);
+  stroke-opacity: 0.5;
+  filter: drop-shadow(0 0 3px rgba(111, 245, 238, 0.6));
+}
+
+.orbital-progress {
+  fill: none;
+  stroke: var(--holo-cyan);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 0 4px rgba(0, 191, 243, 0.8));
+}
+
+.orbital-spin {
+  animation: orbital-spin 140s linear infinite;
+}
+
+.orbital-spin.is-medium {
+  animation-duration: 36s;
+}
+
+.orbital-spin.is-reverse {
+  animation-duration: 80s;
+  animation-direction: reverse;
+}
+
+@keyframes orbital-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* the orbit: turns to bring the selected node to the top */
+.orbital-orbit {
+  position: absolute;
+  inset: 0;
+  transform: rotate(var(--turn));
+  transition: transform 1100ms cubic-bezier(0.65, 0, 0.25, 1);
+  pointer-events: none;
+}
+
+.home-v1-page .orbital-node {
+  --node: calc(var(--o) * 0.16);
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--node);
+  height: var(--node);
+  margin: calc(var(--node) / -2) 0 0 calc(var(--node) / -2);
+  transform: rotate(var(--angle)) translateY(calc(var(--o) * -0.345)) rotate(calc(-1 * var(--angle)));
+  color: inherit;
+  text-decoration: none;
+  pointer-events: auto;
+}
+
+.home-v1-page .orbital-node:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* the node's face: a square of light like the cube's, kept upright while
+   the orbit turns */
+.orbital-node-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(111, 245, 238, 0.45);
+  border-radius: 12%;
+  background: rgba(2, 7, 15, 0.92);
+  box-shadow: 0 0 8px rgba(0, 191, 243, 0.35), inset 0 0 12px rgba(0, 191, 243, 0.12);
+  transform: rotate(calc(-1 * var(--turn)));
+  transition: transform 1100ms cubic-bezier(0.65, 0, 0.25, 1), border-color 300ms ease, box-shadow 300ms ease,
+    background 300ms ease;
+}
+
+.orbital-node:hover .orbital-node-face,
+.orbital-node:focus-visible .orbital-node-face {
+  border-color: rgba(111, 245, 238, 0.8);
+}
+
+.orbital-node.is-selected .orbital-node-face {
+  border-color: var(--holo-light);
+  background: rgba(8, 26, 38, 0.95);
+  box-shadow: 0 0 20px rgba(111, 245, 238, 0.75), inset 0 0 20px rgba(111, 245, 238, 0.3);
+  transform: rotate(calc(-1 * var(--turn))) scale(1.12);
+}
+
+.orbital-node-index {
+  color: var(--holo-dim);
+  font: 600 calc(var(--o) * 0.017) / 1 var(--holo-display);
+  letter-spacing: 0.1em;
+}
+
+.orbital-node-label {
+  padding-left: 0.1em;
+  color: #cfe0ec;
+  font: 600 calc(var(--o) * 0.0165) / 1 var(--holo-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.orbital-node.is-selected .orbital-node-index {
+  color: var(--holo-cyan);
+}
+
+.orbital-node.is-selected .orbital-node-label {
+  color: #fff;
+  text-shadow: 0 0 8px rgba(111, 245, 238, 0.8);
+}
+
+/* the centre: the selected section's details */
+.orbital-core {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(var(--o) * 0.46);
+  text-align: center;
+  transform: translate(-50%, -50%);
+  animation: orbital-core-in 600ms ease-out both;
+}
+
+@keyframes orbital-core-in {
+  from {
+    opacity: 0;
+    filter: blur(3px);
+    transform: translate(-50%, calc(-50% + 8px));
+  }
+  to {
+    opacity: 1;
+    filter: none;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.home-v1-page .orbital-count {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 12px;
+}
+
+.orbital-count strong {
+  color: #fff;
+  font: 600 calc(var(--o) * 0.085) / 1 var(--holo-display);
+  text-shadow: 0 0 16px rgba(111, 245, 238, 0.7), 0 0 34px rgba(0, 191, 243, 0.45);
+}
+
+.orbital-count span {
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+}
+
+.home-v1-page .orbital-title {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: #eaf7ff;
+  font: 500 16px/1.3 var(--holo-font);
+}
+
+.home-v1-page .orbital-detail {
+  display: -webkit-box;
+  margin: 6px 0 16px;
+  overflow: hidden;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  color: var(--holo-muted);
+  font: 400 13px/1.35 var(--holo-font);
+}
+
+/* --- phones and narrow windows --------------------------------------- */
+@media (max-width: 800px) {
+  .home-v1-page {
+    --o: min(92vw, 440px);
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+    padding: 36px 16px 96px;
+  }
+
+  .v1-side {
+    display: contents;
+  }
+
+  .v1-brand {
+    order: 1;
+    text-align: center;
+  }
+
+  .home-v1-page .v1-name {
+    font-size: 17px;
+    letter-spacing: 0.24em;
+    padding-left: 0.24em;
+  }
+
+  .v1-stage {
+    order: 2;
+  }
+
+  /* the sections become three tabs under the instrument */
+  .v1-sections {
+    order: 3;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .home-v1-page .v1-section {
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 4px;
+    border: 1px solid rgba(111, 245, 238, 0.2);
+    border-radius: 6px;
+    text-align: center;
+  }
+
+  .home-v1-page .v1-section::before {
+    left: 20%;
+    right: 20%;
+    top: auto;
+    bottom: -1px;
+    width: auto;
+    height: 2px;
+    transform: scaleX(0.3);
+  }
+
+  .home-v1-page .v1-section.is-selected {
+    border-color: rgba(111, 245, 238, 0.55);
+    background: rgba(111, 245, 238, 0.05);
+  }
+
+  .v1-section-text {
+    align-items: center;
+  }
+
+  .v1-section-text strong {
+    font-size: 15px;
+  }
+
+  .v1-section-text small {
+    font-size: 8px;
+  }
+
+  .v1-more {
+    order: 4;
+    flex-direction: row;
+    justify-content: center;
+    gap: 28px;
+    padding: 0;
+  }
+
+  .home-v1-page .orbital-node {
+    --node: calc(var(--o) * 0.19);
+  }
+
+  .orbital-node-index {
+    font-size: 8px;
+  }
+
+  .orbital-node-label {
+    font-size: 7px;
+  }
+
+  .home-v1-page .orbital-title {
+    font-size: 13px;
+  }
+
+  .home-v1-page .orbital-detail {
+    margin-bottom: 10px;
+    font-size: 11px;
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v1-name-letter,
+  .orbital-spin,
+  .orbital-core {
+    animation: none;
+  }
+
+  .orbital-orbit,
+  .orbital-node-face {
+    transition: none;
+  }
+}
