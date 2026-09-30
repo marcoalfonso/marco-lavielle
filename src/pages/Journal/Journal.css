@@ -11,7 +11,8 @@ html.journal-html body {
   --magi-line: #3fd6e6;
   --d: min(640px, 76vh, 92vw); /* the dial's size */
   min-height: 100vh;
-  background: linear-gradient(170deg, #03050a 0%, #000 55%, #02050b 100%) fixed;
+  /* plain black: a fixed gradient showed a hard seam while layers animated */
+  background: #010207;
   color: #ccd4de;
   font-family: var(--holo-font);
   -webkit-font-smoothing: antialiased;
@@ -215,6 +216,15 @@ html.journal-html body {
 }
 
 /* --- the three arms: a social channel each ------------------------------- */
+/* they turn together, counter-clockwise against the outer rings (which turn
+   clockwise); the core, drawn above them, stays still */
+.magi-arms {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  animation: magi-spin 150s linear infinite reverse;
+}
+
 .magi-arm {
   position: absolute;
   left: 50%;
@@ -940,7 +950,142 @@ html.journal-html body {
   }
 }
 
+/* --- leaving: the opening in reverse, everything compressing into the core --- */
+/* the log sinks away, the readouts power down, the channels retract, the
+   ring layers compress inward (outermost first) and the core flickers out;
+   the link is followed as it goes (LEAVE_MS in Journal.js) */
+.is-leaving .magi-log-list li {
+  animation: magi-sink 320ms ease-in calc(var(--i, 0) * 25ms) both;
+}
+
+.is-leaving .magi-log-title,
+.is-leaving .magi-top {
+  animation: magi-sink 320ms ease-in both;
+}
+
+@keyframes magi-sink {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.is-leaving .magi-hud-box {
+  animation: magi-hud-shut 300ms ease-in calc(120ms + var(--hud) * 50ms) both;
+}
+
+.is-leaving .magi-hud-bar {
+  animation: magi-bar-out 260ms ease-in calc(260ms + var(--hud) * 50ms) both;
+}
+
+@keyframes magi-hud-shut {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  30% {
+    opacity: 0.3;
+  }
+  45% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    clip-path: inset(0 50% 0 50%);
+  }
+}
+
+@keyframes magi-bar-out {
+  from {
+    opacity: 0.8;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 1 0;
+  }
+}
+
+.is-leaving .magi-social-row {
+  animation: magi-retract 300ms cubic-bezier(0.6, 0, 0.8, 0.2) calc(260ms + (3 - var(--build)) * 60ms) both;
+}
+
+@keyframes magi-retract {
+  from {
+    opacity: 1;
+    scale: 1 1;
+  }
+  to {
+    opacity: 0;
+    scale: 0 1;
+  }
+}
+
+/* the turning carries on underneath (same name, same place in the list) */
+.is-leaving .magi-spin.is-glyphs {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 480ms both, magi-spin 90s linear infinite;
+}
+
+.is-leaving .magi-spin.is-b {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 580ms both, magi-spin 260s linear infinite reverse;
+}
+
+.is-leaving .magi-spin.is-a {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 680ms both, magi-spin 200s linear infinite;
+}
+
+.is-leaving .magi-static {
+  animation: magi-compress 560ms cubic-bezier(0.6, 0, 0.8, 0.2) 780ms both;
+}
+
+@keyframes magi-compress {
+  0% {
+    opacity: 1;
+    scale: 1;
+    clip-path: circle(75% at 50% 50%);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.3;
+    clip-path: circle(0% at 50% 50%);
+  }
+}
+
+.is-leaving .magi-core {
+  animation: magi-core-out 380ms ease-in 1060ms both;
+}
+
+@keyframes magi-core-out {
+  0% {
+    opacity: 1;
+    scale: 1;
+  }
+  25% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+    scale: 1.12;
+  }
+  100% {
+    opacity: 0;
+    scale: 0.05;
+  }
+}
+
+.is-leaving {
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .magi-arms,
   .magi-spin,
   .magi-spin.is-a,
   .magi-spin.is-b,

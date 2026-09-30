@@ -119,56 +119,59 @@ const MagiDial = ({ channels }) => (
     {/* the three arms: one social channel each, a single link made of four
         slanted rows (header, identity, a ticker of what's there, and a call
         to action with a live signal) */}
-    {channels.map((ch, a) => {
-      const angle = ARM_ANGLES[a];
-      const flipped = Math.abs(angle) > 90;
-      return (
-        <div
-          key={ch.id}
-          className={flipped ? "magi-arm is-flipped" : "magi-arm"}
-          style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)`, "--arm": a }}
-        >
-          <a
-            className="magi-social"
-            href={ch.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`${ch.name}, ${ch.handle} (opens in a new tab)`}
+    {/* the channels turn together, against the outer rings; the core stays put */}
+    <div className="magi-arms">
+      {channels.map((ch, a) => {
+        const angle = ARM_ANGLES[a];
+        const flipped = Math.abs(angle) > 90;
+        return (
+          <div
+            key={ch.id}
+            className={flipped ? "magi-arm is-flipped" : "magi-arm"}
+            style={{ transform: `rotate(${flipped ? angle + 180 : angle}deg)`, "--arm": a }}
           >
-            <span className="magi-social-row is-head" style={{ "--build": 0 }}>
-              <span className="magi-social-signal" aria-hidden="true" />
-              <SocialIcon name={ch.id} />
-              <span className="magi-social-name">{ch.name}</span>
-              <span className="magi-social-channel">{ch.channel}</span>
-            </span>
-            <span className="magi-social-row is-handle" style={{ "--build": 1 }}>
-              {ch.handle}
-            </span>
-            <span className="magi-social-row is-ticker" style={{ "--build": 2 }} aria-hidden="true">
-              <span className="magi-ticker">
-                <span className="magi-ticker-track">
-                  {ch.feed.concat(ch.feed[0]).map((line, i) => (
-                    <span key={i} className="magi-ticker-line">
-                      {line}
-                    </span>
-                  ))}
+            <a
+              className="magi-social"
+              href={ch.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${ch.name}, ${ch.handle} (opens in a new tab)`}
+            >
+              <span className="magi-social-row is-head" style={{ "--build": 0 }}>
+                <span className="magi-social-signal" aria-hidden="true" />
+                <SocialIcon name={ch.id} />
+                <span className="magi-social-name">{ch.name}</span>
+                <span className="magi-social-channel">{ch.channel}</span>
+              </span>
+              <span className="magi-social-row is-handle" style={{ "--build": 1 }}>
+                {ch.handle}
+              </span>
+              <span className="magi-social-row is-ticker" style={{ "--build": 2 }} aria-hidden="true">
+                <span className="magi-ticker">
+                  <span className="magi-ticker-track">
+                    {ch.feed.concat(ch.feed[0]).map((line, i) => (
+                      <span key={i} className="magi-ticker-line">
+                        {line}
+                      </span>
+                    ))}
+                  </span>
                 </span>
               </span>
-            </span>
-            <span className="magi-social-row is-action" style={{ "--build": 3 }}>
-              <span className="magi-social-bars" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-                <span />
-                <span />
+              <span className="magi-social-row is-action" style={{ "--build": 3 }}>
+                <span className="magi-social-bars" aria-hidden="true">
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                  <span />
+                </span>
+                <span className="magi-social-cta">{ch.action}</span>
               </span>
-              <span className="magi-social-cta">{ch.action}</span>
-            </span>
-          </a>
-        </div>
-      );
-    })}
+            </a>
+          </div>
+        );
+      })}
+    </div>
 
     <div className="magi-core">
       <span className="magi-core-kicker">Marco-1</span>
