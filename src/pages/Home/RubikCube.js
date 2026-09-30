@@ -32,6 +32,20 @@ const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
 const DOT_MS = 460;
 
+// Colours mode: every square has its own colour, rises and sinks and sends
+// light up on its own random timing (fixed for the visit).
+const rand = (min, max) => min + Math.random() * (max - min);
+const makeCellTimings = () =>
+  FACES.map(() =>
+    Array.from({ length: 9 }, () => ({
+      "--rise-dur": `${rand(1.4, 3.2).toFixed(2)}s`,
+      "--rise-delay": `${rand(-3.2, 0).toFixed(2)}s`,
+      "--cell-hue": Math.round(rand(0, 360)),
+      "--beam-dur": `${rand(1.6, 3.4).toFixed(2)}s`,
+      "--beam-delay": `${rand(-3.4, 0).toFixed(2)}s`,
+    })),
+  );
+
 const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 const RubikCube = ({ links, onHint }) => {
@@ -58,6 +72,7 @@ const RubikCube = ({ links, onHint }) => {
   const [reduceMotion] = useState(prefersReducedMotion);
   const [collapsing, setCollapsing] = useState(false);
   const [active, setActive] = useState(-1);
+  const [timings] = useState(makeCellTimings);
 
   // phones: the cube follows the phone's tilt, on top of its own tumbling
   const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
@@ -300,6 +315,7 @@ const RubikCube = ({ links, onHint }) => {
                     <a
                       key={i}
                       className="rc-cell rc-link"
+                      style={timings[f][i]}
                       href={link.href}
                       onClick={(e) => pick(e, face, link)}
                       onFocus={() => {
@@ -311,6 +327,7 @@ const RubikCube = ({ links, onHint }) => {
                         state.tapped = -1;
                       }}
                     >
+                      <span className="rc-cell-glow" aria-hidden="true" />
                       <span className="rc-link-text">{link.label}</span>
                     </a>
                   ) : (
@@ -318,8 +335,10 @@ const RubikCube = ({ links, onHint }) => {
                       key={i}
                       className="rc-cell"
                       onClick={() => look(f)}
-                      style={{ "--rc-wave": `${(((i % 3) + Math.floor(i / 3) + f * 2) * 0.35).toFixed(2)}s` }}
-                    />
+                      style={{ ...timings[f][i], "--rc-wave": `${(((i % 3) + Math.floor(i / 3) + f * 2) * 0.35).toFixed(2)}s` }}
+                    >
+                      <span className="rc-cell-glow" aria-hidden="true" />
+                    </span>
                   ),
                 )}
                 {/* this face's hologram, lit while the face is looked at */}
