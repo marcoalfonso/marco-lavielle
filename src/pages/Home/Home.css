@@ -564,8 +564,7 @@ body.home-v2-body {
 /* Every square has its own colour (--cell-hue, random per square) and the
    whole face turns through the spectrum, so each square keeps changing
    colour while staying different from its neighbours. Squares rise and
-   sink, and send light up, on their own random timing (--rise-*, --beam-*
-   set per square from script). Everything that moves is a transform or an
+   sink on their own random timing (--rise-* set per square from script). Everything that moves is a transform or an
    opacity, which the graphics card handles without repainting; the faces
    stay flat layers (Safari needs that), so a square "rises" by growing and
    brightening. */
@@ -635,41 +634,6 @@ body.home-v2-body {
   border-color: hsl(var(--cell-hue, 183) 100% 75%);
   box-shadow: 0 0 24px hsl(var(--cell-hue, 183) 100% 60%), inset 0 0 18px hsl(var(--cell-hue, 183) 100% 60% / 0.4);
   animation-duration: 2.6s;
-}
-
-/* a ray of light rising out of each square's top edge, up through the
-   gap above it */
-.home-v2.is-spectrum .rc-cell::before {
-  content: "";
-  position: absolute;
-  left: calc(50% - 1.5px);
-  bottom: 100%;
-  width: 3px;
-  height: 75%;
-  border-radius: 2px;
-  background: linear-gradient(to top, hsl(var(--cell-hue, 183) 100% 80%), hsl(var(--cell-hue, 183) 100% 65% / 0.5) 45%, transparent);
-  box-shadow: 0 0 10px 2px hsl(var(--cell-hue, 183) 100% 60% / 0.55);
-  opacity: 0;
-  pointer-events: none;
-  transform-origin: 50% 100%;
-  animation: rc-beam var(--beam-dur, 2.4s) ease-out var(--beam-delay, 0s) infinite;
-}
-
-@keyframes rc-beam {
-  0% {
-    opacity: 0;
-    transform: translateY(35%) scaleY(0.1);
-  }
-  20% {
-    opacity: 1;
-  }
-  60% {
-    opacity: 0.7;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-45%) scaleY(1);
-  }
 }
 
 .home-v2.is-spectrum .rc-link {

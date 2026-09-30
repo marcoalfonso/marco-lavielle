@@ -32,8 +32,8 @@ const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
 const DOT_MS = 460;
 
-// Colours mode: every square has its own colour, rises and sinks and sends
-// light up on its own random timing (fixed for the visit).
+// Colours mode: every square has its own colour, and rises and sinks on its
+// own random timing (fixed for the visit).
 const rand = (min, max) => min + Math.random() * (max - min);
 const makeCellTimings = () =>
   FACES.map(() =>
@@ -41,8 +41,6 @@ const makeCellTimings = () =>
       "--rise-dur": `${rand(1.4, 3.2).toFixed(2)}s`,
       "--rise-delay": `${rand(-3.2, 0).toFixed(2)}s`,
       "--cell-hue": Math.round(rand(0, 360)),
-      "--beam-dur": `${rand(1.6, 3.4).toFixed(2)}s`,
-      "--beam-delay": `${rand(-3.4, 0).toFixed(2)}s`,
     })),
   );
 
