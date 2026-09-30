@@ -1,84 +1,154 @@
-import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
-import { connect } from 'react-redux'
+import React, { Component } from "react";
+import { withRouter } from "react-router-dom";
+import { connect } from "react-redux";
 
-import { getPosts } from 'actions/appActions'
+import { getPosts } from "actions/appActions";
+import loadOrbitron from "components/fonts/loadOrbitron";
+import MagiDial from "./MagiDial";
+import "components/holo/holo.css";
+import "./Journal.css";
 
-import styles from './Journal.module.css'
+// Journal: the post index as a MAGI-style screen in the site's light. The
+// dial's three arms hold the posts (newest first, in three archive groups),
+// corner readouts give the count and two live counters, and the entry log
+// below lists every post. Pointing at a post in either lights it in both.
+
+const pad = (n, width = 3) => String(n).padStart(width, "0");
+const withCommas = (n) => pad(n, 9).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).getTime()) / 1000));
+
+// "2020-12-01T..." -> "2020.12.01"
+const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
+
+// split into three archive arms of near-equal size, newest first
+const toArms = (posts) => {
+  const size = Math.ceil(posts.length / 3);
+  return [0, 1, 2]
+    .map((a) => {
+      const entries = posts.slice(a * size, (a + 1) * size);
+      if (!entries.length) return null;
+      const newest = entries[0].post.published.slice(0, 4);
+      const oldest = entries[entries.length - 1].post.published.slice(0, 4);
+      return { name: `Archive-${a + 1} · ${newest === oldest ? newest : `${newest}–${oldest}`}`, entries };
+    })
+    .filter(Boolean);
+};
+
+const HudBox = ({ className, label, value, unit, note }) => (
+  <div className={`magi-hud ${className}`}>
+    <span className="magi-hud-bar" aria-hidden="true" />
+    <div className="magi-hud-box">
+      <span className="magi-hud-label">{label}</span>
+      {value !== undefined && (
+        <span className="magi-hud-value">
+          {value}
+          {unit && <small> {unit}</small>}
+        </span>
+      )}
+      {note && <span className="magi-hud-note">{note}</span>}
+    </div>
+  </div>
+);
 
 export class Journal extends Component {
+  state = { selected: 0, now: Date.now() };
+
   componentDidMount() {
-    document.body.classList.add('level-0')
-    this.props.getPosts()
+    loadOrbitron();
+    document.documentElement.classList.add("journal-html");
+    if (!this.props.posts) this.props.getPosts();
+    this.clock = setInterval(() => this.setState({ now: Date.now() }), 1000);
   }
 
+  componentWillUnmount() {
+    clearInterval(this.clock);
+    document.documentElement.classList.remove("journal-html");
+  }
+
+  select = (index) => this.setState({ selected: index });
+
   render() {
-    const posts = this.props.posts && [...this.props.posts].sort((a, b) => a.published.localeCompare(b.published)).reverse()
+    const { selected } = this.state;
+    const sorted = this.props.posts
+      ? [...this.props.posts].sort((a, b) => (b.published || "").localeCompare(a.published || ""))
+      : null;
+    const entries = sorted ? sorted.map((post, index) => ({ post, index, number: sorted.length - index })) : [];
+    const latest = sorted && sorted[0];
+    const first = sorted && sorted[sorted.length - 1];
+
     return (
-      <main className={`loaded ${this.props.device} detected preview-section-1`} id="page">
-        <div className="column-3 backdrop for-section-3"></div>
-        <div className="column-4 backdrop for-section-3"></div>
-        <div className="column-1 slim for-level-1 for-section-3">
-          <a className="uplevel pjax" href="/" data-section="home">
-            <span className="arrow">‹</span>
-            <strong className="logo">
-              <span className="m">M</span>
-              <span className="a">A</span>
-              <span className="r">R</span>
-              <span className="c">C</span>
-              <span className="o">O</span>
-              <br/>
-              <span className="l">L</span>
-              <span className="a2">A</span>
-              <span className="v">V</span>
-              <span className="i">I</span>
-              <span className="e">E</span>
-              <span className="l2">L</span>
-              <span className="l3">L</span>
-              <span className="e2">E</span>
-            </strong>
-            <h1 className="section-title">Journal</h1>
+      <main className="journal-magi holo-ui">
+        <header className="magi-top">
+          <a className="magi-home" href="/">
+            <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
           </a>
-        </div>
-        <div className="l1 level-1-container">
-          <div className="column-3">
-            <div className="article-content">
-              <div className="articles-list">
-                {posts && posts.map((post, index) => {
-                  return (
-                    <div key={index} className="article-preview">
-                      <h1><a href={`/journal/${post.slug}`}>{post.title}</a></h1>
-                      <p>{post.subtitle}</p><a className="pjax read-more" href={`/journal/${post.slug}`}>Read More</a>
-                    </div>
-                  )
-                })}
-              </div>
-              <div className="footer">
-                <div className="container">
-                  <p className="copyright">
-                    © Marco Lavielle ·
-                    <a href="/about" className="about">
-                      About this site
-                    </a>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          <h1 className="magi-title">Thoughts</h1>
+        </header>
+
+        <section className="magi-screen" aria-label="Journal index">
+          <HudBox className="is-tl" label="Journal index" note="on ML-01 original" />
+          <HudBox
+            className="is-tr"
+            label="Time since last entry"
+            value={latest ? withCommas(seconds(latest.published)) : "···,···,···"}
+            unit="sec."
+          />
+          <HudBox
+            className="is-bl"
+            label={`Entries no. ${sorted ? pad(sorted.length) : "···"}`}
+            note="on ML-01 original"
+          />
+          <HudBox
+            className="is-br"
+            label="Time since first entry"
+            value={first ? withCommas(seconds(first.published)) : "···,···,···"}
+            unit="sec."
+          />
+          <MagiDial arms={toArms(entries)} selected={selected} onSelect={this.select} />
+        </section>
+
+        <section className="magi-log" aria-label="All entries">
+          <h2 className="magi-log-title">
+            <span>Entry log</span>
+            <small>{sorted ? `${pad(sorted.length)} records` : "Loading records"}</small>
+          </h2>
+          <ol className="magi-log-list">
+            {entries.map(({ post, index, number }) => (
+              <li key={post.slug}>
+                <a
+                  href={`/journal/${post.slug}`}
+                  className={index === selected ? "magi-entry is-selected" : "magi-entry"}
+                  onPointerEnter={(e) => e.pointerType === "mouse" && this.select(index)}
+                  onFocus={() => this.select(index)}
+                >
+                  <span className="magi-entry-id">
+                    <small>Entry</small>
+                    <strong>{pad(number)}</strong>
+                  </span>
+                  <span className="magi-entry-main">
+                    <span className="magi-entry-title">{post.title}</span>
+                    <span className="magi-entry-sub">{post.subtitle}</span>
+                  </span>
+                  <span className="magi-entry-date">{stamp(post.published)}</span>
+                  <span className="magi-entry-go" aria-hidden="true">
+                    Read &rsaquo;
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </section>
       </main>
-    )
+    );
   }
 }
 
-const mapStateToProps = state => ({
-  loading: state.app.loading,
+const mapStateToProps = (state) => ({
   posts: state.app.posts,
-  device: state.app.device
-})
+});
 
-const mapDispatchToProps = dispatch => ({
+const mapDispatchToProps = (dispatch) => ({
   getPosts: () => dispatch(getPosts()),
-})
+});
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Journal))
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Journal));
