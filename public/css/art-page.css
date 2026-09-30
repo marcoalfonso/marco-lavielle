@@ -115,6 +115,10 @@ body {
   }
 }
 
+.art-menu-toggle {
+  display: none;
+}
+
 .art-nav {
   display: flex;
   flex-direction: column;
@@ -667,43 +671,147 @@ body {
 
 /* --- phones ------------------------------------------------------------ */
 @media (max-width: 700px) {
+  /* name tucked into the top-left corner; the links fold into a Menu pill */
   .art-menu {
     position: relative;
+    z-index: 5;
     top: auto;
     left: auto;
     width: auto;
     display: flex;
-    align-items: flex-end;
+    align-items: flex-start;
     justify-content: space-between;
-    padding: 18px 20px 0;
+    padding: 10px 16px 0 12px;
   }
 
   .art-name {
-    width: 150px;
+    width: 132px;
   }
 
+  .art-menu-drop {
+    position: relative;
+    margin-top: 12px;
+  }
+
+  .art-menu-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 16px;
+    border: 1px solid var(--art-line);
+    border-radius: 999px;
+    background: rgba(3, 10, 20, 0.75);
+    color: var(--art-holo);
+    cursor: pointer;
+    font: 600 11px/1 var(--art-font);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+  }
+
+  .art-menu-drop.is-open .art-menu-toggle {
+    border-color: var(--art-holo);
+    background: rgba(111, 245, 238, 0.1);
+    box-shadow: 0 0 16px rgba(111, 245, 238, 0.35);
+  }
+
+  /* two lines that cross into an X when open */
+  .art-menu-toggle-icon {
+    position: relative;
+    width: 12px;
+    height: 8px;
+  }
+
+  .art-menu-toggle-icon span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1.5px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: transform 250ms ease, top 250ms ease;
+  }
+
+  .art-menu-toggle-icon span:first-child {
+    top: 0;
+  }
+
+  .art-menu-toggle-icon span:last-child {
+    top: 6.5px;
+  }
+
+  .art-menu-drop.is-open .art-menu-toggle-icon span:first-child {
+    top: 3.25px;
+    transform: rotate(45deg);
+  }
+
+  .art-menu-drop.is-open .art-menu-toggle-icon span:last-child {
+    top: 3.25px;
+    transform: rotate(-45deg);
+  }
+
+  /* the links drop down over the page, in a glass panel */
   .art-nav {
-    align-items: flex-end;
-    gap: 2px;
-    margin: 0 0 4px;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    align-items: stretch;
+    gap: 0;
+    min-width: 200px;
+    margin: 0;
+    padding: 8px 0;
+    border: 1px solid rgba(111, 245, 238, 0.3);
+    border-radius: 8px;
+    background: rgba(2, 7, 15, 0.97);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.9), 0 0 24px rgba(61, 139, 255, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transform-origin: top right;
+    transition: opacity 200ms ease, transform 200ms ease, visibility 0s linear 200ms;
+  }
+
+  .art-menu-drop.is-open .art-nav {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+    transition: opacity 200ms ease, transform 200ms ease;
   }
 
   .art-nav a {
-    padding: 5px 0;
-    font-size: 10px;
+    padding: 13px 18px;
+    font-size: 11px;
   }
 
-  /* on the right-aligned column the line points into the link instead */
+  .art-nav a.active {
+    background: rgba(0, 191, 243, 0.06);
+  }
+
   .art-nav a.active::after {
-    display: none;
+    margin-left: auto;
   }
 
-  .art-nav a.active::before {
-    content: "";
-    align-self: center;
-    width: 14px;
-    height: 1px;
-    background: linear-gradient(270deg, var(--art-cyan), transparent);
+  /* the painting's brackets hug it more closely on a narrow screen */
+  .art-corner-tl,
+  .art-corner-tr {
+    top: -8px;
+  }
+
+  .art-corner-bl,
+  .art-corner-br {
+    bottom: -8px;
+  }
+
+  .art-corner-tl,
+  .art-corner-bl {
+    left: -8px;
+  }
+
+  .art-corner-tr,
+  .art-corner-br {
+    right: -8px;
   }
 
   .art-stage {

@@ -280,6 +280,34 @@
   }
 }
 
+/* phones: the brackets hug the panel, clear of the screen's edges */
+@media (max-width: 700px) {
+  .holo-corner {
+    width: 16px;
+    height: 16px;
+  }
+
+  .holo-corner.is-tl,
+  .holo-corner.is-tr {
+    top: -6px;
+  }
+
+  .holo-corner.is-bl,
+  .holo-corner.is-br {
+    bottom: -6px;
+  }
+
+  .holo-corner.is-tl,
+  .holo-corner.is-bl {
+    left: -6px;
+  }
+
+  .holo-corner.is-tr,
+  .holo-corner.is-br {
+    right: -6px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .holo-ui .holo-button.is-busy::after {
     animation: none;

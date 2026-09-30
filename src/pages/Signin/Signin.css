@@ -166,6 +166,12 @@ body.signin-v2-body {
     font-size: 24px;
   }
 
+  /* brackets stand only a little off the glass, so they stay clear of the
+     screen's edges */
+  .signin-v2-panel .holo-corner {
+    transform: translateZ(8px);
+  }
+
   /* a gentler resting lean on a narrow screen */
   .signin-v2-panel {
     --tilt-x: 3deg;
