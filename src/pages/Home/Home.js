@@ -3,6 +3,7 @@ import HoloPlatform from "components/HoloPlatform/HoloPlatform";
 import UiVersionToggle from "components/UiVersionToggle/UiVersionToggle";
 import { isTouchDevice } from "components/motion/useDeviceTilt";
 import loadOrbitron from "components/fonts/loadOrbitron";
+import ColourToggle from "./ColourToggle";
 import FlashName from "./FlashName";
 import { AboutArt, GameArt, GitHubArt, PaintingsArt, SoftwareArt, ThoughtsArt } from "./HoloArt";
 import RubikCube from "./RubikCube";
@@ -22,9 +23,29 @@ const LINKS = [
   { href: "https://github.com/marcoalfonso", label: "GitHub", holo: <GitHubArt /> },
 ];
 
+// the cube colour a visitor picked, remembered in their own browser
+const COLOUR_KEY = "home-cube-colours";
+const savedColours = () => {
+  try {
+    return window.localStorage.getItem(COLOUR_KEY) === "spectrum" ? "spectrum" : "cyan";
+  } catch (e) {
+    return "cyan";
+  }
+};
+
 const Home = () => {
   const [motion, setMotion] = useState(null); // { showHint, requestPermission } from the cube
   const [touch] = useState(isTouchDevice);
+  const [colours, setColours] = useState(savedColours);
+
+  const pickColours = (value) => {
+    setColours(value);
+    try {
+      window.localStorage.setItem(COLOUR_KEY, value);
+    } catch (e) {
+      // private browsing etc.: it just won't be remembered
+    }
+  };
 
   useEffect(() => {
     loadOrbitron(); // the cube's lettering
@@ -42,7 +63,7 @@ const Home = () => {
   }, []);
 
   return (
-    <main className="home-v2">
+    <main className={colours === "spectrum" ? "home-v2 is-spectrum" : "home-v2"}>
       <header className="home-v2-header">
         <FlashName className="home-v2-name" />
         <p className="home-v2-tagline">Coder &middot; Painter</p>
@@ -76,6 +97,7 @@ const Home = () => {
         )}
       </div>
 
+      <ColourToggle value={colours} onChange={pickColours} />
       <UiVersionToggle current="v2" />
     </main>
   );
