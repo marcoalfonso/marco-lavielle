@@ -19,6 +19,10 @@ const CYCLE_MS = 6500;
 const IDLE_MS = 15000; // after an interaction, before cycling resumes
 
 const pad = (n) => String(n).padStart(2, "0");
+
+// the name, one letter at a time, for the glow that runs through it
+const NAME = "Marco Lavielle";
+const GLOW_STEP = 110; // ms between neighbouring letters
 const plural = (n, one, many) => (n === 1 ? one : many);
 
 export class Homepage extends Component {
@@ -106,7 +110,17 @@ export class Homepage extends Component {
       <main className="home-v1-page holo-ui">
         <aside className="v1-side">
           <header className="v1-brand">
-            <h1 className="v1-name">Marco Lavielle</h1>
+            <h1 className="v1-name" aria-label={NAME}>
+              {NAME.split("").map((ch, i) =>
+                ch === " " ? (
+                  <span key={i} className="v1-name-space" aria-hidden="true" />
+                ) : (
+                  <span key={i} className="v1-name-letter" style={{ "--glow-delay": `${800 + i * GLOW_STEP}ms` }} aria-hidden="true">
+                    {ch}
+                  </span>
+                ),
+              )}
+            </h1>
             <p className="v1-tagline">Coder &middot; Painter &middot; Sydney</p>
           </header>
 

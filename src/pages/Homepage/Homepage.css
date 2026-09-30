@@ -36,6 +36,31 @@
   text-shadow: 0 0 12px rgba(111, 245, 238, 0.55), 0 0 26px rgba(0, 191, 243, 0.3);
 }
 
+/* a glow runs through the name from left to right, one letter at a time,
+   every few seconds (as on V2) */
+.v1-name-letter {
+  display: inline-block;
+  animation: v1-name-glow 5s ease-in-out var(--glow-delay, 0ms) infinite;
+}
+
+.v1-name-space {
+  display: inline-block;
+  width: 0.45em;
+}
+
+@keyframes v1-name-glow {
+  0%,
+  12%,
+  100% {
+    color: #effdff;
+    text-shadow: 0 0 12px rgba(111, 245, 238, 0.55), 0 0 26px rgba(0, 191, 243, 0.3);
+  }
+  5% {
+    color: #fff;
+    text-shadow: 0 0 12px #6ff5ee, 0 0 28px #00bff3, 0 0 44px rgba(0, 191, 243, 0.6);
+  }
+}
+
 .home-v1-page .v1-tagline {
   margin: 14px 0 0;
   color: var(--holo-cyan);
@@ -487,6 +512,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .v1-name-letter,
   .orbital-spin,
   .orbital-core {
     animation: none;
