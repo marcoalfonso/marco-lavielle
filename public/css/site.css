@@ -3200,3 +3200,65 @@ html.home-v1 .spinner.desktop-only .full-preview .big-circle.backdrop,
 html.home-v1 .section-1-circles .circle.backdrop {
   background: #02050b;
 }
+
+/* Homepage V1 on phones: the blocks used to be pinned at percentages of the
+   screen height, which iPhone Safari measures as if its toolbars weren't
+   there, so the footer landed under them. Stack them instead, filling the
+   visible screen (and scrolling if it's too short). The logo, rings and
+   cover stay pinned as decoration. */
+/* ...and let the page itself scroll. The site's phone rules make <body> a
+   scroll box with a 3D perspective; on iPhone that pins the UI version
+   toggle to the body instead of the screen, so it sat off screen, jumped
+   while scrolling and the page scrolled oddly. (The rings spin flat, so
+   they don't need the perspective.) */
+html.home-v1.mobile {
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+html.home-v1.mobile body {
+  height: auto;
+  overflow: visible;
+  -webkit-perspective: none;
+  perspective: none;
+}
+html.home-v1 main.homepage.mobile {
+  /* the 1300px rings would widen the page (and phones zoom out to fit);
+     clip them, without making a scroll box or a frame for pinned items */
+  overflow-x: clip;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100svh;
+  height: auto;
+  box-sizing: border-box;
+  padding: 42px 0 calc(84px + env(safe-area-inset-bottom, 0px));
+}
+html.home-v1 main.homepage.mobile .home-last-location {
+  position: relative;
+  top: auto;
+  height: auto;
+  order: 1;
+  padding-bottom: 12px;
+}
+html.home-v1 main.homepage.mobile .sections-nav {
+  position: relative;
+  top: auto;
+  order: 2;
+  margin: 0;
+  /* the sections sit in the middle of whatever space is left */
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+html.home-v1 main.homepage.mobile .home-footer {
+  position: relative;
+  bottom: auto;
+  order: 3;
+  padding: 0;
+}
+html.home-v1 main.homepage.mobile .home-footer a {
+  margin-top: 0;
+}
