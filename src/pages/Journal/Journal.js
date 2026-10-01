@@ -4,13 +4,14 @@ import { connect } from "react-redux";
 
 import { getPosts } from "actions/appActions";
 import loadOrbitron from "components/fonts/loadOrbitron";
-import MagiDial from "./MagiDial";
+import StarChart from "./StarChart";
 import "components/holo/holo.css";
 import "./Journal.css";
 
-// Journal: a MAGI-style screen in the site's light. The dial's three arms
-// are channels to the social profiles, corner readouts give the entry count
-// and two live counters, and the entry log below lists every post.
+// Journal: a star chart in the site's light. A wireframe
+// globe with the social channels as callouts, corner readouts giving the
+// entry count and two live counters, and the entry log below listing every
+// post.
 
 const LEAVE_MS = 1450; // keep in step with the .is-leaving timings in Journal.css
 
@@ -21,50 +22,46 @@ const seconds = (date) => Math.max(0, Math.floor((Date.now() - new Date(date).ge
 // "2020-12-01T..." -> "2020.12.01"
 const stamp = (date) => (date ? date.slice(0, 10).replace(/-/g, ".") : "");
 
-// the dial's three arms: a channel per social profile; the ticker rolls
-// through five lines about what's there
+// the social channels, shown as callouts around the globe
 const CHANNELS = [
   {
     id: "linkedin",
     name: "LinkedIn",
-    channel: "CH-01",
+    side: "right",
     handle: "Marco Lavielle",
     href: "https://www.linkedin.com/in/marcolavielle/",
-    feed: ["Software engineer", "Sydney, Australia", "Work history", "Projects", "Recommendations"],
-    action: "Connect ›",
+    action: "Connect",
   },
   {
     id: "instagram",
     name: "Instagram",
-    channel: "CH-02",
+    side: "left",
     handle: "@cuban_papi_chulo",
     href: "http://instagram.com/cuban_papi_chulo",
-    feed: ["Paintings", "Works in progress", "Studio life", "Sydney", "Behind the canvas"],
-    action: "Follow ›",
+    action: "Follow",
   },
   {
     id: "twitter",
-    name: "Twitter / X",
-    channel: "CH-03",
+    name: "X / Twitter",
+    side: "right",
     handle: "@marcolavielle",
     href: "https://twitter.com/marcolavielle",
-    feed: ["Code", "Thoughts", "Short-form notes", "Tech links", "Replies"],
-    action: "Follow ›",
+    action: "Follow",
   },
 ];
 
 const HudBox = ({ className, label, value, unit, note }) => (
-  <div className={`magi-hud ${className}`}>
-    <span className="magi-hud-bar" aria-hidden="true" />
-    <div className="magi-hud-box">
-      <span className="magi-hud-label">{label}</span>
+  <div className={`journal-hud ${className}`}>
+    <span className="journal-hud-bar" aria-hidden="true" />
+    <div className="journal-hud-box">
+      <span className="journal-hud-label">{label}</span>
       {value !== undefined && (
-        <span className="magi-hud-value">
+        <span className="journal-hud-value">
           {value}
           {unit && <small> {unit}</small>}
         </span>
       )}
-      {note && <span className="magi-hud-note">{note}</span>}
+      {note && <span className="journal-hud-note">{note}</span>}
     </div>
   </div>
 );
@@ -100,23 +97,23 @@ export class Journal extends Component {
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
-    // from further down the page (the entry log), bring the dial to the
+    // from further down the page (the entry log), bring the globe to the
     // middle of the screen first, so the compress can be seen
     this.centring = true;
-    this.centreDial().then(() => {
+    this.centreGlobe().then(() => {
       this.centring = false;
       this.setState({ leaving: true });
       this.leaveTimer = setTimeout(() => window.location.assign(link.href), LEAVE_MS);
     });
   };
 
-  // smooth-scroll the dial to the middle of the screen; resolves once there
+  // smooth-scroll the globe to the middle of the screen; resolves once there
   // (or straight away if it already is)
-  centreDial = () =>
+  centreGlobe = () =>
     new Promise((done) => {
-      const dial = document.querySelector(".magi");
-      if (!dial) return done();
-      const r = dial.getBoundingClientRect();
+      const globe = document.querySelector(".chart-globe");
+      if (!globe) return done();
+      const r = globe.getBoundingClientRect();
       const target = Math.max(0, Math.round(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2));
       if (Math.abs(target - window.scrollY) < 40) return done();
       window.scrollTo({ top: target, behavior: "smooth" });
@@ -150,15 +147,15 @@ export class Journal extends Component {
     const first = sorted && sorted[sorted.length - 1];
 
     return (
-      <main className={this.state.leaving ? "journal-magi holo-ui is-leaving" : "journal-magi holo-ui"} onClickCapture={this.onClickCapture}>
-        <header className="magi-top">
-          <a className="magi-home" href="/">
+      <main className={this.state.leaving ? "journal-page holo-ui is-leaving" : "journal-page holo-ui"} onClickCapture={this.onClickCapture}>
+        <header className="journal-top">
+          <a className="journal-home" href="/">
             <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
           </a>
-          <h1 className="magi-title">Thoughts</h1>
+          <h1 className="journal-title">Thoughts</h1>
         </header>
 
-        <section className="magi-screen" aria-label="Journal index">
+        <section className="journal-screen" aria-label="Journal index">
           <HudBox className="is-tl" label="Journal index" note="on ML-01 original" />
           <HudBox
             className="is-tr"
@@ -177,33 +174,33 @@ export class Journal extends Component {
             value={first ? withCommas(seconds(first.published)) : "···,···,···"}
             unit="sec."
           />
-          <MagiDial channels={CHANNELS} />
+          <StarChart channels={CHANNELS} posts={sorted} now={this.state.now} leaving={this.state.leaving} />
         </section>
 
-        <section className="magi-log" aria-label="All entries">
-          <h2 className="magi-log-title">
+        <section className="journal-log" aria-label="All entries">
+          <h2 className="journal-log-title">
             <span>Entry log</span>
             <small>{sorted ? `${pad(sorted.length)} records` : "Loading records"}</small>
           </h2>
-          <ol className="magi-log-list">
+          <ol className="journal-log-list">
             {entries.map(({ post, index, number }) => (
               <li key={post.slug} style={{ "--i": index }}>
                 <a
                   href={`/journal/${post.slug}`}
-                  className={index === selected ? "magi-entry is-selected" : "magi-entry"}
+                  className={index === selected ? "journal-entry is-selected" : "journal-entry"}
                   onPointerEnter={(e) => e.pointerType === "mouse" && this.select(index)}
                   onFocus={() => this.select(index)}
                 >
-                  <span className="magi-entry-id">
+                  <span className="journal-entry-id">
                     <small>Entry</small>
                     <strong>{pad(number)}</strong>
                   </span>
-                  <span className="magi-entry-main">
-                    <span className="magi-entry-title">{post.title}</span>
-                    <span className="magi-entry-sub">{post.subtitle}</span>
+                  <span className="journal-entry-main">
+                    <span className="journal-entry-title">{post.title}</span>
+                    <span className="journal-entry-sub">{post.subtitle}</span>
                   </span>
-                  <span className="magi-entry-date">{stamp(post.published)}</span>
-                  <span className="magi-entry-go" aria-hidden="true">
+                  <span className="journal-entry-date">{stamp(post.published)}</span>
+                  <span className="journal-entry-go" aria-hidden="true">
                     Read &rsaquo;
                   </span>
                 </a>
