@@ -8,7 +8,10 @@ import React, { useEffect, useRef } from "react";
 // Drawn on a canvas each frame (a few thousand dots is cheap there).
 //
 // It assembles out of a point when the page opens, and collapses back into
-// one when `leaving` turns true.
+// one when `leaving` turns true. Dragging it (on its box, the canvas's
+// parent) spins it, with a little momentum; a mouse can also tip it, a finger
+// only spins it sideways so the page still scrolls. `tiltRef.current`
+// ({ x, y } in radians, e.g. from the phone's tilt) turns it too.
 
 const TAU = Math.PI * 2;
 const DEG = Math.PI / 180;
@@ -55,8 +58,12 @@ const project = (lat, lon, spin, tiltX, tiltZ) => {
 
 export { CANVAS_SCALE };
 
-const Globe = ({ leaving, className }) => {
+const MAX_PITCH = 1.1; // rad a drag can tip it
+
+const Globe = ({ leaving, className, tiltRef }) => {
   const canvasRef = useRef(null);
+  const tiltSource = useRef(tiltRef);
+  tiltSource.current = tiltRef;
   const leaveAt = useRef(null);
 
   useEffect(() => {
@@ -83,6 +90,47 @@ const Globe = ({ leaving, className }) => {
 
     const started = performance.now();
     let raf = null;
+    let still = null; // set when there's no animation loop (reduced motion)
+
+    // --- turning it by hand
+    const view = { auto: 0, yaw: 0, pitch: 0, vYaw: 0, vPitch: 0, tiltX: 0, tiltY: 0, drag: null, last: performance.now() };
+    const box = canvas.parentElement;
+    const onDown = (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      view.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now(), mouse: e.pointerType === "mouse" };
+      view.vYaw = view.vPitch = 0;
+      box.setPointerCapture(e.pointerId);
+      box.classList.add("is-dragging");
+    };
+    const onMove = (e) => {
+      const d = view.drag;
+      if (!d || e.pointerId !== d.id) return;
+      const now = performance.now();
+      const dt = Math.max(0.008, (now - d.t) / 1000);
+      const span = box.clientWidth || 300;
+      // dragging across the globe turns it about a half turn
+      const dYaw = ((e.clientX - d.x) / span) * Math.PI;
+      const dPitch = d.mouse ? -((e.clientY - d.y) / span) * Math.PI : 0;
+      view.yaw += dYaw;
+      view.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, view.pitch + dPitch));
+      view.vYaw = dYaw / dt;
+      view.vPitch = dPitch / dt;
+      d.x = e.clientX;
+      d.y = e.clientY;
+      d.t = now;
+      if (still) still();
+    };
+    const onUp = (e) => {
+      const d = view.drag;
+      if (!d || e.pointerId !== d.id) return;
+      if (performance.now() - d.t > 80) view.vYaw = view.vPitch = 0; // held still before letting go
+      view.drag = null;
+      box.classList.remove("is-dragging");
+    };
+    box.addEventListener("pointerdown", onDown);
+    box.addEventListener("pointermove", onMove);
+    box.addEventListener("pointerup", onUp);
+    box.addEventListener("pointercancel", onUp);
 
     const dots = (points, r, cx, cy, frontAlpha, backAlpha, dotSize) => {
       points.forEach(([x, y, z]) => {
@@ -113,6 +161,20 @@ const Globe = ({ leaving, className }) => {
 
     const draw = (now) => {
       const t = (now - started) / 1000;
+      const dt = Math.min(1 / 20, Math.max(0, (now - view.last) / 1000));
+      view.last = now;
+      if (!view.drag) {
+        // a flick carries on, easing off; the slow turn resumes underneath
+        view.yaw += view.vYaw * dt;
+        view.pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, view.pitch + view.vPitch * dt));
+        view.vYaw *= Math.exp(-dt * 2.5);
+        view.vPitch *= Math.exp(-dt * 2.5);
+        view.auto += dt * 0.22;
+      }
+      // the phone's tilt, eased
+      const tilt = (tiltSource.current && tiltSource.current.current) || { x: 0, y: 0 };
+      view.tiltX += (tilt.x - view.tiltX) * Math.min(1, dt * 6);
+      view.tiltY += (tilt.y - view.tiltY) * Math.min(1, dt * 6);
       const px = size * dpr;
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, px, px);
@@ -132,8 +194,8 @@ const Globe = ({ leaving, className }) => {
       // globe fills more of its box
       const axes = !window.matchMedia("(max-width: 800px)").matches;
       const R = (size / CANVAS_SCALE) * (axes ? 0.37 : 0.47) * k;
-      const spin = reduceMotion ? 0.6 : t * 0.22;
-      const tiltX = -0.38;
+      const spin = (reduceMotion ? 0.6 : view.auto) + view.yaw + view.tiltX;
+      const tiltX = -0.38 + view.pitch - view.tiltY;
       const tiltZ = 0.32;
 
       // the collapse ends in a flash of light at the centre
@@ -221,9 +283,16 @@ const Globe = ({ leaving, className }) => {
       if (document.hidden) return;
       draw(now);
     };
+    const unlisten = () => {
+      box.removeEventListener("pointerdown", onDown);
+      box.removeEventListener("pointermove", onMove);
+      box.removeEventListener("pointerup", onUp);
+      box.removeEventListener("pointercancel", onUp);
+    };
     if (reduceMotion) {
-      // one still frame (redrawn on resize); the leave collapse is skipped
-      const still = () => draw(performance.now());
+      // one still frame, redrawn on resize and while dragged; the leave
+      // collapse is skipped
+      still = () => draw(performance.now());
       still();
       if (ro) {
         ro.disconnect();
@@ -232,14 +301,18 @@ const Globe = ({ leaving, className }) => {
           still();
         });
         ro2.observe(canvas);
-        return () => ro2.disconnect();
+        return () => {
+          ro2.disconnect();
+          unlisten();
+        };
       }
-      return undefined;
+      return unlisten;
     }
     raf = requestAnimationFrame(loop);
     return () => {
       cancelAnimationFrame(raf);
       if (ro) ro.disconnect();
+      unlisten();
     };
   }, []);
 

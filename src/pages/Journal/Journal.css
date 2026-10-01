@@ -172,6 +172,62 @@ html.journal-html body {
   position: relative;
   width: var(--d);
   height: var(--d);
+  /* drag to spin it; a finger's vertical swipes still scroll the page */
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.chart-globe.is-dragging {
+  cursor: grabbing;
+}
+
+/* iPhone: motion access has to be asked for from a tap */
+.journal-magi .chart-motion-hint {
+  position: absolute;
+  left: 50%;
+  bottom: -6px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 1px solid rgba(111, 245, 238, 0.35);
+  border-radius: 999px;
+  background: rgba(3, 10, 20, 0.85);
+  color: var(--holo-light);
+  cursor: pointer;
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.journal-magi .chart-motion-hint.is-passive {
+  cursor: default;
+  pointer-events: none;
+}
+
+.chart-motion-icon {
+  width: 9px;
+  height: 15px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  animation: chart-motion-tilt 2.4s ease-in-out infinite;
+}
+
+@keyframes chart-motion-tilt {
+  0%,
+  100% {
+    transform: rotate(-18deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
 }
 
 /* the social channels, each at the end of an axis (the axis is its leader
@@ -757,7 +813,7 @@ html.journal-html body {
   .chart-globe {
     order: 2;
     justify-self: center;
-    margin: 8px 0;
+    margin: 30px 0;
   }
 
   .magi-log {

@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useRef } from "react";
+import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
 import Globe, { AXES } from "./Globe";
 
 // The journal's star chart, after Evangelion's: a wireframe globe whose
@@ -128,38 +129,60 @@ const Channel = ({ ch, side }) => (
 const AXIS_OF = { linkedin: 0, instagram: 1, twitter: 2 };
 const SIDE_OF_AXIS = ["left", "right", "right"];
 
-const StarChart = ({ channels, posts, now, leaving }) => (
-  <div className="chart">
-    <div className="chart-side is-left">
-      <ActivityChart data={activity(posts)} />
-      <Gauge />
-    </div>
+const PHONE_GAIN = 1.3; // globe turn per degree of phone tilt
 
-    <div className="chart-globe-wrap">
-      <div className="chart-globe">
-        <Globe className="chart-globe-canvas" leaving={leaving} />
-      </div>
-      <div className="chart-channels">
-        {channels.map((ch) => {
-          const axis = AXIS_OF[ch.id];
-          const [dx, dy] = AXES[axis];
-          return (
-            <div
-              key={ch.id}
-              className={`chart-channel-slot is-axis-${axis}`}
-              style={{ "--ax": dx, "--ay": dy }}
-            >
-              <Channel ch={ch} side={SIDE_OF_AXIS[axis]} />
-            </div>
-          );
-        })}
-      </div>
-    </div>
+const StarChart = ({ channels, posts, now, leaving }) => {
+  // phones: the globe follows the phone's tilt, as the homepage cube does
+  // (on iPhone, after a tap on the hint)
+  const tiltRef = useRef({ x: 0, y: 0 });
+  const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
+    tiltRef.current = { x: (x * PHONE_GAIN * Math.PI) / 180, y: (y * PHONE_GAIN * Math.PI) / 180 };
+  }, !prefersReducedMotion());
 
-    <div className="chart-side is-right">
-      <Readout now={now} />
+  return (
+    <div className="chart">
+      <div className="chart-side is-left">
+        <ActivityChart data={activity(posts)} />
+        <Gauge />
+      </div>
+
+      <div className="chart-globe-wrap">
+        <div className="chart-globe">
+          <Globe className="chart-globe-canvas" leaving={leaving} tiltRef={tiltRef} />
+          {showHint && (
+            <button type="button" className="chart-motion-hint" onClick={requestPermission}>
+              <span className="chart-motion-icon" aria-hidden="true" />
+              Tap, then move your phone
+            </button>
+          )}
+          {denied && (
+            <p className="chart-motion-hint is-passive" aria-live="polite">
+              Motion blocked in Safari settings
+            </p>
+          )}
+        </div>
+        <div className="chart-channels">
+          {channels.map((ch) => {
+            const axis = AXIS_OF[ch.id];
+            const [dx, dy] = AXES[axis];
+            return (
+              <div
+                key={ch.id}
+                className={`chart-channel-slot is-axis-${axis}`}
+                style={{ "--ax": dx, "--ay": dy }}
+              >
+                <Channel ch={ch} side={SIDE_OF_AXIS[axis]} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="chart-side is-right">
+        <Readout now={now} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default StarChart;
