@@ -642,8 +642,10 @@ html.journal-html body {
 }
 
 @media (max-width: 800px) {
+  /* no axes here, so the globe's box can be smaller (Globe.js fills more
+     of it) */
   .journal-magi {
-    --d: min(94vw, 440px);
+    --d: min(78vw, 330px);
   }
 
   .journal-magi .magi-screen .magi-hud {
@@ -732,9 +734,12 @@ html.journal-html body {
     grid-column: 1 / -1;
   }
 
+  /* back link on the left, page title on the right */
   .magi-top {
     order: 0;
+    width: 100%;
     gap: 16px;
+    justify-content: space-between;
     padding: 20px 4px 4px;
   }
 

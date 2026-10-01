@@ -128,7 +128,10 @@ const Globe = ({ leaving, className }) => {
       const cy = size / 2;
       // the canvas reaches past the globe's box (see .chart-globe-canvas), so
       // the axes have room: the globe is 0.37 of the box
-      const R = (size / CANVAS_SCALE) * 0.37 * k;
+      // phones: no axes (the social links sit below the page there), so the
+      // globe fills more of its box
+      const axes = !window.matchMedia("(max-width: 800px)").matches;
+      const R = (size / CANVAS_SCALE) * (axes ? 0.37 : 0.47) * k;
       const spin = reduceMotion ? 0.6 : t * 0.22;
       const tiltX = -0.38;
       const tiltZ = 0.32;
@@ -151,15 +154,18 @@ const Globe = ({ leaving, className }) => {
       ctx.fillStyle = glow;
       ctx.fillRect(0, 0, size, size);
 
-      // axes, fixed on the screen, reaching past the sphere
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = cyan(0.35 * k);
-      ctx.beginPath();
-      AXES.forEach(([dx, dy]) => {
-        ctx.moveTo(cx, cy);
-        ctx.lineTo(cx + dx * R * AXIS_LENGTH, cy + dy * R * AXIS_LENGTH);
-      });
-      ctx.stroke();
+      // axes, fixed on the screen, reaching past the sphere to the social
+      // links
+      if (axes) {
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = cyan(0.35 * k);
+        ctx.beginPath();
+        AXES.forEach(([dx, dy]) => {
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + dx * R * AXIS_LENGTH, cy + dy * R * AXIS_LENGTH);
+        });
+        ctx.stroke();
+      }
 
       // outer sphere: dotted meridians and parallels
       const outer = [];
