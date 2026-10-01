@@ -8,7 +8,7 @@ import StarChart from "./StarChart";
 import "components/holo/holo.css";
 import "./Journal.css";
 
-// Journal: an Evangelion-style star chart in the site's light. A wireframe
+// Journal: a star chart in the site's light. A wireframe
 // globe with the social channels as callouts, corner readouts giving the
 // entry count and two live counters, and the entry log below listing every
 // post.
@@ -51,17 +51,17 @@ const CHANNELS = [
 ];
 
 const HudBox = ({ className, label, value, unit, note }) => (
-  <div className={`magi-hud ${className}`}>
-    <span className="magi-hud-bar" aria-hidden="true" />
-    <div className="magi-hud-box">
-      <span className="magi-hud-label">{label}</span>
+  <div className={`journal-hud ${className}`}>
+    <span className="journal-hud-bar" aria-hidden="true" />
+    <div className="journal-hud-box">
+      <span className="journal-hud-label">{label}</span>
       {value !== undefined && (
-        <span className="magi-hud-value">
+        <span className="journal-hud-value">
           {value}
           {unit && <small> {unit}</small>}
         </span>
       )}
-      {note && <span className="magi-hud-note">{note}</span>}
+      {note && <span className="journal-hud-note">{note}</span>}
     </div>
   </div>
 );
@@ -147,15 +147,15 @@ export class Journal extends Component {
     const first = sorted && sorted[sorted.length - 1];
 
     return (
-      <main className={this.state.leaving ? "journal-magi holo-ui is-leaving" : "journal-magi holo-ui"} onClickCapture={this.onClickCapture}>
-        <header className="magi-top">
-          <a className="magi-home" href="/">
+      <main className={this.state.leaving ? "journal-page holo-ui is-leaving" : "journal-page holo-ui"} onClickCapture={this.onClickCapture}>
+        <header className="journal-top">
+          <a className="journal-home" href="/">
             <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
           </a>
-          <h1 className="magi-title">Thoughts</h1>
+          <h1 className="journal-title">Thoughts</h1>
         </header>
 
-        <section className="magi-screen" aria-label="Journal index">
+        <section className="journal-screen" aria-label="Journal index">
           <HudBox className="is-tl" label="Journal index" note="on ML-01 original" />
           <HudBox
             className="is-tr"
@@ -177,30 +177,30 @@ export class Journal extends Component {
           <StarChart channels={CHANNELS} posts={sorted} now={this.state.now} leaving={this.state.leaving} />
         </section>
 
-        <section className="magi-log" aria-label="All entries">
-          <h2 className="magi-log-title">
+        <section className="journal-log" aria-label="All entries">
+          <h2 className="journal-log-title">
             <span>Entry log</span>
             <small>{sorted ? `${pad(sorted.length)} records` : "Loading records"}</small>
           </h2>
-          <ol className="magi-log-list">
+          <ol className="journal-log-list">
             {entries.map(({ post, index, number }) => (
               <li key={post.slug} style={{ "--i": index }}>
                 <a
                   href={`/journal/${post.slug}`}
-                  className={index === selected ? "magi-entry is-selected" : "magi-entry"}
+                  className={index === selected ? "journal-entry is-selected" : "journal-entry"}
                   onPointerEnter={(e) => e.pointerType === "mouse" && this.select(index)}
                   onFocus={() => this.select(index)}
                 >
-                  <span className="magi-entry-id">
+                  <span className="journal-entry-id">
                     <small>Entry</small>
                     <strong>{pad(number)}</strong>
                   </span>
-                  <span className="magi-entry-main">
-                    <span className="magi-entry-title">{post.title}</span>
-                    <span className="magi-entry-sub">{post.subtitle}</span>
+                  <span className="journal-entry-main">
+                    <span className="journal-entry-title">{post.title}</span>
+                    <span className="journal-entry-sub">{post.subtitle}</span>
                   </span>
-                  <span className="magi-entry-date">{stamp(post.published)}</span>
-                  <span className="magi-entry-go" aria-hidden="true">
+                  <span className="journal-entry-date">{stamp(post.published)}</span>
+                  <span className="journal-entry-go" aria-hidden="true">
                     Read &rsaquo;
                   </span>
                 </a>

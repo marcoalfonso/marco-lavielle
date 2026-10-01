@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
-   Journal: an Evangelion-style star chart in the site's cyan light (a
+   Journal: a star chart in the site's cyan light (a
    wireframe globe with callouts, corner readouts), and an entry log
    beneath it.
    --------------------------------------------------------------------- */
@@ -8,7 +8,7 @@ html.journal-html body {
   background: #000;
 }
 
-.journal-magi {
+.journal-page {
   --d: min(560px, 62vh, 40vw); /* the globe's size */
   min-height: 100vh;
   /* plain black: a fixed gradient showed a hard seam while layers animated */
@@ -19,7 +19,7 @@ html.journal-html body {
 }
 
 /* --- top bar ------------------------------------------------------------ */
-.magi-top {
+.journal-top {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -29,7 +29,7 @@ html.journal-html body {
   box-sizing: border-box;
 }
 
-.journal-magi .magi-home {
+.journal-page .journal-home {
   color: var(--holo-muted);
   font: 600 11px/1 var(--holo-font);
   letter-spacing: 0.3em;
@@ -38,13 +38,13 @@ html.journal-html body {
   transition: color 250ms ease;
 }
 
-.journal-magi .magi-home:hover,
-.journal-magi .magi-home:focus {
+.journal-page .journal-home:hover,
+.journal-page .journal-home:focus {
   color: #fff;
   text-decoration: none;
 }
 
-.journal-magi .magi-title {
+.journal-page .journal-title {
   margin: 0;
   color: #effdff;
   font: 600 13px/1 var(--holo-display);
@@ -54,7 +54,7 @@ html.journal-html body {
 }
 
 /* --- the screen: star chart in the middle, readouts in the corners ------- */
-.magi-screen {
+.journal-screen {
   position: relative;
   display: grid;
   place-items: center;
@@ -68,7 +68,7 @@ html.journal-html body {
 }
 
 /* corner readouts: an outlined box beside a thick bar */
-.magi-hud {
+.journal-hud {
   position: absolute;
   z-index: 3;
   display: flex;
@@ -76,29 +76,29 @@ html.journal-html body {
   gap: 8px;
 }
 
-.magi-hud.is-tl {
+.journal-hud.is-tl {
   top: 24px;
   left: 32px;
 }
 
-.magi-hud.is-tr {
+.journal-hud.is-tr {
   top: 24px;
   right: 32px;
   flex-direction: row-reverse;
 }
 
-.magi-hud.is-bl {
+.journal-hud.is-bl {
   bottom: 24px;
   left: 32px;
 }
 
-.magi-hud.is-br {
+.journal-hud.is-br {
   bottom: 24px;
   right: 32px;
   flex-direction: row-reverse;
 }
 
-.magi-hud-bar {
+.journal-hud-bar {
   width: 7px;
   border-radius: 2px;
   background: var(--holo-light);
@@ -106,7 +106,7 @@ html.journal-html body {
   opacity: 0.8;
 }
 
-.magi-hud-box {
+.journal-hud-box {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -118,13 +118,13 @@ html.journal-html body {
   box-shadow: 0 0 14px rgba(0, 191, 243, 0.35), inset 0 0 14px rgba(0, 191, 243, 0.12);
 }
 
-.magi-hud.is-tr .magi-hud-box,
-.magi-hud.is-br .magi-hud-box {
+.journal-hud.is-tr .journal-hud-box,
+.journal-hud.is-br .journal-hud-box {
   align-items: flex-end;
   text-align: right;
 }
 
-.magi-hud-label {
+.journal-hud-label {
   color: #effdff;
   font: 700 15px/1.1 var(--holo-display);
   letter-spacing: 0.06em;
@@ -132,7 +132,7 @@ html.journal-html body {
   text-shadow: 0 0 8px rgba(111, 245, 238, 0.6);
 }
 
-.magi-hud-value {
+.journal-hud-value {
   color: var(--holo-light);
   font: 700 26px/1 var(--holo-display);
   letter-spacing: 0.04em;
@@ -141,11 +141,11 @@ html.journal-html body {
   white-space: nowrap;
 }
 
-.magi-hud-value small {
+.journal-hud-value small {
   font-size: 14px;
 }
 
-.magi-hud-note {
+.journal-hud-note {
   color: var(--holo-cyan);
   font: 600 10px/1 var(--holo-font);
   letter-spacing: 0.2em;
@@ -184,7 +184,7 @@ html.journal-html body {
 }
 
 /* iPhone: motion access has to be asked for from a tap */
-.journal-magi .chart-motion-hint {
+.journal-page .chart-motion-hint {
   position: absolute;
   left: 50%;
   bottom: -6px;
@@ -206,7 +206,7 @@ html.journal-html body {
   transform: translateX(-50%);
 }
 
-.journal-magi .chart-motion-hint.is-passive {
+.journal-page .chart-motion-hint.is-passive {
   cursor: default;
   pointer-events: none;
 }
@@ -261,13 +261,13 @@ html.journal-html body {
 }
 
 /* on the globe (desktop): slim pills with just the logo and the account */
-.journal-magi .chart-channel-slot .chart-channel {
+.journal-page .chart-channel-slot .chart-channel {
   width: auto;
   gap: 9px;
   padding: 5px 16px 5px 5px;
 }
 
-.journal-magi .chart-channel-slot .chart-channel.is-left {
+.journal-page .chart-channel-slot .chart-channel.is-left {
   padding: 5px 5px 5px 16px;
 }
 
@@ -449,7 +449,7 @@ html.journal-html body {
 }
 
 /* --- social channels: rounded callouts with a ring marker ----------------- */
-.journal-magi .chart-channel {
+.journal-page .chart-channel {
   position: relative;
   display: flex;
   align-items: center;
@@ -466,14 +466,14 @@ html.journal-html body {
   transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
 }
 
-.journal-magi .chart-channel.is-left {
+.journal-page .chart-channel.is-left {
   flex-direction: row-reverse;
   padding: 10px 12px 10px 18px;
   text-align: right;
 }
 
-.journal-magi .chart-channel:hover,
-.journal-magi .chart-channel:focus-visible {
+.journal-page .chart-channel:hover,
+.journal-page .chart-channel:focus-visible {
   border-color: var(--holo-light);
   background: rgba(111, 245, 238, 0.14);
   box-shadow: 0 0 20px rgba(111, 245, 238, 0.65), inset 0 0 18px rgba(111, 245, 238, 0.25);
@@ -556,14 +556,14 @@ html.journal-html body {
 }
 
 /* --- entry log ------------------------------------------------------------ */
-.magi-log {
+.journal-log {
   max-width: 1080px;
   margin: 0 auto;
   padding: 24px 32px 96px;
   box-sizing: border-box;
 }
 
-.journal-magi .magi-log-title {
+.journal-page .journal-log-title {
   display: flex;
   align-items: baseline;
   gap: 16px;
@@ -572,21 +572,21 @@ html.journal-html body {
   border-bottom: 1px solid rgba(111, 245, 238, 0.25);
 }
 
-.magi-log-title span {
+.journal-log-title span {
   color: #effdff;
   font: 600 16px/1 var(--holo-display);
   letter-spacing: 0.3em;
   text-transform: uppercase;
 }
 
-.magi-log-title small {
+.journal-log-title small {
   color: var(--holo-cyan);
   font: 600 10px/1 var(--holo-font);
   letter-spacing: 0.26em;
   text-transform: uppercase;
 }
 
-.journal-magi .magi-log-list {
+.journal-page .journal-log-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -595,7 +595,7 @@ html.journal-html body {
   list-style: none;
 }
 
-.journal-magi .magi-entry {
+.journal-page .journal-entry {
   display: grid;
   grid-template-columns: 76px minmax(0, 1fr) auto auto;
   align-items: center;
@@ -610,9 +610,9 @@ html.journal-html body {
   transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
 }
 
-.journal-magi .magi-entry.is-selected,
-.journal-magi .magi-entry:hover,
-.journal-magi .magi-entry:focus-visible {
+.journal-page .journal-entry.is-selected,
+.journal-page .journal-entry:hover,
+.journal-page .journal-entry:focus-visible {
   border-color: rgba(111, 245, 238, 0.6);
   border-left-color: var(--holo-light);
   background: rgba(8, 26, 38, 0.8);
@@ -621,50 +621,50 @@ html.journal-html body {
   text-decoration: none;
 }
 
-.magi-entry-id {
+.journal-entry-id {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.magi-entry-id small {
+.journal-entry-id small {
   color: var(--holo-dim);
   font: 600 9px/1 var(--holo-font);
   letter-spacing: 0.26em;
   text-transform: uppercase;
 }
 
-.magi-entry-id strong {
+.journal-entry-id strong {
   color: var(--holo-light);
   font: 700 22px/1 var(--holo-display);
   text-shadow: 0 0 10px rgba(111, 245, 238, 0.55);
 }
 
-.magi-entry-main {
+.journal-entry-main {
   display: flex;
   flex-direction: column;
   gap: 6px;
   min-width: 0;
 }
 
-.magi-entry-title {
+.journal-entry-title {
   color: #eef8ff;
   font: 500 18px/1.3 var(--holo-font);
 }
 
-.magi-entry-sub {
+.journal-entry-sub {
   color: var(--holo-muted);
   font: 400 14px/1.4 var(--holo-font);
 }
 
-.magi-entry-date {
+.journal-entry-date {
   color: var(--holo-cyan);
   font: 600 12px/1 var(--holo-display);
   letter-spacing: 0.08em;
   font-variant-numeric: tabular-nums;
 }
 
-.magi-entry-go {
+.journal-entry-go {
   color: var(--holo-muted);
   font: 600 10px/1 var(--holo-display);
   letter-spacing: 0.22em;
@@ -672,8 +672,8 @@ html.journal-html body {
   transition: color 200ms ease;
 }
 
-.magi-entry.is-selected .magi-entry-go,
-.magi-entry:hover .magi-entry-go {
+.journal-entry.is-selected .journal-entry-go,
+.journal-entry:hover .journal-entry-go {
   color: var(--holo-light);
 }
 
@@ -684,15 +684,15 @@ html.journal-html body {
 }
 
 @media (max-width: 1100px) {
-  .magi-hud-box {
+  .journal-hud-box {
     min-width: 170px;
   }
 
-  .magi-hud-label {
+  .journal-hud-label {
     font-size: 12px;
   }
 
-  .magi-hud-value {
+  .journal-hud-value {
     font-size: 19px;
   }
 }
@@ -700,53 +700,53 @@ html.journal-html body {
 @media (max-width: 800px) {
   /* no axes here, so the globe's box can be smaller (Globe.js fills more
      of it) */
-  .journal-magi {
+  .journal-page {
     --d: min(78vw, 330px);
   }
 
-  .journal-magi .magi-screen .magi-hud {
+  .journal-page .journal-screen .journal-hud {
     z-index: 3;
   }
 
-  .magi-top {
+  .journal-top {
     padding: 20px 16px 0;
   }
 
   /* the readouts become a 2 x 2 grid above the dial */
-  .magi-screen {
+  .journal-screen {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
     min-height: 0;
     padding: 20px 12px 8px;
   }
 
-  .magi-hud {
+  .journal-hud {
     position: static;
   }
 
-  .magi-hud-bar {
+  .journal-hud-bar {
     width: 4px;
   }
 
-  .magi-hud-box {
+  .journal-hud-box {
     flex: 1;
     min-width: 0;
     padding: 8px 10px;
   }
 
-  .magi-hud-label {
+  .journal-hud-label {
     font-size: 9px;
   }
 
-  .magi-hud-value {
+  .journal-hud-value {
     font-size: 13px;
   }
 
-  .magi-hud-value small {
+  .journal-hud-value small {
     font-size: 9px;
   }
 
-  .magi-hud-note {
+  .journal-hud-note {
     font-size: 8px;
   }
 
@@ -757,8 +757,8 @@ html.journal-html body {
     margin: 6px 0;
   }
 
-  .magi-hud.is-bl,
-  .magi-hud.is-br {
+  .journal-hud.is-bl,
+  .journal-hud.is-br {
     order: 2;
   }
 
@@ -766,7 +766,7 @@ html.journal-html body {
      log, then the rest (bottom readouts, activity, gauge, time), and the
      social channels last. The wrappers step aside (display: contents) so
      their parts can be ordered on the page's own grid. */
-  .journal-magi {
+  .journal-page {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
@@ -774,16 +774,16 @@ html.journal-html body {
     box-sizing: border-box;
   }
 
-  .magi-screen,
+  .journal-screen,
   .chart,
   .chart-side,
   .chart-globe-wrap {
     display: contents;
   }
 
-  .magi-top,
+  .journal-top,
   .chart-globe,
-  .magi-log,
+  .journal-log,
   .chart-panel,
   .chart-readout,
   .chart-channels {
@@ -791,7 +791,7 @@ html.journal-html body {
   }
 
   /* back link on the left, page title on the right */
-  .magi-top {
+  .journal-top {
     order: 0;
     width: 100%;
     gap: 16px;
@@ -799,14 +799,14 @@ html.journal-html body {
     padding: 20px 4px 4px;
   }
 
-  .journal-magi .magi-home,
-  .journal-magi .magi-title {
+  .journal-page .journal-home,
+  .journal-page .journal-title {
     font-size: 10px;
     letter-spacing: 0.22em;
   }
 
-  .magi-hud.is-tl,
-  .magi-hud.is-tr {
+  .journal-hud.is-tl,
+  .journal-hud.is-tr {
     order: 1;
   }
 
@@ -816,12 +816,12 @@ html.journal-html body {
     margin: 30px 0;
   }
 
-  .magi-log {
+  .journal-log {
     order: 3;
   }
 
-  .magi-hud.is-bl,
-  .magi-hud.is-br {
+  .journal-hud.is-bl,
+  .journal-hud.is-br {
     order: 4;
   }
 
@@ -861,8 +861,8 @@ html.journal-html body {
     transform: none;
   }
 
-  .journal-magi .chart-channel-slot .chart-channel,
-  .journal-magi .chart-channel-slot .chart-channel.is-left {
+  .journal-page .chart-channel-slot .chart-channel,
+  .journal-page .chart-channel-slot .chart-channel.is-left {
     flex-direction: row;
     width: 100%;
     gap: 10px;
@@ -899,38 +899,38 @@ html.journal-html body {
     display: inline;
   }
 
-  .magi-log {
+  .journal-log {
     padding: 12px 0 8px;
   }
 
-  .journal-magi .magi-entry {
+  .journal-page .journal-entry {
     grid-template-columns: 52px minmax(0, 1fr);
     gap: 6px 14px;
     padding: 14px;
   }
 
-  .magi-entry-id {
+  .journal-entry-id {
     grid-row: span 2;
   }
 
-  .magi-entry-id strong {
+  .journal-entry-id strong {
     font-size: 18px;
   }
 
-  .magi-entry-title {
+  .journal-entry-title {
     font-size: 16px;
   }
 
-  .magi-entry-sub {
+  .journal-entry-sub {
     font-size: 13px;
   }
 
-  .magi-entry-date {
+  .journal-entry-date {
     grid-column: 2;
     font-size: 11px;
   }
 
-  .magi-entry-go {
+  .journal-entry-go {
     display: none;
   }
 }
@@ -938,11 +938,11 @@ html.journal-html body {
 /* --- start: the globe assembles out of a point (Globe.js), then the
    leader lines draw, the callouts and panels come in, the corner readouts
    power up and the log rises ------------------------------------------------ */
-.magi-top {
-  animation: magi-fade 600ms ease-out both;
+.journal-top {
+  animation: journal-fade 600ms ease-out both;
 }
 
-@keyframes magi-fade {
+@keyframes journal-fade {
   from {
     opacity: 0;
   }
@@ -951,15 +951,15 @@ html.journal-html body {
   }
 }
 
-.journal-magi .chart-channel {
+.journal-page .chart-channel {
   animation: chart-extend 420ms cubic-bezier(0.2, 0.8, 0.2, 1) 1550ms both;
 }
 
-.journal-magi .chart-channel.is-left {
+.journal-page .chart-channel.is-left {
   transform-origin: 100% 50%;
 }
 
-.journal-magi .chart-channel.is-right {
+.journal-page .chart-channel.is-right {
   transform-origin: 0 50%;
 }
 
@@ -986,7 +986,7 @@ html.journal-html body {
 
 .chart-panel,
 .chart-readout {
-  animation: magi-rise 500ms ease-out 1450ms both;
+  animation: journal-rise 500ms ease-out 1450ms both;
 }
 
 .chart-gauge {
@@ -994,31 +994,31 @@ html.journal-html body {
 }
 
 /* the corner readouts power up */
-.magi-hud-bar {
-  animation: magi-bar-in 400ms ease-out calc(1900ms + var(--hud) * 120ms) both;
+.journal-hud-bar {
+  animation: journal-bar-in 400ms ease-out calc(1900ms + var(--hud) * 120ms) both;
 }
 
-.magi-hud-box {
-  animation: magi-hud-in 600ms steps(1, end) calc(2000ms + var(--hud) * 120ms) both, magi-hud-open 450ms ease-out calc(2000ms + var(--hud) * 120ms) both;
+.journal-hud-box {
+  animation: journal-hud-in 600ms steps(1, end) calc(2000ms + var(--hud) * 120ms) both, journal-hud-open 450ms ease-out calc(2000ms + var(--hud) * 120ms) both;
 }
 
-.magi-hud.is-tl {
+.journal-hud.is-tl {
   --hud: 0;
 }
 
-.magi-hud.is-tr {
+.journal-hud.is-tr {
   --hud: 1;
 }
 
-.magi-hud.is-bl {
+.journal-hud.is-bl {
   --hud: 2;
 }
 
-.magi-hud.is-br {
+.journal-hud.is-br {
   --hud: 3;
 }
 
-@keyframes magi-bar-in {
+@keyframes journal-bar-in {
   from {
     opacity: 0;
     scale: 1 0;
@@ -1029,7 +1029,7 @@ html.journal-html body {
   }
 }
 
-@keyframes magi-hud-open {
+@keyframes journal-hud-open {
   from {
     clip-path: inset(0 50% 0 50%);
   }
@@ -1038,7 +1038,7 @@ html.journal-html body {
   }
 }
 
-@keyframes magi-hud-in {
+@keyframes journal-hud-in {
   0% {
     opacity: 0;
   }
@@ -1055,15 +1055,15 @@ html.journal-html body {
 }
 
 /* the log comes in beneath */
-.magi-log-title {
-  animation: magi-rise 500ms ease-out 2200ms both;
+.journal-log-title {
+  animation: journal-rise 500ms ease-out 2200ms both;
 }
 
-.magi-log-list li {
-  animation: magi-rise 500ms ease-out calc(2300ms + var(--i, 0) * 70ms) both;
+.journal-log-list li {
+  animation: journal-rise 500ms ease-out calc(2300ms + var(--i, 0) * 70ms) both;
 }
 
-@keyframes magi-rise {
+@keyframes journal-rise {
   from {
     opacity: 0;
     transform: translateY(14px);
@@ -1078,16 +1078,16 @@ html.journal-html body {
    down, the callouts retract, the lines withdraw and the globe collapses
    into a point (Globe.js); the link is followed as it goes (LEAVE_MS in
    Journal.js) ----------------------------------------------------------------- */
-.is-leaving .magi-log-list li {
-  animation: magi-sink 320ms ease-in calc(var(--i, 0) * 25ms) both;
+.is-leaving .journal-log-list li {
+  animation: journal-sink 320ms ease-in calc(var(--i, 0) * 25ms) both;
 }
 
-.is-leaving .magi-log-title,
-.is-leaving .magi-top {
-  animation: magi-sink 320ms ease-in both;
+.is-leaving .journal-log-title,
+.is-leaving .journal-top {
+  animation: journal-sink 320ms ease-in both;
 }
 
-@keyframes magi-sink {
+@keyframes journal-sink {
   from {
     opacity: 1;
     transform: none;
@@ -1098,15 +1098,15 @@ html.journal-html body {
   }
 }
 
-.is-leaving .magi-hud-box {
-  animation: magi-hud-shut 300ms ease-in calc(120ms + var(--hud) * 50ms) both;
+.is-leaving .journal-hud-box {
+  animation: journal-hud-shut 300ms ease-in calc(120ms + var(--hud) * 50ms) both;
 }
 
-.is-leaving .magi-hud-bar {
-  animation: magi-bar-out 260ms ease-in calc(260ms + var(--hud) * 50ms) both;
+.is-leaving .journal-hud-bar {
+  animation: journal-bar-out 260ms ease-in calc(260ms + var(--hud) * 50ms) both;
 }
 
-@keyframes magi-hud-shut {
+@keyframes journal-hud-shut {
   0% {
     opacity: 1;
     clip-path: inset(0 0 0 0);
@@ -1123,7 +1123,7 @@ html.journal-html body {
   }
 }
 
-@keyframes magi-bar-out {
+@keyframes journal-bar-out {
   from {
     opacity: 0.8;
     scale: 1 1;
@@ -1136,11 +1136,11 @@ html.journal-html body {
 
 .is-leaving .chart-panel,
 .is-leaving .chart-readout {
-  animation: magi-sink 300ms ease-in 200ms both;
+  animation: journal-sink 300ms ease-in 200ms both;
 }
 
-.is-leaving .journal-magi .chart-channel,
-.journal-magi.is-leaving .chart-channel {
+.is-leaving .journal-page .chart-channel,
+.journal-page.is-leaving .chart-channel {
   animation: chart-retract 300ms cubic-bezier(0.6, 0, 0.8, 0.2) 250ms both;
 }
 
@@ -1160,16 +1160,16 @@ html.journal-html body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .magi-top,
-  .journal-magi .chart-channel,
+  .journal-top,
+  .journal-page .chart-channel,
   .chart-channel-marker,
   .chart-panel,
   .chart-readout,
   .chart-gauge-scan,
-  .magi-hud-bar,
-  .magi-hud-box,
-  .magi-log-title,
-  .magi-log-list li {
+  .journal-hud-bar,
+  .journal-hud-box,
+  .journal-log-title,
+  .journal-log-list li {
     animation: none;
   }
 }

@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
 import Globe, { AXES } from "./Globe";
 
-// The journal's star chart, after Evangelion's: a wireframe globe whose
+// The journal's star chart: a wireframe globe whose
 // three axes end in the social channels (rounded callouts); on the left an
 // entry-activity chart and a gauge, on the right a live readout of Sydney's
 // coordinates and time.

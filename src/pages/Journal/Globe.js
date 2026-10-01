@@ -1,10 +1,9 @@
 import React, { useEffect, useRef } from "react";
 
-// A wireframe globe drawn in dots of light, after the Evangelion star-chart
-// screens: an outer sphere of dotted meridians and parallels turning on a
-// tilted axis, a smaller inner sphere turning the other way, bright bands
-// sweeping round it, and three axes reaching out. Lines on the far side are
-// dimmer.
+// A wireframe globe drawn in dots of light, like a star-chart display: an
+// outer sphere of dotted meridians and parallels turning on a tilted axis, a
+// smaller inner sphere turning the other way, bright bands sweeping round it,
+// and three axes reaching out. Lines on the far side are dimmer.
 // Drawn on a canvas each frame (a few thousand dots is cheap there).
 //
 // It assembles out of a point when the page opens, and collapses back into
