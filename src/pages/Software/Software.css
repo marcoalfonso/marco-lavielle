@@ -777,7 +777,7 @@ html.xp-modal-open body {
     height: auto;
     min-height: 0;
     overflow: hidden;
-    padding: calc(56px + 2 * min(36vw, 20svh) + 20px) 20px 0;
+    padding: calc(56px + 2 * min(34vw, 19svh) + 40px) 20px 0;
   }
 
   .software-earth {
@@ -798,7 +798,7 @@ html.xp-modal-open body {
     position: relative;
     left: auto;
     bottom: auto;
-    margin-top: 16px;
+    margin-top: 26px;
     transform: none;
   }
 
@@ -807,7 +807,7 @@ html.xp-modal-open body {
     position: relative;
     left: auto;
     bottom: auto;
-    margin-top: 6px;
+    margin-top: 40px;
     gap: 8px;
     transform: none;
   }
@@ -821,11 +821,11 @@ html.xp-modal-open body {
   }
 
   .software-page .software-lede {
-    margin-top: 12px;
+    margin-top: 18px;
   }
 
   .software-page .software-stats {
-    margin-top: 16px;
+    margin-top: 24px;
   }
 
   .software-page .software-lede {
@@ -870,7 +870,6 @@ html.xp-modal-open body {
 
   .xp-meta {
     padding: 16px 8px 4px;
-    background: #010207;
     text-align: center;
   }
 

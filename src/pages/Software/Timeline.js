@@ -6,10 +6,13 @@ import { duration, imageSet, monthYear } from "./experience";
 // card sideways, running across, and turning down into the next (right,
 // down, left, down...). It draws itself as the page scrolls, a point of
 // light at its tip, and lights each card as it arrives. On phones the cards
-// stack down the middle and the path runs straight down behind them.
+// stack down the middle and the path runs straight down behind them: it's
+// masked out where each card sits and fades back in below it, so it reads
+// as passing underneath.
 
 const RADIUS = 28; // the path's corners
 const SAMPLE = 6; // px between samples along the path (for the scroll lookup)
+const FADE = 36; // phones: px over which the path fades back in below a card
 
 // a path through the card centres: across, a rounded corner, then down
 const buildPath = (points, stacked) => {
@@ -36,7 +39,7 @@ const Timeline = ({ items, onOpen }) => {
   const glowRef = useRef(null);
   const headRef = useRef(null);
   const samples = useRef([]); // [{ len, y, x }]
-  const [path, setPath] = useState({ d: "", w: 0, h: 0 });
+  const [path, setPath] = useState({ d: "", w: 0, h: 0, holes: [] });
   const [lit, setLit] = useState(-1);
 
   // where the cards are, and the path through them
@@ -45,12 +48,20 @@ const Timeline = ({ items, onOpen }) => {
     if (!wrap) return;
     const box = wrap.getBoundingClientRect();
     const stacked = window.matchMedia("(max-width: 800px)").matches;
-    const points = cardRefs.current.filter(Boolean).map((el) => {
+    const cards = cardRefs.current.filter(Boolean);
+    const points = cards.map((el) => {
       const r = el.getBoundingClientRect();
       const media = el.querySelector(".xp-media").getBoundingClientRect();
       return { x: stacked ? box.width / 2 : r.left + r.width / 2 - box.left, y: media.top + media.height / 2 - box.top };
     });
-    setPath({ d: buildPath(points, stacked), w: box.width, h: box.height });
+    // phones: where the cards sit, to hide the path under them
+    const holes = stacked
+      ? cards.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { top: r.top - box.top, bottom: r.bottom - box.top };
+        })
+      : [];
+    setPath({ d: buildPath(points, stacked), w: box.width, h: box.height, holes });
   };
 
   useLayoutEffect(measure, [items]);
@@ -139,12 +150,31 @@ const Timeline = ({ items, onOpen }) => {
   return (
     <div className="xp-timeline" ref={wrapRef}>
       <svg className="xp-path" width={path.w} height={path.h} aria-hidden="true">
-        <path className="xp-path-track" d={path.d} />
-        <path className="xp-path-glow" ref={glowRef} d={path.d} />
-        <path className="xp-path-line" ref={pathRef} d={path.d} />
-        <g className="xp-path-head" ref={headRef}>
-          <circle r="10" className="xp-path-head-halo" />
-          <circle r="4" className="xp-path-head-dot" />
+        {path.holes.length > 0 && (
+          <defs>
+            <linearGradient id="xp-fade" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#000" />
+              <stop offset="1" stopColor="#fff" />
+            </linearGradient>
+            <mask id="xp-under" maskUnits="userSpaceOnUse" x="0" y="0" width={path.w} height={path.h}>
+              <rect width={path.w} height={path.h} fill="#fff" />
+              {path.holes.map((h, i) => (
+                <React.Fragment key={i}>
+                  <rect y={h.top} width={path.w} height={h.bottom - h.top} fill="#000" />
+                  <rect y={h.bottom} width={path.w} height={FADE} fill="url(#xp-fade)" />
+                </React.Fragment>
+              ))}
+            </mask>
+          </defs>
+        )}
+        <g mask={path.holes.length > 0 ? "url(#xp-under)" : undefined}>
+          <path className="xp-path-track" d={path.d} />
+          <path className="xp-path-glow" ref={glowRef} d={path.d} />
+          <path className="xp-path-line" ref={pathRef} d={path.d} />
+          <g className="xp-path-head" ref={headRef}>
+            <circle r="10" className="xp-path-head-halo" />
+            <circle r="4" className="xp-path-head-dot" />
+          </g>
         </g>
       </svg>
 

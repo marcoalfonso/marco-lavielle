@@ -162,7 +162,7 @@ const Earth = ({ className, tiltRef, onReady }) => {
     // where the Earth sits and how big: right of centre on wide screens,
     // centred near the top on narrow ones
     const wide = () => w > 800;
-    const earthRadius = () => (wide() ? Math.min(w * 0.25, h * 0.37) : Math.min(w * 0.36, h * 0.2));
+    const earthRadius = () => (wide() ? Math.min(w * 0.25, h * 0.37) : Math.min(w * 0.34, h * 0.19));
     // (on phones just under the top bar, leaving the rest of the screen to the intro)
     const earthCentre = () => (wide() ? [w * 0.67, h * 0.48] : [w / 2, 56 + earthRadius()]);
 
