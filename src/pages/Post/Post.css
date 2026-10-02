@@ -1,0 +1,509 @@
+/* ---------------------------------------------------------------------
+   Journal entry: the post on a pane of glass with the HUD brackets, under a
+   header with a small globe. The page scrolls normally; nothing behind the
+   text moves while reading.
+   --------------------------------------------------------------------- */
+html.entry-html,
+html.entry-html body {
+  background: #010207;
+}
+
+.entry-page {
+  --entry-width: 760px;
+  min-height: 100vh;
+  padding: 0 24px 96px;
+  box-sizing: border-box;
+  background: #010207;
+  color: #ccd4de;
+  font-family: var(--holo-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* reading progress, a line of light along the top */
+.entry-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  height: 2px;
+  background: rgba(111, 245, 238, 0.08);
+}
+
+.entry-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--holo-cyan), var(--holo-light));
+  box-shadow: 0 0 10px rgba(111, 245, 238, 0.8);
+  transform-origin: 0 50%;
+}
+
+/* --- top bar ---------------------------------------------------------- */
+.entry-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 8px 0;
+}
+
+.entry-page .entry-back {
+  color: var(--holo-muted);
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.3em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.entry-page .entry-back:hover,
+.entry-page .entry-back:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.entry-section {
+  color: #effdff;
+  font: 600 13px/1 var(--holo-display);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
+}
+
+/* --- header: globe beside the entry's title -------------------------- */
+.entry-head {
+  display: grid;
+  grid-template-columns: 200px minmax(0, 1fr);
+  align-items: center;
+  gap: 40px;
+  max-width: var(--entry-width);
+  margin: 48px auto 44px;
+  animation: entry-rise 600ms ease-out both;
+}
+
+.entry-globe-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.entry-globe {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.entry-globe.is-dragging {
+  cursor: grabbing;
+}
+
+.entry-globe-canvas {
+  /* 1.5x the globe's box (CANVAS_SCALE in Globe.js) */
+  position: absolute;
+  left: -25%;
+  top: -25%;
+  display: block;
+  width: 150%;
+  height: 150%;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(111, 245, 238, 0.55));
+}
+
+.entry-page .entry-kicker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin: 0 0 14px;
+  color: var(--holo-cyan);
+  font: 600 11px/1 var(--holo-display);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.entry-page .entry-title {
+  margin: 0;
+  color: #f2fbff;
+  font: 600 clamp(26px, 3.2vw, 38px) / 1.2 var(--holo-font);
+  letter-spacing: 0.01em;
+  text-shadow: 0 0 18px rgba(111, 245, 238, 0.35);
+}
+
+.entry-page .entry-subtitle {
+  margin: 14px 0 0;
+  color: #9fb0bf;
+  font: 400 18px/1.45 var(--holo-font);
+}
+
+.entry-page .entry-author {
+  margin: 14px 0 0;
+  color: var(--holo-muted);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+/* iPhone: motion access has to be asked for from a tap */
+.entry-page .entry-motion-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid rgba(111, 245, 238, 0.35);
+  border-radius: 999px;
+  background: rgba(3, 10, 20, 0.85);
+  color: var(--holo-light);
+  cursor: pointer;
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.entry-page .entry-motion-hint.is-passive {
+  cursor: default;
+}
+
+.entry-motion-icon {
+  width: 9px;
+  height: 15px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  animation: entry-motion-tilt 2.4s ease-in-out infinite;
+}
+
+@keyframes entry-motion-tilt {
+  0%,
+  100% {
+    transform: rotate(-18deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
+}
+
+/* --- the reading panel ----------------------------------------------- */
+.entry-panel {
+  max-width: var(--entry-width);
+  margin: 0 auto;
+  animation: entry-rise 600ms ease-out 150ms both;
+}
+
+.entry-panel > .holo-panel-body {
+  padding: 48px 56px 52px;
+}
+
+/* the glass behind the text is calmer than elsewhere, for reading */
+.entry-panel > .holo-panel-frame {
+  background: rgba(3, 9, 17, 0.94);
+}
+
+.entry-panel > .holo-panel-frame::after {
+  opacity: 0.5;
+}
+
+.entry-page .entry-loading {
+  margin: 0;
+  color: var(--holo-muted);
+}
+
+/* the post itself: comfortable to read */
+.entry-body {
+  color: #d6e0e8;
+  font: 400 18px/1.75 var(--holo-font);
+  overflow-wrap: break-word;
+}
+
+.entry-body > :first-child {
+  margin-top: 0;
+}
+
+.entry-body > :last-child {
+  margin-bottom: 0;
+}
+
+.entry-body p,
+.entry-body ul,
+.entry-body ol,
+.entry-body blockquote,
+.entry-body pre {
+  margin: 0 0 1.2em;
+}
+
+.entry-body h1,
+.entry-body h2,
+.entry-body h3,
+.entry-body h4 {
+  margin: 1.8em 0 0.6em;
+  color: #fff;
+  font-family: var(--holo-font);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.entry-body h1,
+.entry-body h2 {
+  font-size: 24px;
+}
+
+.entry-body h3,
+.entry-body h4 {
+  font-size: 20px;
+}
+
+.entry-body a {
+  color: var(--holo-light);
+  text-decoration: underline;
+  text-decoration-color: rgba(111, 245, 238, 0.4);
+  text-underline-offset: 3px;
+}
+
+.entry-body a:hover {
+  text-decoration-color: var(--holo-light);
+}
+
+.entry-body strong,
+.entry-body b {
+  color: #fff;
+}
+
+.entry-body ul,
+.entry-body ol {
+  padding-left: 1.4em;
+}
+
+.entry-body li {
+  margin: 0.3em 0;
+}
+
+.entry-body blockquote {
+  padding: 4px 0 4px 20px;
+  border-left: 2px solid var(--holo-cyan);
+  color: #b9c7d3;
+  font-style: italic;
+}
+
+/* code: a terminal panel that scrolls sideways if a line is long */
+.entry-body pre,
+.entry-body .ql-syntax {
+  overflow-x: auto;
+  padding: 16px 18px;
+  border: 1px solid rgba(111, 245, 238, 0.22);
+  border-left: 2px solid var(--holo-light);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #bdf7f2;
+  font: 400 14px/1.6 "Menlo", "Consolas", monospace;
+  white-space: pre;
+  -webkit-overflow-scrolling: touch;
+}
+
+.entry-body code {
+  padding: 0.1em 0.35em;
+  border-radius: 3px;
+  background: rgba(111, 245, 238, 0.1);
+  color: #bdf7f2;
+  font: 400 0.88em/1 "Menlo", "Consolas", monospace;
+}
+
+.entry-body pre code {
+  padding: 0;
+  background: none;
+  font: inherit;
+}
+
+.entry-body img,
+.entry-body video,
+.entry-body iframe {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1.4em auto;
+  border-radius: 4px;
+}
+
+.entry-body hr {
+  margin: 2em 0;
+  border: 0;
+  border-top: 1px solid rgba(111, 245, 238, 0.2);
+}
+
+/* --- previous / next ------------------------------------------------- */
+.entry-nav {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  max-width: var(--entry-width);
+  margin: 44px auto 0;
+}
+
+.entry-page .entry-nav-link {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+  border: 1px solid rgba(111, 245, 238, 0.25);
+  border-radius: 4px;
+  background: rgba(2, 8, 16, 0.7);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 200ms ease, box-shadow 200ms ease, background 200ms ease;
+}
+
+.entry-page .entry-nav-link.is-newer {
+  text-align: right;
+}
+
+.entry-page .entry-nav-link:hover,
+.entry-page .entry-nav-link:focus-visible {
+  border-color: var(--holo-light);
+  background: rgba(8, 26, 38, 0.8);
+  box-shadow: 0 0 16px rgba(111, 245, 238, 0.3);
+  outline: none;
+  text-decoration: none;
+}
+
+.entry-nav-link small {
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-display);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.entry-nav-link strong {
+  color: #eef8ff;
+  font: 500 16px/1.35 var(--holo-font);
+}
+
+.entry-page .entry-foot {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin: 40px 0 0;
+  color: var(--holo-dim);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.entry-page .entry-foot a {
+  color: var(--holo-muted);
+  text-decoration: none;
+}
+
+.entry-page .entry-foot a:hover {
+  color: #fff;
+}
+
+@keyframes entry-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* --- phones ------------------------------------------------------------ */
+@media (max-width: 700px) {
+  .entry-page {
+    padding: 0 14px 72px;
+  }
+
+  .entry-top {
+    padding: 20px 4px 0;
+  }
+
+  .entry-page .entry-back,
+  .entry-section {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+
+  .entry-head {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    gap: 20px;
+    margin: 28px auto 32px;
+    text-align: center;
+  }
+
+  .entry-globe {
+    width: 150px;
+    height: 150px;
+  }
+
+  .entry-page .entry-kicker {
+    justify-content: center;
+  }
+
+  .entry-page .entry-subtitle {
+    font-size: 16px;
+  }
+
+  .entry-panel > .holo-panel-body {
+    padding: 28px 20px 32px;
+  }
+
+  /* the brackets sit closer on a narrow screen, clear of its edges */
+  .entry-panel .holo-corner.is-tl,
+  .entry-panel .holo-corner.is-tr {
+    top: -8px;
+  }
+
+  .entry-panel .holo-corner.is-bl,
+  .entry-panel .holo-corner.is-br {
+    bottom: -8px;
+  }
+
+  .entry-panel .holo-corner.is-tl,
+  .entry-panel .holo-corner.is-bl {
+    left: -8px;
+  }
+
+  .entry-panel .holo-corner.is-tr,
+  .entry-panel .holo-corner.is-br {
+    right: -8px;
+  }
+
+  .entry-body {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .entry-body pre,
+  .entry-body .ql-syntax {
+    margin-left: -8px;
+    margin-right: -8px;
+    padding: 14px;
+    font-size: 13px;
+  }
+
+  .entry-nav {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .entry-page .entry-nav-link.is-newer {
+    text-align: left;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry-head,
+  .entry-panel,
+  .entry-motion-icon {
+    animation: none;
+  }
+}

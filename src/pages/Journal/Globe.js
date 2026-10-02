@@ -59,9 +59,11 @@ export { CANVAS_SCALE };
 
 const MAX_PITCH = 1.1; // rad a drag can tip it
 
-const Globe = ({ leaving, className, tiltRef }) => {
+const Globe = ({ leaving, className, tiltRef, showAxes = true }) => {
   const canvasRef = useRef(null);
   const tiltSource = useRef(tiltRef);
+  const showAxesRef = useRef(showAxes);
+  showAxesRef.current = showAxes;
   tiltSource.current = tiltRef;
   const leaveAt = useRef(null);
 
@@ -191,7 +193,7 @@ const Globe = ({ leaving, className, tiltRef }) => {
       // the axes have room: the globe is 0.37 of the box
       // phones: no axes (the social links sit below the page there), so the
       // globe fills more of its box
-      const axes = !window.matchMedia("(max-width: 800px)").matches;
+      const axes = showAxesRef.current && !window.matchMedia("(max-width: 800px)").matches;
       const R = (size / CANVAS_SCALE) * (axes ? 0.37 : 0.47) * k;
       const spin = (reduceMotion ? 0.6 : view.auto) + view.yaw + view.tiltX;
       const tiltX = -0.38 + view.pitch - view.tiltY;
