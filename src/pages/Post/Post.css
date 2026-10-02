@@ -298,7 +298,7 @@ html.entry-html body {
   overflow-x: auto;
   padding: 16px 18px;
   border: 1px solid rgba(111, 245, 238, 0.22);
-  border-left: 2px solid var(--holo-light);
+  border-left: 2px solid rgba(111, 245, 238, 0.45);
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.55);
   color: #bdf7f2;
