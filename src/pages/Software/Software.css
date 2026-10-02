@@ -1,0 +1,924 @@
+/* ---------------------------------------------------------------------
+   Software: an Earth over Mexico -> Sydney, the work history as a path
+   of cards, then education, languages and tech. The site's cyan light,
+   with a little of a travel map's warmth (the gold arc, two-tone headings,
+   small spaced labels).
+   --------------------------------------------------------------------- */
+html.software-html,
+html.software-html body {
+  background: #010207;
+}
+
+html.xp-modal-open,
+html.xp-modal-open body {
+  overflow: hidden;
+}
+
+.software-page {
+  --gold: #ffce80;
+  --date: #4fcaf5;
+  min-height: 100vh;
+  background: #010207;
+  color: #ccd4de;
+  font-family: var(--holo-font);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- top bar ------------------------------------------------------------ */
+.software-top {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px 0;
+  pointer-events: none;
+}
+
+.software-top > * {
+  pointer-events: auto;
+}
+
+.software-page .software-back {
+  color: var(--holo-muted);
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.3em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.software-page .software-back:hover,
+.software-page .software-back:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* --- hero: the Earth with the intro beside it ---------------------------- */
+.software-hero {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  min-height: 560px;
+}
+
+.software-earth {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: grab;
+  touch-action: pan-y;
+}
+
+.software-earth.is-dragging {
+  cursor: grabbing;
+}
+
+.software-intro {
+  position: absolute;
+  z-index: 2;
+  left: max(32px, calc((100vw - 1280px) / 2 + 32px));
+  bottom: 14vh;
+  max-width: 400px;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 800ms ease, transform 800ms ease;
+}
+
+.is-ready .software-intro {
+  opacity: 1;
+  transform: none;
+}
+
+/* small, spaced, coloured labels */
+.software-page .software-label {
+  margin: 0 0 16px;
+  color: var(--holo-light);
+  font: 700 11px/1 var(--holo-display);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.software-page .software-title {
+  margin: 0;
+  color: #fff;
+  font: 700 clamp(44px, 5.4vw, 76px) / 1 var(--holo-display);
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 30px rgba(111, 245, 238, 0.35);
+}
+
+.software-page .software-lede {
+  margin: 22px 0 0;
+  color: #eef8ff;
+  font: 500 20px/1.45 var(--holo-font);
+}
+
+.software-lede span {
+  color: var(--holo-muted);
+}
+
+.software-page .software-stats {
+  display: flex;
+  gap: 36px;
+  margin: 28px 0 0;
+}
+
+.software-stats dt {
+  margin: 0 0 8px;
+  color: var(--holo-cyan);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: default;
+}
+
+.software-stats dd {
+  margin: 0;
+  color: #fff;
+  font: 700 22px/1 var(--holo-display);
+}
+
+.software-page .software-motion-hint {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 22px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 1px solid rgba(111, 245, 238, 0.35);
+  border-radius: 999px;
+  background: rgba(3, 10, 20, 0.85);
+  color: var(--holo-light);
+  cursor: pointer;
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.software-page .software-motion-hint.is-passive {
+  cursor: default;
+}
+
+.software-motion-icon {
+  width: 9px;
+  height: 15px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  animation: software-tilt 2.4s ease-in-out infinite;
+}
+
+@keyframes software-tilt {
+  0%,
+  100% {
+    transform: rotate(-18deg);
+  }
+  50% {
+    transform: rotate(18deg);
+  }
+}
+
+/* a cue to scroll: the word, and a line of light running down */
+.software-page .software-scroll-cue {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
+  color: var(--holo-muted);
+  cursor: pointer;
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateX(-50%);
+  transition: opacity 800ms ease 400ms, color 250ms ease;
+}
+
+.software-page .software-scroll-cue:hover,
+.software-page .software-scroll-cue:focus-visible {
+  color: var(--holo-light);
+  outline: none;
+}
+
+/* the motion hint takes the bottom centre while it's showing */
+.software-motion-hint ~ .software-scroll-cue {
+  bottom: 76px;
+}
+
+.is-ready .software-scroll-cue {
+  opacity: 1;
+}
+
+.software-scroll-cue::after {
+  content: "";
+  width: 1px;
+  height: 46px;
+  background: linear-gradient(to bottom, var(--holo-light), transparent);
+  animation: software-cue 2s ease-in-out infinite;
+  transform-origin: top;
+}
+
+@keyframes software-cue {
+  0% {
+    transform: scaleY(0);
+    opacity: 1;
+  }
+  70% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 0;
+  }
+}
+
+/* --- sections ------------------------------------------------------------- */
+.software-block {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 120px 32px 0;
+}
+
+.software-hero + .software-block {
+  padding-top: 72px;
+}
+
+.software-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 24px;
+  margin-bottom: 72px;
+}
+
+/* a two-tone statement: the point in white, the rest quieter */
+.software-page .software-statement {
+  margin: 0;
+  color: #fff;
+  font: 600 clamp(26px, 3.2vw, 40px) / 1.2 var(--holo-font);
+}
+
+.software-statement span {
+  color: #5d6f80;
+}
+
+/* --- the timeline -------------------------------------------------------- */
+.xp-timeline {
+  position: relative;
+}
+
+.xp-path {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.xp-path path {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* the whole route, a wide dark track (as on a travel map) */
+.xp-path-track {
+  stroke: #121a24;
+  stroke-width: 12;
+}
+
+/* drawn as the page scrolls: a glow and a bright line of light */
+.xp-path-glow {
+  stroke: rgba(0, 191, 243, 0.35);
+  stroke-width: 12;
+  filter: blur(6px);
+}
+
+.xp-path-line {
+  stroke: var(--holo-light);
+  stroke-width: 3;
+}
+
+.xp-path-head {
+  transition: opacity 200ms ease;
+}
+
+.xp-path-head-halo {
+  fill: rgba(111, 245, 238, 0.25);
+}
+
+.xp-path-head-dot {
+  fill: #fff;
+}
+
+.software-page .xp-list {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 90px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.xp-card {
+  position: relative;
+  width: min(440px, 44%);
+  transform: translateY(12px);
+  transition: transform 600ms ease;
+}
+
+.xp-card.is-left {
+  align-self: flex-start;
+}
+
+.xp-card.is-right {
+  align-self: flex-end;
+}
+
+.xp-card.is-lit {
+  transform: none;
+}
+
+/* until the path reaches it, a card waits in shadow (dimmed, never see-through) */
+.software-page .xp-card.is-lit .xp-media {
+  border-color: rgba(111, 245, 238, 0.55);
+  box-shadow: 0 0 22px rgba(0, 191, 243, 0.18), 0 30px 50px -24px rgba(0, 0, 0, 0.9);
+}
+
+.xp-meta {
+  transition: color 600ms ease;
+}
+
+.xp-card:not(.is-lit) .xp-company {
+  color: #8796a6;
+}
+
+/* the client's site, framed like the paintings, clickable for details */
+.software-page .xp-media {
+  position: relative;
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 1px solid rgba(111, 245, 238, 0.2);
+  border-radius: 6px;
+  background: #02070f;
+  cursor: pointer;
+  box-shadow: 0 30px 50px -24px rgba(0, 0, 0, 0.9);
+  transition: border-color 250ms ease, box-shadow 250ms ease, transform 250ms ease;
+}
+
+.xp-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  object-position: top;
+  border-radius: 5px;
+  filter: saturate(0.55) brightness(0.62);
+  transition: filter 600ms ease;
+}
+
+.xp-card.is-lit .xp-media img {
+  filter: none;
+}
+
+.xp-media-frame .holo-corner {
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+.xp-card.is-lit .xp-media-frame .holo-corner {
+  opacity: 1;
+}
+
+.software-page .xp-media:hover,
+.software-page .xp-media:focus-visible {
+  border-color: var(--holo-light);
+  outline: none;
+  box-shadow: 0 0 24px rgba(111, 245, 238, 0.35), 0 30px 50px -24px rgba(0, 0, 0, 0.9);
+  transform: translateY(-3px);
+}
+
+.xp-media:hover img,
+.xp-media:focus-visible img {
+  filter: none;
+}
+
+.xp-media-more {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding: 7px 12px;
+  border: 1px solid rgba(111, 245, 238, 0.5);
+  border-radius: 999px;
+  background: rgba(2, 10, 18, 0.85);
+  color: var(--holo-light);
+  font: 600 9px/1 var(--holo-display);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 250ms ease, transform 250ms ease;
+}
+
+.xp-media:hover .xp-media-more,
+.xp-media:focus-visible .xp-media-more {
+  opacity: 1;
+  transform: none;
+}
+
+.xp-meta {
+  padding: 18px 4px 0;
+}
+
+.xp-dates {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  color: var(--date);
+  font: 600 11px/1.3 var(--holo-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.xp-dates small {
+  color: var(--holo-dim);
+  font-size: 10px;
+}
+
+.software-page .xp-company {
+  margin: 10px 0 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-transform: none;
+  letter-spacing: 0;
+  color: #fff;
+  font: 700 26px/1.15 var(--holo-font);
+}
+
+.software-page .xp-role {
+  margin: 6px 0 0;
+  color: #9fb0bf;
+  font: 400 15px/1.4 var(--holo-font);
+}
+
+.xp-client {
+  color: var(--holo-muted);
+}
+
+/* chips: a role's tech, and the tech list */
+.software-page .xp-chips,
+.xp-modal .xp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.software-page .xp-chips li,
+.xp-modal .xp-chips li {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  padding: 6px 11px;
+  border: 1px solid rgba(111, 245, 238, 0.3);
+  border-radius: 999px;
+  background: rgba(111, 245, 238, 0.05);
+  color: #cfe9ee;
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.04em;
+}
+
+.software-page .xp-chips.is-large li {
+  padding: 9px 15px;
+  font-size: 13px;
+}
+
+/* --- the role modal --------------------------------------------------------- */
+.xp-modal {
+  position: fixed;
+  z-index: 2000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  overflow-y: auto;
+  background: rgba(0, 3, 8, 0.82);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  animation: xp-modal-in 250ms ease-out both;
+}
+
+@keyframes xp-modal-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.xp-modal-panel {
+  width: min(720px, 100%);
+  margin: auto;
+  animation: xp-panel-in 350ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes xp-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.xp-modal-panel > .holo-panel-body {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.xp-modal-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  object-position: top;
+  border-bottom: 1px solid rgba(111, 245, 238, 0.2);
+}
+
+.xp-modal-body {
+  padding: 28px 32px 30px;
+}
+
+.xp-modal .xp-modal-body .holo-kicker {
+  color: #4fcaf5;
+  line-height: 1.5;
+}
+
+.xp-modal .xp-modal-title {
+  margin: 12px 0 0;
+  color: #fff;
+  font: 700 32px/1.15 var(--holo-font);
+}
+
+.xp-modal .xp-modal-role {
+  margin: 6px 0 0;
+  color: #9fb0bf;
+  font: 500 16px/1.4 var(--holo-font);
+}
+
+.xp-modal .xp-modal-summary {
+  margin: 20px 0 22px;
+  color: #d6e0e8;
+  font: 400 16px/1.7 var(--holo-font);
+}
+
+.xp-modal-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+/* the way out to the site: calm, readable, not a light source */
+.holo-ui .xp-modal-links .holo-button {
+  min-height: 46px;
+  padding: 12px 26px;
+  border-color: rgba(111, 245, 238, 0.45);
+  border-radius: 999px;
+  background: rgba(0, 191, 243, 0.08);
+  box-shadow: none;
+  color: #e6f4f7;
+  font: 600 13px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-shadow: none;
+}
+
+.holo-ui .xp-modal-links .holo-button.is-quiet {
+  background: transparent;
+  color: #9fb0bf;
+}
+
+.holo-ui .xp-modal-links .holo-button:hover,
+.holo-ui .xp-modal-links .holo-button:focus-visible {
+  border-color: var(--holo-light);
+  background: rgba(0, 191, 243, 0.14);
+  box-shadow: 0 0 14px rgba(111, 245, 238, 0.3);
+  color: #fff;
+}
+
+.xp-modal .xp-modal-close {
+  position: absolute;
+  z-index: 2;
+  top: 12px;
+  right: 12px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 1px solid rgba(111, 245, 238, 0.5);
+  border-radius: 50%;
+  background: rgba(2, 10, 18, 0.85);
+  color: var(--holo-light);
+  cursor: pointer;
+  font: 400 22px/1 var(--holo-font);
+  transition: box-shadow 200ms ease, border-color 200ms ease;
+}
+
+.xp-modal .xp-modal-close:hover,
+.xp-modal .xp-modal-close:focus-visible {
+  border-color: var(--holo-light);
+  box-shadow: 0 0 14px rgba(111, 245, 238, 0.5);
+  outline: none;
+}
+
+/* --- education, languages, tech ------------------------------------------ */
+.software-more {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 64px;
+  padding-top: 160px;
+}
+
+.software-page .software-edu,
+.software-page .software-langs {
+  margin: 0 0 48px;
+  padding: 0;
+  list-style: none;
+}
+
+.software-edu li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(111, 245, 238, 0.12);
+}
+
+.software-edu li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.software-edu strong {
+  color: #fff;
+  font: 600 18px/1.3 var(--holo-font);
+}
+
+.software-edu span {
+  color: #9fb0bf;
+  font: 400 15px/1.4 var(--holo-font);
+}
+
+.software-edu small {
+  color: var(--date);
+  font: 600 11px/1 var(--holo-display);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.software-langs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 28px;
+}
+
+.software-langs li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #fff;
+  font: 600 22px/1.2 var(--holo-font);
+}
+
+.software-lang-index {
+  color: var(--holo-dim);
+  font: 600 11px/1 var(--holo-display);
+}
+
+.software-page .software-foot {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  margin: 0;
+  padding: 120px 20px 72px;
+}
+
+.software-foot a {
+  color: var(--holo-muted);
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.26em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.software-foot a:hover,
+.software-foot a:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* --- phones ------------------------------------------------------------- */
+@media (max-width: 800px) {
+  .software-top {
+    padding: 20px 16px 0;
+  }
+
+  .software-page .software-back {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+
+  /* the Earth fills the top of the screen; the intro, the motion hint and
+     the scroll cue follow it in the flow, so nothing sits on the globe
+     and the hero ends where its content does */
+  .software-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: calc(56px + 2 * min(34vw, 19svh) + 40px) 20px 0;
+  }
+
+  .software-earth {
+    bottom: auto;
+    height: 100vh;
+    height: 100svh;
+  }
+
+  .software-intro {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    align-self: stretch;
+    max-width: none;
+  }
+
+  .software-page .software-motion-hint {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 26px;
+    transform: none;
+  }
+
+  .software-page .software-scroll-cue,
+  .software-motion-hint ~ .software-scroll-cue {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 40px;
+    gap: 8px;
+    transform: none;
+  }
+
+  .software-scroll-cue::after {
+    height: 24px;
+  }
+
+  .software-page .software-title {
+    font-size: 40px;
+  }
+
+  .software-page .software-lede {
+    margin-top: 18px;
+  }
+
+  .software-page .software-stats {
+    margin-top: 24px;
+  }
+
+  .software-page .software-lede {
+    font-size: 16px;
+  }
+
+  .software-page .software-stats {
+    gap: 24px;
+  }
+
+  .software-stats dd {
+    font-size: 18px;
+  }
+
+  .software-block {
+    padding: 80px 20px 0;
+  }
+
+  .software-hero + .software-block {
+    padding-top: 28px;
+  }
+
+  .software-heading {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    margin-bottom: 48px;
+  }
+
+  /* long runs of the path between cards, so the scroll draws it out */
+  .software-page .xp-list {
+    gap: 150px;
+  }
+
+  /* the cards stack down the middle, the path a spine running behind them */
+  .xp-card,
+  .xp-card.is-left,
+  .xp-card.is-right {
+    width: 100%;
+    max-width: 480px;
+    align-self: center;
+  }
+
+  .xp-meta {
+    padding: 16px 8px 4px;
+    text-align: center;
+  }
+
+  .xp-dates {
+    justify-content: center;
+  }
+
+  .xp-modal {
+    align-items: flex-start;
+    padding: 16px 12px;
+  }
+
+  .xp-modal-body {
+    padding: 22px 20px 24px;
+  }
+
+  .xp-modal .xp-modal-title {
+    font-size: 26px;
+  }
+
+  .software-more {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    padding-top: 100px;
+  }
+}
+
+/* short phones (an SE with Safari's bars): drop the stats so the scroll cue still shows */
+@media (max-width: 800px) and (max-height: 620px) {
+  .software-page .software-stats {
+    display: none;
+  }
+
+  .software-page .software-title {
+    font-size: 34px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .software-intro,
+  .software-scroll-cue,
+  .xp-card {
+    transition: none;
+  }
+
+  .software-motion-icon,
+  .software-scroll-cue::after,
+  .xp-modal,
+  .xp-modal-panel {
+    animation: none;
+  }
+}
