@@ -43,7 +43,15 @@ const initialState = {
       status: 'Sold',
     },
     { 
+      link: '../images/paintings/swimmer.jpg',
+      status: 'Sold',
+    },
+    { 
       link: '../images/paintings/abstract_1.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/straya.jpg',
       status: 'Sold',
     },
     { 
