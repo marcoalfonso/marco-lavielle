@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 
 import { getPosts } from "actions/appActions";
 import loadOrbitron from "components/fonts/loadOrbitron";
+import navigateAfter from "components/navigation/navigateAfter";
 import StarChart from "./StarChart";
 import "components/holo/holo.css";
 import "./Journal.css";
@@ -97,13 +98,25 @@ export class Journal extends Component {
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
+    // the history step is taken now, inside the click (see navigateAfter);
+    // Back before the page changes puts the screen back
+    const nav = navigateAfter(link.href, {
+      onCancel: () => {
+        clearTimeout(this.leaveTimer);
+        this.centring = false;
+        this.cancelled = true;
+        this.setState({ leaving: false });
+      },
+    });
+    this.cancelled = false;
     // from further down the page (the entry log), bring the globe to the
     // middle of the screen first, so the compress can be seen
     this.centring = true;
     this.centreGlobe().then(() => {
       this.centring = false;
+      if (this.cancelled) return;
       this.setState({ leaving: true });
-      this.leaveTimer = setTimeout(() => window.location.assign(link.href), LEAVE_MS);
+      this.leaveTimer = setTimeout(() => nav.finish(), LEAVE_MS);
     });
   };
 

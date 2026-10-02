@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
+import navigateAfter from "components/navigation/navigateAfter";
 import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss } from "./quat";
 
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
@@ -23,7 +24,8 @@ const FACES = [
   { name: "bottom", rotate: "rotateX(-90deg)", q: Q(1, 0, 0, -90) },
 ];
 
-const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
+// starts square-on to the front face (Software), then eases into its tumble
+const START = IDENTITY;
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
 const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
@@ -233,7 +235,7 @@ const RubikCube = ({ links, onHint }) => {
       dot.style.transform = `translate(-50%, -50%) scale(${0.4 + 0.6 * Math.sin(Math.min(1, k * 1.4) * Math.PI * 0.5)})`;
       if (k >= 1 && !s.done) {
         s.done = true;
-        window.location.assign(s.href);
+        s.nav.finish();
       }
     };
 
@@ -242,12 +244,7 @@ const RubikCube = ({ links, onHint }) => {
     // back button from the next page: the browser may restore this page as
     // it was left (collapsed to a dot), so put the cube back
     const onPageShow = (e) => {
-      if (!e.persisted) return;
-      state.select = null;
-      state.omega = [0, 0, 0];
-      if (squashRef.current) squashRef.current.style.transform = "";
-      if (dotRef.current) dotRef.current.style.opacity = "0";
-      setCollapsing(false);
+      if (e.persisted) restore();
     };
     window.addEventListener("pageshow", onPageShow);
     return () => {
@@ -255,6 +252,19 @@ const RubikCube = ({ links, onHint }) => {
       window.removeEventListener("pageshow", onPageShow);
     };
   }, []);
+
+  // put the cube back as it was before a pick (Back pressed mid-animation,
+  // or this page restored from the browser's cache)
+  const restore = () => {
+    state.select = null;
+    state.omega = [0, 0, 0];
+    if (squashRef.current) squashRef.current.style.transform = "";
+    if (dotRef.current) {
+      dotRef.current.style.opacity = "0";
+      dotRef.current.style.transform = "";
+    }
+    setCollapsing(false);
+  };
 
   // the rotation that brings a face to the front, upright, the short way round
   const facing = (face) => {
@@ -292,7 +302,10 @@ const RubikCube = ({ links, onHint }) => {
     state.tilt = IDENTITY;
     state.focus = null;
     const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-    state.select = { start: performance.now(), from, to: facing(face), href: link.href, axes: [randomAxis(), randomAxis()] };
+    // the history step is taken now, inside the click (see navigateAfter);
+    // Back during the animation puts the cube back
+    const nav = navigateAfter(link.href, { onCancel: restore });
+    state.select = { start: performance.now(), from, to: facing(face), nav, axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 
