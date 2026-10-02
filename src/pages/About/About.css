@@ -1,0 +1,86 @@
+/* ---------------------------------------------------------------------
+   About: the top bar and heading in the style of the other pages (back
+   link on the left, page name on the right, an Orbitron heading)
+   --------------------------------------------------------------------- */
+/* one black behind the whole page (the site's default is a lighter slate) */
+html.about-html,
+html.about-html body {
+  background: #010207;
+}
+
+.about-top {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 32px 0;
+  box-sizing: border-box;
+}
+
+.about-top .about-home {
+  color: var(--holo-muted);
+  font: 600 11px/1 var(--holo-font);
+  letter-spacing: 0.3em;
+  text-decoration: none;
+  text-transform: uppercase;
+  transition: color 250ms ease;
+}
+
+.about-top .about-home:hover,
+.about-top .about-home:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+.about-top .about-section {
+  color: #effdff;
+  font: 600 13px/1 var(--holo-display);
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  text-shadow: 0 0 10px rgba(111, 245, 238, 0.6);
+}
+
+.about-heading {
+  padding: 72px 32px 0;
+  text-align: center;
+}
+
+.about-heading .about-kicker {
+  margin: 0 0 18px;
+  color: var(--holo-light);
+  font: 700 11px/1 var(--holo-display);
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.about-heading .about-title {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #fff;
+  font: 700 clamp(30px, 4.2vw, 56px) / 1.1 var(--holo-display);
+  letter-spacing: 0;
+  text-transform: none;
+  text-shadow: 0 0 24px rgba(111, 245, 238, 0.35);
+}
+
+@media (max-width: 800px) {
+  .about-top {
+    padding: 20px 16px 0;
+  }
+
+  .about-top .about-home,
+  .about-top .about-section {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+  }
+
+  .about-heading {
+    padding: 48px 20px 0;
+  }
+}

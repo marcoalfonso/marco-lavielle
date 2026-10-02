@@ -15,26 +15,6 @@ module.exports = function(app, config) {
 	// gzip responses: the JS bundle shrinks to about a quarter
 	app.use(compression());
 	app.use(cookieParser());
-	// Animated links (the homepage cube, the journal): the browser navigates
-	// as soon as the link is clicked, so it's an ordinary navigation that
-	// Back treats normally, and this holds the page back for the length of
-	// the leaving animation, which plays on in the meantime. The page sets a
-	// short-lived "nav-delay" cookie of "<ms>|<path>" just before going.
-	app.use(function(req, res, next) {
-		var cookie = req.cookies && req.cookies['nav-delay'];
-		if (!cookie || req.method !== 'GET') return next();
-		var parts = String(cookie).split('|');
-		var path;
-		try {
-			path = decodeURIComponent(parts[1] || '');
-		} catch (e) {
-			return next();
-		}
-		if (path !== req.path) return next();
-		res.clearCookie('nav-delay', { path: '/' });
-		var ms = Math.min(2500, Math.max(0, parseInt(parts[0], 10) || 0));
-		setTimeout(next, ms);
-	});
 	app.use(bodyParser.urlencoded({
 	  extended: true
 	}));

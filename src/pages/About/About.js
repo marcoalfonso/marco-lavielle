@@ -4,10 +4,20 @@ import { connect } from "react-redux";
 
 import styles from "./About.module.css";
 import BodyHologram from "./BodyHologram";
+import loadOrbitron from "components/fonts/loadOrbitron";
+import "components/holo/holo.css";
+import "./About.css";
 
 export class About extends Component {
   componentDidMount() {
+    loadOrbitron();
+    document.documentElement.classList.add("about-html");
     document.body.classList.add("level-0");
+  }
+
+  componentWillUnmount() {
+    document.documentElement.classList.remove("about-html");
+    document.body.classList.remove("level-0");
   }
 
   render() {
@@ -16,32 +26,16 @@ export class About extends Component {
         className={`page loaded level-1 ${this.props.device} detected scan-faster`}
         id="page"
       >
-        <div className="column-1">
-          <a className="uplevel pjax" href="/" data-section="home">
-            <span className="arrow">‹</span>
-            <strong className="logo">
-              <span className="m">M</span>
-              <span className="a">A</span>
-              <span className="r">R</span>
-              <span className="c">C</span>
-              <span className="o">O</span>
-              <br />
-              <span className="l">L</span>
-              <span className="a2">A</span>
-              <span className="v">V</span>
-              <span className="i">I</span>
-              <span className="e">E</span>
-              <span className="l2">L</span>
-              <span className="l3">L</span>
-              <span className="e2">E</span>
-            </strong>
-            <h1 className="section-title mobile-only">About</h1>
+        <header className="about-top holo-ui">
+          <a className="about-home" href="/">
+            <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
           </a>
-        </div>
+          <span className="about-section">About</span>
+        </header>
         <div className="about-content">
-          <div className="fancy-header">
-            <h1>Thanks for visiting</h1>
-            <h2>I Design & Build Things</h2>
+          <div className="about-heading holo-ui">
+            <p className="about-kicker">Thanks for visiting</p>
+            <h1 className="about-title">I Design &amp; Build Things</h1>
           </div>
           <div className="personal-info">
             <div className="container">

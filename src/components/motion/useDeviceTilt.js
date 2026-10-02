@@ -41,9 +41,37 @@ export const prefersReducedMotion = () =>
 const RECENTRE = 0.004; // per event (~60/s): the baseline drifts toward the current tilt
 const SMOOTH = 0.35; // per event: how quickly the reading follows the phone
 
-const normalize = (v) => {
-  const len = Math.hypot(...v) || 1;
-  return v.map((c) => c / len);
+const DEG = Math.PI / 180;
+
+// The phone's orientation as a quaternion [w, x, y, z] (device frame to
+// Earth frame), from the orientation event's Z-X'-Y'' angles.
+const toQuat = (alpha, beta, gamma) => {
+  const [cx, cy, cz] = [beta, gamma, alpha].map((a) => Math.cos((a * DEG) / 2));
+  const [sx, sy, sz] = [beta, gamma, alpha].map((a) => Math.sin((a * DEG) / 2));
+  return [
+    cx * cy * cz - sx * sy * sz,
+    sx * cy * cz - cx * sy * sz,
+    cx * sy * cz + sx * cy * sz,
+    cx * cy * sz + sx * sy * cz,
+  ];
+};
+
+const mul = (a, b) => [
+  a[0] * b[0] - a[1] * b[1] - a[2] * b[2] - a[3] * b[3],
+  a[0] * b[1] + a[1] * b[0] + a[2] * b[3] - a[3] * b[2],
+  a[0] * b[2] - a[1] * b[3] + a[2] * b[0] + a[3] * b[1],
+  a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0],
+];
+
+const conj = (q) => [q[0], -q[1], -q[2], -q[3]];
+
+// a step of k from a toward b, the short way round
+const toward = (a, b, k) => {
+  const dot = a[0] * b[0] + a[1] * b[1] + a[2] * b[2] + a[3] * b[3];
+  const s = dot < 0 ? -1 : 1;
+  const q = a.map((v, i) => v + (s * b[i] - v) * k);
+  const len = Math.hypot(...q) || 1;
+  return q.map((v) => v / len);
 };
 
 const useDeviceTilt = (onTilt, enabled = true) => {
@@ -56,52 +84,44 @@ const useDeviceTilt = (onTilt, enabled = true) => {
   useEffect(() => {
     if (!enabled || !isTouchDevice() || typeof window.DeviceOrientationEvent === "undefined") return undefined;
 
-    // The tilt is worked out from the direction of gravity rather than from
-    // the raw angles: near upright (beta ~ 90deg, how a phone is usually
-    // held) gamma can flip by 180deg from one event to the next, which threw
-    // whatever followed the tilt halfway round. Gravity has no such jump.
+    // The tilt is worked out from the phone's whole orientation, as a turn
+    // from how it was held: the raw angles jump near upright (beta ~ 90deg,
+    // how a phone is usually held, gamma can flip by 180deg between events),
+    // and gravity alone misses turns about the vertical, such as rolling an
+    // upright phone left and right. The orientation has neither problem.
     let seen = false;
-    let base = null; // gravity when first held, slowly re-centring
-    let cur = null; // gravity now, smoothed a little
+    let base = null; // the orientation when first held, slowly re-centring
+    let cur = null; // the orientation now, smoothed a little
     const onOrientation = (e) => {
       if (e.beta === null || e.beta === undefined || e.gamma === null || e.gamma === undefined) return;
-      const b = (e.beta * Math.PI) / 180;
-      const g = (e.gamma * Math.PI) / 180;
-      // gravity in the phone's frame (x right, y to the top edge, z out of the screen)
-      let gx = Math.cos(b) * Math.sin(g);
-      let gy = -Math.sin(b);
-      const gz = -Math.cos(b) * Math.cos(g);
-      // ...turned into the screen's frame when the screen is rotated
-      const angle =
-        (window.screen && window.screen.orientation && window.screen.orientation.angle) || window.orientation || 0;
-      const r = (angle * Math.PI) / 180;
-      const sx = gx * Math.cos(r) + gy * Math.sin(r);
-      const sy = -gx * Math.sin(r) + gy * Math.cos(r);
-      gx = sx;
-      gy = sy;
-      const now = [gx, gy, gz];
+      const now = toQuat(e.alpha || 0, e.beta, e.gamma);
       if (!seen) {
         // data is flowing: no need to ask for it
         seen = true;
         clearTimeout(hintTimer);
         setShowHint(false);
-        base = now.slice();
-        cur = now.slice();
+        base = now;
+        cur = now;
       }
-      cur = normalize(cur.map((v, i) => v + (now[i] - v) * SMOOTH));
-      base = normalize(base.map((v, i) => v + (cur[i] - v) * RECENTRE));
-      // the turn from the baseline to now, as angles about the screen's axes
-      const cross = [
-        base[1] * cur[2] - base[2] * cur[1],
-        base[2] * cur[0] - base[0] * cur[2],
-        base[0] * cur[1] - base[1] * cur[0],
-      ];
-      const sin = Math.hypot(...cross);
-      const cos = base[0] * cur[0] + base[1] * cur[1] + base[2] * cur[2];
-      const turn = Math.atan2(sin, cos); // radians
-      const k = sin > 1e-6 ? ((turn / sin) * 180) / Math.PI : 0;
-      // x > 0: right edge dipped; y > 0: top edge raised (as before)
-      onTiltRef.current(-cross[1] * k, -cross[0] * k);
+      cur = toward(cur, now, SMOOTH);
+      base = toward(base, cur, RECENTRE);
+      // the turn from the baseline to now, in the phone's own frame
+      // (x right, y to the top edge, z out of the screen), as axis * angle
+      let d = mul(conj(base), cur);
+      if (d[0] < 0) d = d.map((v) => -v);
+      const sin = Math.hypot(d[1], d[2], d[3]);
+      const k = sin > 1e-6 ? (2 * Math.atan2(sin, d[0])) / sin / DEG : 0;
+      let rx = d[1] * k;
+      let ry = d[2] * k;
+      const rz = d[3] * k;
+      // ...turned into the screen's frame when the screen is rotated
+      const angle =
+        (window.screen && window.screen.orientation && window.screen.orientation.angle) || window.orientation || 0;
+      const r = angle * DEG;
+      [rx, ry] = [rx * Math.cos(r) + ry * Math.sin(r), -rx * Math.sin(r) + ry * Math.cos(r)];
+      // x > 0: right edge dipped (tipped sideways, or rolled clockwise like
+      // a steering wheel); y > 0: top edge raised
+      onTiltRef.current(ry - rz, rx);
     };
 
     let listening = false;
