@@ -77,7 +77,15 @@ const initialState = {
       status: 'Sold',
     },
     {
+      link: '../images/paintings/blue_forms.jpg',
+      status: 'Sold',
+    },
+    {
       link: '../images/paintings/silver_portrait.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/red_leaves.jpg',
       status: 'Sold',
     },
     {
