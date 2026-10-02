@@ -43,19 +43,43 @@ const initialState = {
       status: 'Sold',
     },
     { 
-      link: '../images/paintings/swimmer.jpg',
-      status: 'Sold',
-    },
-    { 
       link: '../images/paintings/abstract_1.jpg',
       status: 'Sold',
     },
     { 
-      link: '../images/paintings/straya.jpg',
+      link: '../images/paintings/abstract_3.jpg',
       status: 'Sold',
     },
-    { 
-      link: '../images/paintings/abstract_3.jpg',
+    {
+      link: '../images/paintings/red_figure.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/winking_portrait.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/orange_portrait.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/green_bouquet.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/blue_forms.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/silver_portrait.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/red_leaves.jpg',
+      status: 'Sold',
+    },
+    {
+      link: '../images/paintings/hydrangea.jpg',
       status: 'Sold',
     },
   ]
