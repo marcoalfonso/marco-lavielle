@@ -43,7 +43,15 @@ const initialState = {
       status: 'Sold',
     },
     { 
+      link: '../images/paintings/swimmer.jpg',
+      status: 'Sold',
+    },
+    { 
       link: '../images/paintings/abstract_1.jpg',
+      status: 'Sold',
+    },
+    { 
+      link: '../images/paintings/straya.jpg',
       status: 'Sold',
     },
     { 
@@ -69,15 +77,7 @@ const initialState = {
       status: 'Sold',
     },
     {
-      link: '../images/paintings/blue_forms.jpg',
-      status: 'Sold',
-    },
-    {
       link: '../images/paintings/silver_portrait.jpg',
-      status: 'Sold',
-    },
-    {
-      link: '../images/paintings/red_leaves.jpg',
       status: 'Sold',
     },
     {
