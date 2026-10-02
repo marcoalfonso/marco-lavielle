@@ -53,6 +53,8 @@ const initialState = {
     {
       link: '../images/paintings/red_figure.jpg',
       status: 'Sold',
+      // shown smaller on desktop: unframed, it fills its photo edge to edge
+      scale: 0.8,
     },
     {
       link: '../images/paintings/winking_portrait.jpg',

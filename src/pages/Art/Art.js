@@ -132,6 +132,7 @@ export class Art extends Component {
         <PaintingStage
           src={this.imageSrc(painting)}
           spillSrc={smallSrc(painting)}
+          scale={painting.scale}
           name={paintingName(painting)}
           index={index}
           onLoaded={this.preloadAround}
