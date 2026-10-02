@@ -98,8 +98,8 @@ export class Journal extends Component {
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
-    // the navigation starts now, inside the click, and the next page arrives
-    // as the animation ends (see navigateAfter): first the globe is brought
+    // the new address goes into the history now, inside the click, and the
+    // next page shows as the animation ends (see navigateAfter): first the globe is brought
     // to the middle of the screen if the click came from further down, then
     // the screen compresses
     const scrollMs = this.centreGlobe();

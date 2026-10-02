@@ -304,9 +304,8 @@ const RubikCube = ({ links, onHint }) => {
     state.tiltTarget = IDENTITY;
     state.focus = null;
     const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-    // the navigation starts now, inside the click, and the next page arrives
-    // as the animation ends (see navigateAfter); the cube stays a dot until
-    // then
+    // the new address goes into the history now, inside the click, and the
+    // next page shows as the animation ends (see navigateAfter)
     navigateAfter(link.href, { delay: SPIN_MS + FLATTEN_MS + DOT_MS, onCancel: restore });
     state.select = { start: performance.now(), from, to: facing(face), axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
