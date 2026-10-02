@@ -7,7 +7,7 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2024-08",
     to: null,
-    image: "/images/thumbnails/qantas.png",
+    image: "/images/software/qantas.jpg",
     url: "https://www.qantas.com",
     summary:
       "Building the new Qantas.com experience using NextJS, Typescript and React, and managing deployments in Kubernetes. The app has a focus on high code quality, performance and security, with high test coverage: unit tests in Jest and end to end tests in Cypress.",
@@ -19,7 +19,7 @@ export const EXPERIENCE = [
     role: "Senior Full Stack Engineer",
     from: "2021-10",
     to: "2024-07",
-    image: "/images/thumbnails/iag.png",
+    image: "/images/software/iag.jpg",
     url: "https://www.iag.com.au",
     summary:
       "Worked on the rewrite from scratch of IAG's Broker Portal, using React, Redux, Typescript, Hooks, Node, Express and functional programming. Created mid layer Node APIs to talk to other backend services and authentication, and a Typescript model shared between the Node mid layer and the front end. Also worked on features of a legacy app built with React, GraphQL and Apollo.",
@@ -31,8 +31,8 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2019-09",
     to: "2021-09",
-    image: "/images/thumbnails/telstra_purple.png",
-    url: "https://purple.telstra.com",
+    image: "/images/software/telstra.jpg",
+    url: "https://www.telstra.com.au/business-enterprise/services/professional-services",
     summary:
       "Worked with Dragonfly Technologies building a drag and drop automation tool for Telstra Purple, using React, Redux, Typescript and CSS Modules. The UI is very complex (a developer tool) and has a code editor implemented with Monaco Editor.",
     tech: ["React", "Redux", "TypeScript", "CSS Modules", "Monaco Editor"],
@@ -43,7 +43,7 @@ export const EXPERIENCE = [
     role: "Lead JavaScript Engineer",
     from: "2018-07",
     to: "2019-08",
-    image: "/images/thumbnails/service_nsw.png",
+    image: "/images/software/service_nsw.jpg",
     url: "https://www.service.nsw.gov.au",
     summary:
       "Worked on building the main account page and the pet registration and firearms registration forms for the NSW state government. These applications are extremely high volume and talk to several external APIs. Built Node mid layer APIs to communicate with these services; the front ends were built with React, Redux, Node and Express.",
@@ -55,8 +55,8 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2017-07",
     to: "2018-07",
-    image: "/images/thumbnails/marketplace.png",
-    url: "https://marketplace.service.gov.au",
+    image: "/images/software/dta.jpg",
+    url: "https://www.buyict.gov.au",
     extraLink: { label: "Open source on GitHub", href: "https://github.com/AusDTO" },
     summary:
       "Built open source projects for the Australian federal government using React, Node, Express, Webpack, ES6 and D3.",
@@ -68,7 +68,7 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2016-05",
     to: "2017-07",
-    image: "/images/thumbnails/qantas.png",
+    image: "/images/software/qantas.jpg",
     url: "https://www.qantas.com",
     summary:
       "Worked on several Qantas projects using React, Node, Redux, Webpack and ES6: the single sign on login widget, the Qantas loyalty points activity page, the Qantas Business Rewards redesign and the Qantas Money website integrated with Contentful. All the front ends were built to WCAG 2.0 accessibility compliance.",
@@ -81,7 +81,7 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2015-05",
     to: "2016-05",
-    image: "/images/thumbnails/ing.png",
+    image: "/images/software/ing.jpg",
     url: "https://www.ing.com.au",
     summary:
       "Built the ING banking portal front end using Angular, focusing on high coverage of unit tests and accessibility requirements.",
@@ -94,7 +94,7 @@ export const EXPERIENCE = [
     role: "Senior Front End Engineer",
     from: "2014-07",
     to: "2015-05",
-    image: "/images/thumbnails/cre.png",
+    image: "/images/software/cre.jpg",
     url: "https://www.commercialrealestate.com.au",
     summary:
       "Redesigned from scratch the front end of Domain's commercial real estate site. Also built widgets for the Sydney Morning Herald and the Financial Review in Angular, optimised for speed (4M+ views) and high device and browser coverage.",
@@ -106,7 +106,7 @@ export const EXPERIENCE = [
     role: "Ruby on Rails Engineer",
     from: "2012-08",
     to: "2014-07",
-    image: "/images/thumbnails/lawpath.png",
+    image: "/images/software/lawpath.jpg",
     url: "https://lawpath.com.au",
     summary:
       "Helped grow the product from MVP to a successful second round of funding, using Ruby on Rails, PostgreSQL, Angular and Bootstrap to build the legal platform.",
@@ -145,3 +145,6 @@ export const duration = (from, to) => {
   const m = months % 12;
   return [y ? `${y} yr${y > 1 ? "s" : ""}` : "", m ? `${m} mo${m > 1 ? "s" : ""}` : ""].filter(Boolean).join(" ");
 };
+
+// each site has a 1200px screenshot and a 640px one for phones
+export const imageSet = (src) => `${src.replace(/\.jpg$/, "-640.jpg")} 640w, ${src} 1200w`;

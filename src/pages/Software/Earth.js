@@ -3,7 +3,7 @@ import LAND from "./land";
 
 // The Software page's Earth, drawn on a canvas each frame: land as dots of
 // light, a faint graticule, an atmosphere, and a gold flight arc from
-// Monterrey to Sydney with a pulse travelling along it.
+// Mexico City to Sydney with a pulse travelling along it.
 //
 // It opens with a sequence: a point of light, which becomes a black hole
 // (an accretion disc, matter spiralling in), which collapses in a flash out
@@ -15,7 +15,7 @@ import LAND from "./land";
 const DEG = Math.PI / 180;
 const TAU = Math.PI * 2;
 
-const MONTERREY = { lat: 25.6866, lon: -100.3161, label: "Monterrey" };
+const MEXICO = { lat: 19.4326, lon: -99.1332, label: "Mexico" };
 const SYDNEY = { lat: -33.8688, lon: 151.2093, label: "Sydney" };
 // the view rests over the eastern Pacific, a little north: the Americas
 // fill the disc and Australia sits towards the edge
@@ -67,7 +67,7 @@ for (let lon = -180; lon < 180; lon += 30) {
   GRATICULE.push(ring);
 }
 
-// the great circle from Monterrey to Sydney, lifted off the surface
+// the great circle from Mexico City to Sydney, lifted off the surface
 const slerp = (a, b, t) => {
   const d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2]));
   const w = Math.acos(d);
@@ -78,7 +78,7 @@ const slerp = (a, b, t) => {
 };
 const ARC = [];
 {
-  const a = toVec(MONTERREY.lat, MONTERREY.lon);
+  const a = toVec(MEXICO.lat, MEXICO.lon);
   const b = toVec(SYDNEY.lat, SYDNEY.lon);
   for (let i = 0; i <= 120; i++) {
     const t = i / 120;
@@ -161,9 +161,9 @@ const Earth = ({ className, tiltRef, onReady }) => {
 
     // where the Earth sits and how big: right of centre on wide screens,
     // centred near the top on narrow ones
-    const wide = () => w > 900;
-    const earthRadius = () => (wide() ? Math.min(w * 0.25, h * 0.37) : Math.min(w * 0.4, h * 0.27));
-    const earthCentre = () => (wide() ? [w * 0.67, h * 0.48] : [w / 2, h * 0.34]);
+    const wide = () => w > 800;
+    const earthRadius = () => (wide() ? Math.min(w * 0.25, h * 0.37) : Math.min(w * 0.4, h * 0.25));
+    const earthCentre = () => (wide() ? [w * 0.67, h * 0.48] : [w / 2, h * 0.31]);
 
     const started = performance.now();
     let last = started;
@@ -305,7 +305,7 @@ const Earth = ({ className, tiltRef, onReady }) => {
         };
         stroke(7, "rgba(255, 196, 107, 0.12)");
         stroke(1.8, "rgba(255, 206, 128, 0.9)");
-        // a pulse travelling Monterrey -> Sydney
+        // a pulse travelling Mexico City -> Sydney
         if (arcK >= 1 && !reduceMotion) {
           const k = ((t - T_ARC) / 2600) % 1;
           const p = rot(ARC[Math.round(k * (ARC.length - 1))]);
@@ -320,10 +320,11 @@ const Earth = ({ className, tiltRef, onReady }) => {
         ctx.lineCap = "butt";
       }
 
-      // the two places: a pulsing ring at Sydney (now), a dot at Monterrey
+      // the two places: a pulsing ring at Sydney (now), a dot at Mexico City
       const placeK = span(t, T_EARTH - 200, T_EARTH + 400);
-      [MONTERREY, SYDNEY].forEach((place) => {
-        const p = rot(toVec(place.lat, place.lon));
+      const ends = [MEXICO, SYDNEY].map((place) => rot(toVec(place.lat, place.lon)));
+      [MEXICO, SYDNEY].forEach((place, i) => {
+        const p = ends[i];
         if (p[2] <= 0.05 || placeK <= 0) return;
         const x = sx(p);
         const y = sy(p);
@@ -348,10 +349,17 @@ const Earth = ({ className, tiltRef, onReady }) => {
         ctx.font = `600 ${Math.max(9, r / 26)}px Orbitron, "DINWeb", sans-serif`;
         ctx.fillStyle = `rgba(236, 255, 254, ${0.85 * placeK * clamp01(p[2] * 3)})`;
         ctx.textBaseline = "middle";
-        // labels sit on the inner side, so they never run off the screen
-        const left = x > cx;
-        ctx.textAlign = left ? "right" : "left";
-        ctx.fillText(place.label.toUpperCase(), x + (left ? -20 : 20), y);
+        // each label sits on the far side from the other place, clear of the
+        // arc between them, and leans inwards so it never runs off the screen
+        const o = ends[1 - i];
+        let dx = x - sx(o);
+        let dy = y - sy(o);
+        const len = Math.hypot(dx, dy) || 1;
+        dx /= len;
+        dy /= len;
+        if (Math.abs(dx) > 0.5 && (dx > 0) === x > cx) dx = 0;
+        ctx.textAlign = dx > 0.5 ? "left" : dx < -0.5 ? "right" : "center";
+        ctx.fillText(place.label.toUpperCase(), x + dx * 20, y + dy * 26);
       });
 
       if (!readySent && t > T_EARTH) {

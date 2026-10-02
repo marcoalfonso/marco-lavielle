@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------
-   Software: an Earth over Monterrey -> Sydney, the work history as a path
+   Software: an Earth over Mexico -> Sydney, the work history as a path
    of cards, then education, languages and tech. The site's cyan light,
    with a little of a travel map's warmth (the gold arc, two-tone headings,
    small spaced labels).
@@ -16,6 +16,7 @@ html.xp-modal-open body {
 
 .software-page {
   --gold: #ffce80;
+  --date: #4fcaf5;
   min-height: 100vh;
   background: #010207;
   color: #ccd4de;
@@ -201,21 +202,38 @@ html.xp-modal-open body {
 }
 
 /* a cue to scroll: the word, and a line of light running down */
-.software-scroll-cue {
+.software-page .software-scroll-cue {
   position: absolute;
   z-index: 2;
-  right: max(32px, calc((100vw - 1280px) / 2 + 32px));
-  bottom: 40px;
+  left: 50%;
+  bottom: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  margin: 0;
+  padding: 8px 12px;
+  border: 0;
+  background: none;
   color: var(--holo-muted);
+  cursor: pointer;
   font: 600 10px/1 var(--holo-font);
   letter-spacing: 0.3em;
   text-transform: uppercase;
   opacity: 0;
-  transition: opacity 800ms ease 400ms;
+  transform: translateX(-50%);
+  transition: opacity 800ms ease 400ms, color 250ms ease;
+}
+
+.software-page .software-scroll-cue:hover,
+.software-page .software-scroll-cue:focus-visible {
+  color: var(--holo-light);
+  outline: none;
+}
+
+/* the motion hint takes the bottom centre while it's showing */
+.software-motion-hint ~ .software-scroll-cue {
+  bottom: 76px;
 }
 
 .is-ready .software-scroll-cue {
@@ -333,9 +351,8 @@ html.xp-modal-open body {
 .xp-card {
   position: relative;
   width: min(440px, 44%);
-  opacity: 0.45;
   transform: translateY(12px);
-  transition: opacity 600ms ease, transform 600ms ease;
+  transition: transform 600ms ease;
 }
 
 .xp-card.is-left {
@@ -347,8 +364,21 @@ html.xp-modal-open body {
 }
 
 .xp-card.is-lit {
-  opacity: 1;
   transform: none;
+}
+
+/* until the path reaches it, a card waits in shadow (dimmed, never see-through) */
+.software-page .xp-card.is-lit .xp-media {
+  border-color: rgba(111, 245, 238, 0.55);
+  box-shadow: 0 0 22px rgba(0, 191, 243, 0.18), 0 30px 50px -24px rgba(0, 0, 0, 0.9);
+}
+
+.xp-meta {
+  transition: color 600ms ease;
+}
+
+.xp-card:not(.is-lit) .xp-company {
+  color: #8796a6;
 }
 
 /* the client's site, framed like the paintings, clickable for details */
@@ -358,7 +388,7 @@ html.xp-modal-open body {
   width: 100%;
   margin: 0;
   padding: 0;
-  border: 1px solid rgba(111, 245, 238, 0.3);
+  border: 1px solid rgba(111, 245, 238, 0.2);
   border-radius: 6px;
   background: #02070f;
   cursor: pointer;
@@ -370,11 +400,16 @@ html.xp-modal-open body {
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: 400 / 221;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
+  object-position: top;
   border-radius: 5px;
-  filter: saturate(0.85) brightness(0.85);
-  transition: filter 300ms ease;
+  filter: saturate(0.55) brightness(0.62);
+  transition: filter 600ms ease;
+}
+
+.xp-card.is-lit .xp-media img {
+  filter: none;
 }
 
 .xp-media-frame .holo-corner {
@@ -431,7 +466,7 @@ html.xp-modal-open body {
   align-items: baseline;
   flex-wrap: wrap;
   gap: 4px 12px;
-  color: var(--gold);
+  color: var(--date);
   font: 600 11px/1.3 var(--holo-display);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -464,7 +499,8 @@ html.xp-modal-open body {
 }
 
 /* chips: a role's tech, and the tech list */
-.software-page .xp-chips {
+.software-page .xp-chips,
+.xp-modal .xp-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
@@ -473,7 +509,12 @@ html.xp-modal-open body {
   list-style: none;
 }
 
-.xp-chips li {
+.software-page .xp-chips li,
+.xp-modal .xp-chips li {
+  display: block;
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
   padding: 6px 11px;
   border: 1px solid rgba(111, 245, 238, 0.3);
   border-radius: 999px;
@@ -483,7 +524,7 @@ html.xp-modal-open body {
   letter-spacing: 0.04em;
 }
 
-.xp-chips.is-large li {
+.software-page .xp-chips.is-large li {
   padding: 9px 15px;
   font-size: 13px;
 }
@@ -542,6 +583,7 @@ html.xp-modal-open body {
   height: auto;
   max-height: 300px;
   object-fit: cover;
+  object-position: top;
   border-bottom: 1px solid rgba(111, 245, 238, 0.2);
 }
 
@@ -549,8 +591,9 @@ html.xp-modal-open body {
   padding: 28px 32px 30px;
 }
 
-.xp-modal-body .holo-kicker {
-  color: var(--gold);
+.xp-modal .xp-modal-body .holo-kicker {
+  color: #4fcaf5;
+  line-height: 1.5;
 }
 
 .xp-modal .xp-modal-title {
@@ -574,8 +617,36 @@ html.xp-modal-open body {
 .xp-modal-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 24px;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+/* the way out to the site: calm, readable, not a light source */
+.holo-ui .xp-modal-links .holo-button {
+  min-height: 46px;
+  padding: 12px 26px;
+  border-color: rgba(111, 245, 238, 0.45);
+  border-radius: 999px;
+  background: rgba(0, 191, 243, 0.08);
+  box-shadow: none;
+  color: #e6f4f7;
+  font: 600 13px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-shadow: none;
+}
+
+.holo-ui .xp-modal-links .holo-button.is-quiet {
+  background: transparent;
+  color: #9fb0bf;
+}
+
+.holo-ui .xp-modal-links .holo-button:hover,
+.holo-ui .xp-modal-links .holo-button:focus-visible {
+  border-color: var(--holo-light);
+  background: rgba(0, 191, 243, 0.14);
+  box-shadow: 0 0 14px rgba(111, 245, 238, 0.3);
+  color: #fff;
 }
 
 .xp-modal .xp-modal-close {
@@ -641,7 +712,7 @@ html.xp-modal-open body {
 }
 
 .software-edu small {
-  color: var(--gold);
+  color: var(--date);
   font: 600 11px/1 var(--holo-display);
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -701,19 +772,56 @@ html.xp-modal-open body {
     letter-spacing: 0.22em;
   }
 
+  /* the Earth fills the top of the screen; the intro, the motion hint and
+     the scroll cue follow it in the flow, so nothing sits on the globe
+     and the hero ends where its content does */
   .software-hero {
-    min-height: 640px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: auto;
+    min-height: 0;
+    overflow: hidden;
+    padding: calc(31svh + min(40vw, 25svh) + 30px) 20px 12px;
+  }
+
+  .software-earth {
+    bottom: auto;
+    height: 100vh;
+    height: 100svh;
   }
 
   .software-intro {
-    left: 20px;
-    right: 20px;
-    bottom: 76px;
+    position: relative;
+    left: auto;
+    bottom: auto;
+    align-self: stretch;
     max-width: none;
   }
 
+  .software-page .software-motion-hint {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 22px;
+    transform: none;
+  }
+
+  .software-page .software-scroll-cue,
+  .software-motion-hint ~ .software-scroll-cue {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    margin-top: 14px;
+    transform: none;
+  }
+
+  .software-scroll-cue::after {
+    height: 32px;
+  }
+
   .software-page .software-lede {
-    font-size: 17px;
+    font-size: 16px;
   }
 
   .software-page .software-stats {
@@ -722,10 +830,6 @@ html.xp-modal-open body {
 
   .software-stats dd {
     font-size: 18px;
-  }
-
-  .software-scroll-cue {
-    display: none;
   }
 
   .software-block {
@@ -742,13 +846,23 @@ html.xp-modal-open body {
     gap: 64px;
   }
 
-  /* the cards sit beside the path's rail */
+  /* the cards stack down the middle, the path a spine running behind them */
   .xp-card,
   .xp-card.is-left,
   .xp-card.is-right {
-    width: auto;
-    align-self: stretch;
-    margin-left: 26px;
+    width: 100%;
+    max-width: 480px;
+    align-self: center;
+  }
+
+  .xp-meta {
+    padding: 16px 8px 4px;
+    background: #010207;
+    text-align: center;
+  }
+
+  .xp-dates {
+    justify-content: center;
   }
 
   .xp-modal {

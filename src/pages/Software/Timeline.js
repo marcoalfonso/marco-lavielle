@@ -1,15 +1,14 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { duration, monthYear } from "./experience";
+import { duration, imageSet, monthYear } from "./experience";
 
 // The work history, latest first: a card per role (the client's site, name,
 // role, dates), alternating left and right. A path joins them, leaving each
 // card sideways, running across, and turning down into the next (right,
 // down, left, down...). It draws itself as the page scrolls, a point of
 // light at its tip, and lights each card as it arrives. On phones the cards
-// stack and the path runs down a rail on their left.
+// stack down the middle and the path runs straight down behind them.
 
 const RADIUS = 28; // the path's corners
-const RAIL = 6; // phones: the rail's distance from the left edge
 const SAMPLE = 6; // px between samples along the path (for the scroll lookup)
 
 // a path through the card centres: across, a rounded corner, then down
@@ -49,7 +48,7 @@ const Timeline = ({ items, onOpen }) => {
     const points = cardRefs.current.filter(Boolean).map((el) => {
       const r = el.getBoundingClientRect();
       const media = el.querySelector(".xp-media").getBoundingClientRect();
-      return { x: stacked ? RAIL : r.left + r.width / 2 - box.left, y: media.top + media.height / 2 - box.top };
+      return { x: stacked ? box.width / 2 : r.left + r.width / 2 - box.left, y: media.top + media.height / 2 - box.top };
     });
     setPath({ d: buildPath(points, stacked), w: box.width, h: box.height });
   };
@@ -165,7 +164,7 @@ const Timeline = ({ items, onOpen }) => {
                 <span className="holo-corner is-bl" />
                 <span className="holo-corner is-br" />
               </span>
-              <img src={item.image} alt="" loading="lazy" />
+              <img src={item.image} srcSet={imageSet(item.image)} sizes="(max-width: 800px) min(92vw, 480px), 440px" width="1200" height="675" alt="" loading="lazy" />
               <span className="xp-media-more" aria-hidden="true">
                 Details
               </span>

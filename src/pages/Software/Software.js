@@ -8,7 +8,7 @@ import { EDUCATION, EXPERIENCE, LANGUAGES, TECH, monthYear } from "./experience"
 import "components/holo/holo.css";
 import "./Software.css";
 
-// Software: a career, from Monterrey to Sydney. An Earth that forms out of
+// Software: a career, from Mexico to Sydney. An Earth that forms out of
 // a black hole with a flight arc between the two, then the work history as
 // a path of cards drawn as the page scrolls, then education, languages and
 // tech.
@@ -21,6 +21,7 @@ const Software = () => {
   const [open, setOpen] = useState(null);
   const [ready, setReady] = useState(false);
   const tiltRef = useRef({ x: 0, y: 0 });
+  const xpRef = useRef(null);
   const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
     const cap = (v) => Math.max(-25, Math.min(25, v));
     tiltRef.current = { x: (cap(x) * PHONE_GAIN * Math.PI) / 180, y: (cap(y) * PHONE_GAIN * Math.PI) / 180 };
@@ -46,7 +47,7 @@ const Software = () => {
       <section className="software-hero">
         <Earth className="software-earth" tiltRef={tiltRef} onReady={() => setReady(true)} />
         <div className="software-intro">
-          <p className="software-label">Work · Monterrey → Sydney</p>
+          <p className="software-label">Work · Mexico → Sydney</p>
           <h1 className="software-title">Software</h1>
           <p className="software-lede">
             I like to design and build pixel perfect products.
@@ -78,12 +79,16 @@ const Software = () => {
             Motion blocked in Safari settings
           </p>
         )}
-        <span className="software-scroll-cue" aria-hidden="true">
-          Experience
-        </span>
+        <button
+          type="button"
+          className="software-scroll-cue"
+          onClick={() => xpRef.current && xpRef.current.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth" })}
+        >
+          Scroll down
+        </button>
       </section>
 
-      <section className="software-block" aria-labelledby="xp-heading">
+      <section className="software-block" aria-labelledby="xp-heading" ref={xpRef}>
         <div className="software-heading">
           <p className="software-label" id="xp-heading">
             Experience

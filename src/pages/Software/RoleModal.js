@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import HoloPanel from "components/holo/HoloPanel";
-import { duration, monthYear } from "./experience";
+import { duration, imageSet, monthYear } from "./experience";
 
 // More about a role, from the CV: what was built, with what, and a link to
 // the site. Closes on Escape, the close button or a click outside; the page
@@ -43,7 +43,7 @@ const RoleModal = ({ item, onClose }) => {
         <button type="button" className="xp-modal-close" onClick={onClose} ref={closeRef} aria-label="Close">
           <span aria-hidden="true">×</span>
         </button>
-        <img className="xp-modal-image" src={item.image} alt={`${item.company} website`} />
+        <img className="xp-modal-image" src={item.image} srcSet={imageSet(item.image)} sizes="(max-width: 800px) 100vw, 720px" alt={`${item.company} website`} />
         <div className="xp-modal-body">
           <p className="holo-kicker">
             {monthYear(item.from)} – {monthYear(item.to)} · {duration(item.from, item.to)}
