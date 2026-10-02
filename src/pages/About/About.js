@@ -10,6 +10,11 @@ export class About extends Component {
     document.body.classList.add("level-0");
   }
 
+  // pages now change inside the app, so take this page's class away on leaving
+  componentWillUnmount() {
+    document.body.classList.remove("level-0");
+  }
+
   render() {
     return (
       <main
