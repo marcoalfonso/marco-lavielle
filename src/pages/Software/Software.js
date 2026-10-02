@@ -1,139 +1,148 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
-import { getClients } from 'actions/appActions'
+import React, { useEffect, useRef, useState } from "react";
+import loadOrbitron from "components/fonts/loadOrbitron";
+import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
+import Earth from "./Earth";
+import Timeline from "./Timeline";
+import RoleModal from "./RoleModal";
+import { EDUCATION, EXPERIENCE, LANGUAGES, TECH, monthYear } from "./experience";
+import "components/holo/holo.css";
+import "./Software.css";
 
-import styles from './Software.module.css'
+// Software: a career, from Monterrey to Sydney. An Earth that forms out of
+// a black hole with a flight arc between the two, then the work history as
+// a path of cards drawn as the page scrolls, then education, languages and
+// tech.
 
-export class Software extends Component {
-  componentDidMount() {
-    this.props.getClients()
-  }
+const PHONE_GAIN = 1.2; // Earth turn per degree of phone tilt
 
-  render() {
-    const sortedClients = this.props.clients ? [...this.props.clients].sort((a, b) => a.name.localeCompare(b.name)) : [];
-    return (
-      <div className={`home ng-scope loaded detected ${this.props.device} level-0`}>
-        <section className="content">
-          <div id="device-info" className={`ng-scope loaded ${this.props.device} detected preview-section-1`}>
-            <main id="page" className="page ng-scope">
-              <div className="wide column-3 backdrop for-section-1"></div>
-              <div className="wide section-header backdrop"></div>
-              <div className="column-1">
-                <a href="/" className="uplevel pjax">
-                  <span className="arrow">‹</span>
-                  <strong className="logo">
-                    <span className="m">M</span>
-                    <span className="a">A</span>
-                    <span className="r">R</span>
-                    <span className="c">C</span>
-                    <span className="o">O</span>
-                    <br/>
-                    <span className="l">L</span>
-                    <span className="a2">A</span>
-                    <span className="v">V</span>
-                    <span className="i">I</span>
-                    <span className="e">E</span>
-                    <span className="l2">L</span>
-                    <span className="l3">L</span>
-                    <span className="e2">E</span>
-                  </strong>
-                  <h1 className="section-title">Work</h1>
-                  <span className="smaller alive icon section-1-icon">
-                    <span className="bar one"></span>
-                    <span className="bar two"></span>
-                    <span className="bar three"></span>
-                  </span>
-              </a>
-              <dl className="stats section-1-stats">
-                <dt>PI</dt>
-                <dd>3.1416</dd>
-              </dl>
+const yearsSince = (ym) => new Date().getFullYear() - Number(ym.slice(0, 4));
+
+const Software = () => {
+  const [open, setOpen] = useState(null);
+  const [ready, setReady] = useState(false);
+  const tiltRef = useRef({ x: 0, y: 0 });
+  const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
+    const cap = (v) => Math.max(-25, Math.min(25, v));
+    tiltRef.current = { x: (cap(x) * PHONE_GAIN * Math.PI) / 180, y: (cap(y) * PHONE_GAIN * Math.PI) / 180 };
+  }, !prefersReducedMotion());
+
+  useEffect(() => {
+    loadOrbitron();
+    document.documentElement.classList.add("software-html");
+    return () => document.documentElement.classList.remove("software-html");
+  }, []);
+
+  const first = EXPERIENCE[EXPERIENCE.length - 1];
+
+  return (
+    <main className={`software-page holo-ui${ready ? " is-ready" : ""}`}>
+      <header className="software-top">
+        <a className="software-back" href="/">
+          <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
+        </a>
+        <span className="software-section">Software</span>
+      </header>
+
+      <section className="software-hero">
+        <Earth className="software-earth" tiltRef={tiltRef} onReady={() => setReady(true)} />
+        <div className="software-intro">
+          <p className="software-label">Work · Monterrey → Sydney</p>
+          <h1 className="software-title">Software</h1>
+          <p className="software-lede">
+            I like to design and build pixel perfect products.
+            <span> Early stage startups, enterprise and government.</span>
+          </p>
+          <dl className="software-stats">
+            <div>
+              <dt>Years building</dt>
+              <dd>{yearsSince(first.from)}+</dd>
             </div>
-            <div className="l1 level-1-container client-screen">
-              <div className="wide column-3">
-                <header className="wide section-header section-1-header">
-                  <div className="map-container">
-                    <a style={{left: 642, top: 232}} className="pjax blip go-to-day positioned showing">
-                      <span className="circle-1"></span>
-                      <span className="circle-2"></span>
-                      <span className="circle-3"></span>
-                      <span className="circle">
-                        <img className="symbol"/>
-                      </span>
-                    </a>
-                    <div className="map-goes-here"></div>
-                  </div>
-                  <div className="current-location">
-                    <h3>Coded in</h3>
-                    <h1><a>Sydney</a></h1>
-                    <div className="lat-long">
-                      <span className="lat">
-                        <small>Latitude</small>
-                        <span className="value">33.520413</span>
-                      </span>
-                      <span className="long">
-                        <small>Longitude</small>
-                        <span className="value">151.122633</span>
-                      </span>
-                    </div>
-                  </div>
-                </header>
-                <section className="content">
-                  <div className="clients-list">
-                    {sortedClients.map((client, index ) => (
-                      <a href={client.url} target="_blank" rel="nofollow" key={index}>
-                        <div className="client-example">
-                          <h2 className="client-title">
-                            <div className="client-name">{client.name}</div>
-                            <ul className="tags">
-                              <li className="tag">{client.tags}</li>
-                            </ul>
-                          </h2>
-                          <div className="client-url">
-                            <div className="text">
-                              <small>
-                                <div>{client.url}</div>
-                              </small>
-                            </div>
-                          </div>
-                          <div className="client-photos">
-                            <div className="photo">
-                              <img src={client.photo} alt="Client Photo" onError={(e)=>{e.target.onerror = null; e.target.src='../images/thumbnails/400x221.png'}}/>
-                            </div>
-                          </div>
-                          {/*<small><div className="client-description">{client.description}</div></small>*/}
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </section>
-                <div className="footer">
-                  <div className="container">
-                    <p className="copyright">
-                      © Marco Lavielle ·
-                      <a href="/about" className="about">
-                        About this site
-                      </a>
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <dt>Roles</dt>
+              <dd>{String(EXPERIENCE.length).padStart(2, "0")}</dd>
             </div>
-          </main>
+            <div>
+              <dt>Since</dt>
+              <dd>{monthYear(first.from)}</dd>
+            </div>
+          </dl>
+        </div>
+        {showHint && (
+          <button type="button" className="software-motion-hint" onClick={requestPermission}>
+            <span className="software-motion-icon" aria-hidden="true" />
+            Tap, then move your phone
+          </button>
+        )}
+        {denied && (
+          <p className="software-motion-hint is-passive" aria-live="polite">
+            Motion blocked in Safari settings
+          </p>
+        )}
+        <span className="software-scroll-cue" aria-hidden="true">
+          Experience
+        </span>
+      </section>
+
+      <section className="software-block" aria-labelledby="xp-heading">
+        <div className="software-heading">
+          <p className="software-label" id="xp-heading">
+            Experience
+          </p>
+          <h2 className="software-statement">
+            Where I&rsquo;ve built things.
+            <span> Most recent first. Open a site for the details.</span>
+          </h2>
+        </div>
+        <Timeline items={EXPERIENCE} onOpen={setOpen} />
+      </section>
+
+      <section className="software-block software-more">
+        <div className="software-col">
+          <p className="software-label">Education</p>
+          <ul className="software-edu">
+            {EDUCATION.map((e) => (
+              <li key={e.degree}>
+                <strong>{e.degree}</strong>
+                <span>{e.school}</span>
+                <small>
+                  {monthYear(e.from)} – {monthYear(e.to)}
+                </small>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="software-col">
+          <p className="software-label">Languages</p>
+          <ul className="software-langs">
+            {LANGUAGES.map((l, i) => (
+              <li key={l}>
+                <span className="software-lang-index">{String(i + 1).padStart(2, "0")}</span>
+                {l}
+              </li>
+            ))}
+          </ul>
+          <p className="software-label">Tech</p>
+          <ul className="xp-chips is-large">
+            {TECH.map((t) => (
+              <li key={t}>{t}</li>
+            ))}
+          </ul>
         </div>
       </section>
-    </div>
-    )
-  }
-}
 
-const mapStateToProps = state => ({
-  clients: state.app.clients,
-  device: state.app.device
-})
+      <footer className="software-foot">
+        <a href="https://www.linkedin.com/in/marcolavielle/" target="_blank" rel="noopener noreferrer">
+          LinkedIn
+        </a>
+        <a href="https://github.com/marcoalfonso" target="_blank" rel="noopener noreferrer">
+          GitHub
+        </a>
+        <a href="/about">Contact</a>
+      </footer>
 
-const mapDispatchToProps = dispatch => ({
-  getClients: () => dispatch(getClients()),
-})
+      <RoleModal item={open} onClose={() => setOpen(null)} />
+    </main>
+  );
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(Software)
+export default Software;

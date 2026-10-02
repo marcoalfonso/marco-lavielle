@@ -3262,3 +3262,14 @@ html.home-v1 main.homepage.mobile .home-footer {
 html.home-v1 main.homepage.mobile .home-footer a {
   margin-top: 0;
 }
+
+/* The redesigned pages (Software, journal entries, Journal) pin things to
+   the screen (a dialog, the reading-progress line). The site's phone rules
+   give <body> a 3D perspective, which on phones pins those to the body
+   instead, so turn it off there. */
+html.software-html.mobile body,
+html.entry-html.mobile body,
+html.journal-html.mobile body {
+  -webkit-perspective: none;
+  perspective: none;
+}
