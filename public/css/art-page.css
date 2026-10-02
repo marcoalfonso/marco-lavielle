@@ -232,9 +232,11 @@ body {
   display: block;
   width: auto;
   height: auto;
-  max-width: min(44vw, 640px);
-  max-height: calc(100vh - 380px);
-  max-height: calc(100dvh - 380px);
+  /* --art-scale: a painting photographed edge to edge (no frame around it)
+     can be shown a little smaller, to sit alongside the framed ones */
+  max-width: calc(min(44vw, 640px) * var(--art-scale, 1));
+  max-height: calc((100vh - 380px) * var(--art-scale, 1));
+  max-height: calc((100dvh - 380px) * var(--art-scale, 1));
   min-height: 200px;
   animation: art-materialise 900ms ease-out both;
 }

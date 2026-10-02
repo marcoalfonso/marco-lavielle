@@ -18,7 +18,7 @@ const SWIPE = 45; // px
 const desktopMove = { x: 18, y: 12, turn: 14, tip: 10 };
 const phoneMove = () => ({ x: window.innerWidth * 0.08, y: window.innerHeight * 0.05, turn: 12, tip: 9 });
 
-const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded }) => {
+const PaintingStage = ({ src, spillSrc, scale, name, index, onNext, onPrev, onLoaded }) => {
   const floatRef = useRef(null);
   const baseRef = useRef(null);
   const swipeRef = useRef(null);
@@ -33,7 +33,7 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
   // The painting on show only changes once the next one has fully
   // downloaded, so a half-loaded image never appears; until then the
   // previous one stays up, dimmed, with a loading readout.
-  const [shown, setShown] = useState(null); // { src, name, index }
+  const [shown, setShown] = useState(null); // { src, name, index, scale }
   const loading = !shown || shown.src !== src;
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
     const img = new Image();
     img.onload = img.onerror = () => {
       if (cancelled) return;
-      setShown({ src, name, index });
+      setShown({ src, name, index, scale });
       if (onLoaded) onLoaded();
     };
     img.src = src;
@@ -148,7 +148,13 @@ const PaintingStage = ({ src, spillSrc, name, index, onNext, onPrev, onLoaded })
             >
               {shown ? (
                 <>
-                  <img key={shown.index} className="art-painting-img" src={shown.src} alt={shown.name} />
+                  <img
+                    key={shown.index}
+                    className="art-painting-img"
+                    src={shown.src}
+                    alt={shown.name}
+                    style={shown.scale ? { "--art-scale": shown.scale } : undefined}
+                  />
                   <span key={`scan-${shown.index}`} className="art-scan" aria-hidden="true" />
                 </>
               ) : (
