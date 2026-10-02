@@ -41,7 +41,6 @@ const Software = () => {
         <a className="software-back" href="/">
           <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
         </a>
-        <span className="software-section">Software</span>
       </header>
 
       <section className="software-hero">
@@ -57,10 +56,6 @@ const Software = () => {
             <div>
               <dt>Years building</dt>
               <dd>{yearsSince(first.from)}+</dd>
-            </div>
-            <div>
-              <dt>Roles</dt>
-              <dd>{String(EXPERIENCE.length).padStart(2, "0")}</dd>
             </div>
             <div>
               <dt>Since</dt>

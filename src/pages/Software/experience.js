@@ -123,8 +123,8 @@ export const EDUCATION = [
 export const LANGUAGES = ["English", "Spanish", "JavaScript"];
 
 export const TECH = [
-  "React", "Node", "Redux", "NextJS", "GraphQL", "Apollo", "ES6",
-  "MongoDB", "Mongoose", "Express", "PostgreSQL", "Webpack", "AWS",
+  "React", "TypeScript", "Node", "Redux", "NextJS", "GraphQL", "ES6",
+  "Python", "MongoDB", "Express", "PostgreSQL", "AWS",
 ];
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
