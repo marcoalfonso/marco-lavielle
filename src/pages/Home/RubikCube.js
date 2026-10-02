@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useDeviceTilt, { prefersReducedMotion } from "components/motion/useDeviceTilt";
+import navigateAfter from "components/navigation/navigateAfter";
 import { IDENTITY, conjugate, fromAxisAngle, multiply, normalize, slerp, toCss } from "./quat";
 
 // A Rubik's cube drawn in light: 6 faces of 3 x 3 squares whose edges glow.
@@ -23,7 +24,8 @@ const FACES = [
   { name: "bottom", rotate: "rotateX(-90deg)", q: Q(1, 0, 0, -90) },
 ];
 
-const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
+// starts square-on to the front face (Software), then eases into its tumble
+const START = IDENTITY;
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
 const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
@@ -31,11 +33,6 @@ const SPIN_MS = 1100; // the whirl before the fold
 const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
 const DOT_MS = 460;
-
-// on load, the same in reverse: a dot grows into a flat square of the front
-// face, which inflates into the cube and whirls round into place
-const INTRO_DELAY = 250;
-const INTRO_DOT_MS = 420; // the dot lights up
 
 // Colours mode: every square has its own colour, and rises and sinks on its
 // own random timing (fixed for the visit).
@@ -66,7 +63,6 @@ const RubikCube = ({ links, onHint }) => {
     tapped: -1, // phones: the face last tapped (shows its hologram, holds still)
     active: -1, // the face whose hologram is showing
     select: null, // the pick animation in progress
-    intro: null, // the opening animation in progress
     tilt: IDENTITY,
   }).current;
   const release = () => {
@@ -74,7 +70,6 @@ const RubikCube = ({ links, onHint }) => {
     state.tapped = -1;
   };
   const [reduceMotion] = useState(prefersReducedMotion);
-  const [assembling, setAssembling] = useState(() => !prefersReducedMotion());
   const [collapsing, setCollapsing] = useState(false);
   const [active, setActive] = useState(-1);
   const [timings] = useState(makeCellTimings);
@@ -95,7 +90,7 @@ const RubikCube = ({ links, onHint }) => {
     const size = () => (cubeRef.current ? cubeRef.current.offsetWidth : 300);
 
     const onDown = (e) => {
-      if (state.select || state.intro || (e.pointerType === "mouse" && e.button !== 0)) return;
+      if (state.select || (e.pointerType === "mouse" && e.button !== 0)) return;
       state.drag = { id: e.pointerId, x: e.clientX, y: e.clientY, lastX: e.clientX, lastY: e.clientY, t: performance.now(), moved: false };
       state.dragged = false;
     };
@@ -175,9 +170,7 @@ const RubikCube = ({ links, onHint }) => {
       if (document.hidden) return;
       const t = now / 1000;
 
-      if (state.intro) {
-        runIntro(now);
-      } else if (state.select) {
+      if (state.select) {
         runSelect(now);
       } else if (state.focus) {
         state.q = slerp(state.q, state.focus, 1 - Math.exp(-dt * 8));
@@ -187,12 +180,12 @@ const RubikCube = ({ links, onHint }) => {
       // when a window switches between touch and mouse.
       const el = sceneRef.current.querySelector(".rc-face:hover");
       const hovered = el ? Number(el.dataset.face) : state.tapped;
-      const nextActive = state.select || state.intro ? state.active : hovered;
+      const nextActive = state.select ? state.active : hovered;
       if (nextActive !== state.active) {
         state.active = nextActive;
         setActive(nextActive);
       }
-      if (!state.select && !state.intro && !state.focus && !state.drag) {
+      if (!state.select && !state.focus && !state.drag) {
         // hold still while a face is being looked at, so it can be picked
         const paused = hovered >= 0;
         // tumble about a slowly wandering axis; a flick's spin eases into it
@@ -206,7 +199,7 @@ const RubikCube = ({ links, onHint }) => {
         if (w > 1e-5) state.q = normalize(multiply(fromAxisAngle(...state.omega, w * dt), state.q));
       }
       if (cubeRef.current) {
-        cubeRef.current.style.transform = toCss(state.select || state.intro ? state.q : multiply(state.tilt, state.q));
+        cubeRef.current.style.transform = toCss(state.select ? state.q : multiply(state.tilt, state.q));
       }
     };
 
@@ -242,77 +235,16 @@ const RubikCube = ({ links, onHint }) => {
       dot.style.transform = `translate(-50%, -50%) scale(${0.4 + 0.6 * Math.sin(Math.min(1, k * 1.4) * Math.PI * 0.5)})`;
       if (k >= 1 && !s.done) {
         s.done = true;
-        window.location.assign(s.href);
+        s.nav.finish();
       }
     };
 
-    // load: the pick in reverse. A dot lights up and opens into a flat
-    // square of the front face, the square inflates into the cube, and the
-    // cube whirls round (the pick's whirl, run backwards) into place.
-    const runIntro = (now) => {
-      const s = state.intro;
-      const squash = squashRef.current;
-      const dot = dotRef.current;
-      let e = now - s.start - INTRO_DELAY;
-      if (e < 0) return;
-      if (e < INTRO_DOT_MS) {
-        const k = easeInOut(e / INTRO_DOT_MS);
-        dot.style.opacity = String(k);
-        dot.style.transform = `translate(-50%, -50%) scale(${0.4 + 0.6 * k})`;
-        return;
-      }
-      e -= INTRO_DOT_MS;
-      if (e < DOT_MS) {
-        const k = e / DOT_MS;
-        const grow = Math.max(0.012, easeInOut(k));
-        squash.style.transform = `scale3d(${grow}, ${grow}, 0.001)`;
-        dot.style.opacity = String(Math.max(0, 1 - k * 2.2));
-        return;
-      }
-      e -= DOT_MS;
-      dot.style.opacity = "0";
-      if (e < FLATTEN_MS) {
-        const k = easeInOut(e / FLATTEN_MS);
-        squash.style.transform = `scale3d(1, 1, ${Math.max(0.001, k)})`;
-        return;
-      }
-      e -= FLATTEN_MS;
-      if (e < SPIN_MS) {
-        const k = easeInOut(e / SPIN_MS);
-        const whirl = multiply(
-          fromAxisAngle(...s.axes[0], SPIN_TURNS[0] * 2 * Math.PI * (1 - k)),
-          fromAxisAngle(...s.axes[1], SPIN_TURNS[1] * 2 * Math.PI * (1 - k)),
-        );
-        state.q = multiply(whirl, slerp(IDENTITY, START, k));
-        squash.style.transform = `scale(${(1 + 0.1 * Math.sin(k * Math.PI)).toFixed(4)})`;
-        return;
-      }
-      // assembled: hand over to the usual tumble
-      state.q = START;
-      squash.style.transform = "";
-      state.intro = null;
-      setAssembling(false);
-    };
-
-    if (!reduceMotion) {
-      const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-      state.q = IDENTITY;
-      state.intro = { start: performance.now(), axes: [randomAxis(), randomAxis()] };
-    }
     raf = requestAnimationFrame(loop);
 
     // back button from the next page: the browser may restore this page as
     // it was left (collapsed to a dot), so put the cube back
     const onPageShow = (e) => {
-      if (!e.persisted) return;
-      state.select = null;
-      state.intro = null;
-      state.q = START;
-      state.omega = [0, 0, 0];
-      setAssembling(false);
-      if (squashRef.current) squashRef.current.style.transform = "";
-      if (dotRef.current) dotRef.current.style.opacity = "0";
-      setCollapsing(false);
+      if (e.persisted) restore();
     };
     window.addEventListener("pageshow", onPageShow);
     return () => {
@@ -320,6 +252,19 @@ const RubikCube = ({ links, onHint }) => {
       window.removeEventListener("pageshow", onPageShow);
     };
   }, []);
+
+  // put the cube back as it was before a pick (Back pressed mid-animation,
+  // or this page restored from the browser's cache)
+  const restore = () => {
+    state.select = null;
+    state.omega = [0, 0, 0];
+    if (squashRef.current) squashRef.current.style.transform = "";
+    if (dotRef.current) {
+      dotRef.current.style.opacity = "0";
+      dotRef.current.style.transform = "";
+    }
+    setCollapsing(false);
+  };
 
   // the rotation that brings a face to the front, upright, the short way round
   const facing = (face) => {
@@ -347,7 +292,7 @@ const RubikCube = ({ links, onHint }) => {
       state.dragged = false;
       return;
     }
-    if (state.select || state.intro) return;
+    if (state.select) return;
     if (reduceMotion) {
       window.location.assign(link.href);
       return;
@@ -357,23 +302,17 @@ const RubikCube = ({ links, onHint }) => {
     state.tilt = IDENTITY;
     state.focus = null;
     const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-    state.select = { start: performance.now(), from, to: facing(face), href: link.href, axes: [randomAxis(), randomAxis()] };
+    // the history step is taken now, inside the click (see navigateAfter);
+    // Back during the animation puts the cube back
+    const nav = navigateAfter(link.href, { onCancel: restore });
+    state.select = { start: performance.now(), from, to: facing(face), nav, axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 
   return (
-    <div
-      className={`rc-scene${collapsing ? " is-collapsing" : ""}${assembling ? " is-assembling" : ""}`}
-      ref={sceneRef}
-    >
-      {/* starts as a speck when the opening animation will play, so the full
-          cube never flashes up before it */}
-      <div
-        className="rc-squash"
-        ref={squashRef}
-        style={assembling ? { transform: "scale3d(0.012, 0.012, 0.001)" } : undefined}
-      >
-        <div className="rc-cube" ref={cubeRef} style={{ transform: toCss(assembling ? IDENTITY : START) }}>
+    <div className={collapsing ? "rc-scene is-collapsing" : "rc-scene"} ref={sceneRef}>
+      <div className="rc-squash" ref={squashRef}>
+        <div className="rc-cube" ref={cubeRef} style={{ transform: toCss(START) }}>
           {FACES.map((face, f) => {
             const link = links[f];
             return (

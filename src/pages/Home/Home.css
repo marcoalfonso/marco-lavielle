@@ -530,15 +530,12 @@ body.home-v2-body {
   stroke-width: 0.8;
 }
 
-/* picked: every edge lights up while the cube folds away into a dot (and,
-   on load, while it unfolds out of one) */
-.rc-scene.is-assembling .rc-cell,
+/* picked: every edge lights up while the cube folds away into a dot */
 .rc-scene.is-collapsing .rc-cell {
   border-color: var(--home-holo);
   box-shadow: 0 0 16px rgba(111, 245, 238, 0.9), inset 0 0 16px rgba(111, 245, 238, 0.4);
 }
 
-.rc-scene.is-assembling .rc-cell::after,
 .rc-scene.is-collapsing .rc-cell::after {
   animation: none;
 }
