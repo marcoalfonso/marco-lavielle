@@ -232,10 +232,6 @@ const RubikCube = ({ links, onHint }) => {
       squash.style.transform = `scale3d(${shrink}, ${shrink}, 0.001)`;
       dot.style.opacity = String(Math.min(1, k * 2.2));
       dot.style.transform = `translate(-50%, -50%) scale(${0.4 + 0.6 * Math.sin(Math.min(1, k * 1.4) * Math.PI * 0.5)})`;
-      if (k >= 1 && !s.done) {
-        s.done = true;
-        s.nav.finish();
-      }
     };
 
     raf = requestAnimationFrame(loop);
@@ -301,10 +297,11 @@ const RubikCube = ({ links, onHint }) => {
     state.tilt = IDENTITY;
     state.focus = null;
     const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-    // the history step is taken now, inside the click (see navigateAfter);
-    // Back during the animation puts the cube back
-    const nav = navigateAfter(link.href, { onCancel: restore });
-    state.select = { start: performance.now(), from, to: facing(face), nav, axes: [randomAxis(), randomAxis()] };
+    // the navigation starts now, inside the click, and the next page arrives
+    // as the animation ends (see navigateAfter); the cube stays a dot until
+    // then
+    navigateAfter(link.href, { delay: SPIN_MS + FLATTEN_MS + DOT_MS, onCancel: restore });
+    state.select = { start: performance.now(), from, to: facing(face), axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 

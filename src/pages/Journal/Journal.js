@@ -14,7 +14,7 @@ import "./Journal.css";
 // entry count and two live counters, and the entry log below listing every
 // post.
 
-const LEAVE_MS = 1450; // keep in step with the .is-leaving timings in Journal.css
+const LEAVE_MS = 1450; // the compress, from .is-leaving in Journal.css
 
 const pad = (n, width = 3) => String(n).padStart(width, "0");
 const withCommas = (n) => pad(n, 9).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -98,51 +98,46 @@ export class Journal extends Component {
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
-    // the history step is taken now, inside the click (see navigateAfter);
-    // Back before the page changes puts the screen back
-    const nav = navigateAfter(link.href, {
+    // the navigation starts now, inside the click, and the next page arrives
+    // as the animation ends (see navigateAfter): first the globe is brought
+    // to the middle of the screen if the click came from further down, then
+    // the screen compresses
+    const scrollMs = this.centreGlobe();
+    this.centring = true;
+    navigateAfter(link.href, {
+      delay: scrollMs + LEAVE_MS,
       onCancel: () => {
         clearTimeout(this.leaveTimer);
         this.centring = false;
-        this.cancelled = true;
         this.setState({ leaving: false });
       },
     });
-    this.cancelled = false;
-    // from further down the page (the entry log), bring the globe to the
-    // middle of the screen first, so the compress can be seen
-    this.centring = true;
-    this.centreGlobe().then(() => {
+    this.leaveTimer = setTimeout(() => {
       this.centring = false;
-      if (this.cancelled) return;
       this.setState({ leaving: true });
-      this.leaveTimer = setTimeout(() => nav.finish(), LEAVE_MS);
-    });
+    }, scrollMs);
   };
 
-  // smooth-scroll the globe to the middle of the screen; resolves once there
-  // (or straight away if it already is)
-  centreGlobe = () =>
-    new Promise((done) => {
-      const globe = document.querySelector(".chart-globe");
-      if (!globe) return done();
-      const r = globe.getBoundingClientRect();
-      const target = Math.max(0, Math.round(window.scrollY + r.top + r.height / 2 - window.innerHeight / 2));
-      if (Math.abs(target - window.scrollY) < 40) return done();
-      window.scrollTo({ top: target, behavior: "smooth" });
-      // wait until the page stops moving (scrollend isn't everywhere yet)
-      const started = Date.now();
-      let last = window.scrollY;
-      let still = 0;
-      const check = () => {
-        const y = window.scrollY;
-        still = Math.abs(y - last) < 1 ? still + 1 : 0;
-        last = y;
-        if (still >= 4 || Date.now() - started > 1200) done();
-        else requestAnimationFrame(check);
-      };
-      requestAnimationFrame(check);
-    });
+  // scroll the globe to the middle of the screen over a fixed time (so the
+  // page change can be timed to match); returns that time, 0 if no scroll
+  centreGlobe = () => {
+    const globe = document.querySelector(".chart-globe");
+    if (!globe) return 0;
+    const r = globe.getBoundingClientRect();
+    const from = window.scrollY;
+    const to = Math.max(0, Math.round(from + r.top + r.height / 2 - window.innerHeight / 2));
+    if (Math.abs(to - from) < 40) return 0;
+    const duration = 550;
+    const start = performance.now();
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const step = (now) => {
+      const t = Math.min(1, (now - start) / duration);
+      window.scrollTo(0, from + (to - from) * ease(t));
+      if (t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+    return duration;
+  };
 
   // back to this page from the next one: undo the compress if the browser
   // restored it as it was left
