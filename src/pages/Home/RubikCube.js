@@ -24,8 +24,7 @@ const FACES = [
   { name: "bottom", rotate: "rotateX(-90deg)", q: Q(1, 0, 0, -90) },
 ];
 
-// starts square-on to the front face (Software), then eases into its tumble
-const START = IDENTITY;
+const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
 const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
