@@ -27,7 +27,7 @@ const FACES = [
 const START = multiply(Q(1, 0, 0, -24), Q(0, 1, 0, 34)); // three faces in view
 const AUTO_SPEED = 0.32; // rad/s
 const DRAG_SLOP = 6; // px of movement before a press becomes a drag
-const PHONE_GAIN = 1.3; // cube turn per degree of phone tilt
+const PHONE_MAX_TILT = 30; // deg: the most the phone's tilt turns the cube (a face turn is 45)
 const SPIN_MS = 1100; // the whirl before the fold
 const SPIN_TURNS = [2, 1]; // whole turns about each of two random axes
 const FLATTEN_MS = 380;
@@ -63,6 +63,7 @@ const RubikCube = ({ links, onHint }) => {
     active: -1, // the face whose hologram is showing
     select: null, // the pick animation in progress
     tilt: IDENTITY,
+    tiltTarget: IDENTITY,
   }).current;
   const release = () => {
     state.focus = null;
@@ -76,7 +77,10 @@ const RubikCube = ({ links, onHint }) => {
   // phones: the cube follows the phone's tilt, on top of its own tumbling
   const { showHint, requestPermission, denied } = useDeviceTilt((x, y) => {
     // dip the right edge and the cube turns right; raise the top and it tips back
-    state.tilt = multiply(Q(0, 1, 0, x * PHONE_GAIN), Q(1, 0, 0, -y * PHONE_GAIN));
+    // capped well short of 45deg, so tilting never swings another face round;
+    // eased toward each frame (see the loop)
+    const cap = (v) => Math.max(-PHONE_MAX_TILT, Math.min(PHONE_MAX_TILT, v));
+    state.tiltTarget = multiply(Q(0, 1, 0, cap(x)), Q(1, 0, 0, -cap(y)));
   }, !reduceMotion);
 
   useEffect(() => {
@@ -197,6 +201,8 @@ const RubikCube = ({ links, onHint }) => {
         const w = Math.hypot(...state.omega);
         if (w > 1e-5) state.q = normalize(multiply(fromAxisAngle(...state.omega, w * dt), state.q));
       }
+      // the phone's tilt, eased so a jolt doesn't jerk the cube
+      if (!state.select) state.tilt = slerp(state.tilt, state.tiltTarget, 1 - Math.exp(-dt * 8));
       if (cubeRef.current) {
         cubeRef.current.style.transform = toCss(state.select ? state.q : multiply(state.tilt, state.q));
       }
@@ -232,10 +238,6 @@ const RubikCube = ({ links, onHint }) => {
       squash.style.transform = `scale3d(${shrink}, ${shrink}, 0.001)`;
       dot.style.opacity = String(Math.min(1, k * 2.2));
       dot.style.transform = `translate(-50%, -50%) scale(${0.4 + 0.6 * Math.sin(Math.min(1, k * 1.4) * Math.PI * 0.5)})`;
-      if (k >= 1 && !s.done) {
-        s.done = true;
-        s.nav.finish();
-      }
     };
 
     raf = requestAnimationFrame(loop);
@@ -299,12 +301,14 @@ const RubikCube = ({ links, onHint }) => {
     const from = multiply(state.tilt, state.q);
     state.q = from;
     state.tilt = IDENTITY;
+    state.tiltTarget = IDENTITY;
     state.focus = null;
     const randomAxis = () => normalize([Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, 0]).slice(0, 3);
-    // the history step is taken now, inside the click (see navigateAfter);
-    // Back during the animation puts the cube back
-    const nav = navigateAfter(link.href, { onCancel: restore });
-    state.select = { start: performance.now(), from, to: facing(face), nav, axes: [randomAxis(), randomAxis()] };
+    // the navigation starts now, inside the click, and the next page arrives
+    // as the animation ends (see navigateAfter); the cube stays a dot until
+    // then
+    navigateAfter(link.href, { delay: SPIN_MS + FLATTEN_MS + DOT_MS, onCancel: restore });
+    state.select = { start: performance.now(), from, to: facing(face), axes: [randomAxis(), randomAxis()] };
     setCollapsing(true);
   };
 
