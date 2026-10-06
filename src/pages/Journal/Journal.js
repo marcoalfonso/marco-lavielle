@@ -1,6 +1,5 @@
-import React, { Component } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 import { getPosts } from "actions/appActions";
 import loadOrbitron from "components/fonts/loadOrbitron";
@@ -67,166 +66,155 @@ const HudBox = ({ className, label, value, unit, note }) => (
   </div>
 );
 
-export class Journal extends Component {
-  state = { selected: 0, now: Date.now(), leaving: false };
+// scroll the globe to the middle of the screen over a fixed time (so the
+// page change can be timed to match); returns that time, 0 if no scroll
+const centreGlobe = () => {
+  const globe = document.querySelector(".chart-globe");
+  if (!globe) return 0;
+  const r = globe.getBoundingClientRect();
+  const from = window.scrollY;
+  const to = Math.max(0, Math.round(from + r.top + r.height / 2 - window.innerHeight / 2));
+  if (Math.abs(to - from) < 40) return 0;
+  const duration = 550;
+  const start = performance.now();
+  const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const step = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    window.scrollTo(0, from + (to - from) * ease(t));
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+  return duration;
+};
 
-  componentDidMount() {
+const Journal = () => {
+  const dispatch = useDispatch();
+  const posts = useSelector((state) => state.app.posts);
+  const [selected, setSelected] = useState(0);
+  const [now, setNow] = useState(Date.now);
+  const [leaving, setLeaving] = useState(false);
+  const centring = useRef(false); // bringing the globe to the middle before leaving
+  const leaveTimer = useRef(null);
+
+  useEffect(() => {
     loadOrbitron();
     document.documentElement.classList.add("journal-html");
-    if (!this.props.posts) this.props.getPosts();
-    this.clock = setInterval(() => this.setState({ now: Date.now() }), 1000);
-    window.addEventListener("pageshow", this.onPageShow);
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.clock);
-    clearTimeout(this.leaveTimer);
-    window.removeEventListener("pageshow", this.onPageShow);
-    document.documentElement.classList.remove("journal-html");
-  }
-
-  select = (index) => this.setState({ selected: index });
+    if (!posts) dispatch(getPosts());
+    const clock = setInterval(() => setNow(Date.now()), 1000);
+    // back to this page from the next one: undo the compress if the browser
+    // restored it as it was left
+    const onPageShow = (e) => {
+      if (e.persisted) setLeaving(false);
+    };
+    window.addEventListener("pageshow", onPageShow);
+    return () => {
+      clearInterval(clock);
+      clearTimeout(leaveTimer.current);
+      window.removeEventListener("pageshow", onPageShow);
+      document.documentElement.classList.remove("journal-html");
+    };
+  }, []);
 
   // Leaving by a link on the page: the screen compresses back into its core
   // (the opening in reverse), then the link is followed. Links that open a
   // new tab (the social channels) go straight away: this page stays open,
   // and browsers only allow a new tab straight from the click.
-  onClickCapture = (e) => {
+  const onClickCapture = (e) => {
     const link = e.target.closest && e.target.closest("a[href]");
-    if (!link || this.state.leaving || this.centring) return;
+    if (!link || leaving || centring.current) return;
     if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
     if (link.target === "_blank" || link.origin !== window.location.origin) return;
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     e.preventDefault();
     // the new address goes into the history now, inside the click, and the
-    // next page shows as the animation ends (see navigateAfter): first the globe is brought
-    // to the middle of the screen if the click came from further down, then
-    // the screen compresses
-    const scrollMs = this.centreGlobe();
-    this.centring = true;
+    // next page shows as the animation ends (see navigateAfter): first the
+    // globe is brought to the middle of the screen if the click came from
+    // further down, then the screen compresses
+    const scrollMs = centreGlobe();
+    centring.current = true;
     navigateAfter(link.href, {
       delay: scrollMs + LEAVE_MS,
       onCancel: () => {
-        clearTimeout(this.leaveTimer);
-        this.centring = false;
-        this.setState({ leaving: false });
+        clearTimeout(leaveTimer.current);
+        centring.current = false;
+        setLeaving(false);
       },
     });
-    this.leaveTimer = setTimeout(() => {
-      this.centring = false;
-      this.setState({ leaving: true });
+    leaveTimer.current = setTimeout(() => {
+      centring.current = false;
+      setLeaving(true);
     }, scrollMs);
   };
 
-  // scroll the globe to the middle of the screen over a fixed time (so the
-  // page change can be timed to match); returns that time, 0 if no scroll
-  centreGlobe = () => {
-    const globe = document.querySelector(".chart-globe");
-    if (!globe) return 0;
-    const r = globe.getBoundingClientRect();
-    const from = window.scrollY;
-    const to = Math.max(0, Math.round(from + r.top + r.height / 2 - window.innerHeight / 2));
-    if (Math.abs(to - from) < 40) return 0;
-    const duration = 550;
-    const start = performance.now();
-    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-    const step = (now) => {
-      const t = Math.min(1, (now - start) / duration);
-      window.scrollTo(0, from + (to - from) * ease(t));
-      if (t < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-    return duration;
-  };
+  const sorted = posts ? [...posts].sort((a, b) => (b.published || "").localeCompare(a.published || "")) : null;
+  const entries = sorted ? sorted.map((post, index) => ({ post, index, number: sorted.length - index })) : [];
+  const latest = sorted && sorted[0];
+  const first = sorted && sorted[sorted.length - 1];
 
-  // back to this page from the next one: undo the compress if the browser
-  // restored it as it was left
-  onPageShow = (e) => {
-    if (e.persisted) this.setState({ leaving: false });
-  };
+  return (
+    <main className={leaving ? "journal-page holo-ui is-leaving" : "journal-page holo-ui"} onClickCapture={onClickCapture}>
+      <header className="journal-top">
+        <a className="journal-home" href="/">
+          <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
+        </a>
+        <h1 className="journal-title">Thoughts</h1>
+      </header>
 
-  render() {
-    const { selected } = this.state;
-    const sorted = this.props.posts
-      ? [...this.props.posts].sort((a, b) => (b.published || "").localeCompare(a.published || ""))
-      : null;
-    const entries = sorted ? sorted.map((post, index) => ({ post, index, number: sorted.length - index })) : [];
-    const latest = sorted && sorted[0];
-    const first = sorted && sorted[sorted.length - 1];
+      <section className="journal-screen" aria-label="Journal index">
+        <HudBox className="is-tl" label="Journal index" note="on ML-01 original" />
+        <HudBox
+          className="is-tr"
+          label="Time since last entry"
+          value={latest ? withCommas(seconds(latest.published)) : "···,···,···"}
+          unit="sec."
+        />
+        <HudBox
+          className="is-bl"
+          label={`Entries no. ${sorted ? pad(sorted.length) : "···"}`}
+          note="on ML-01 original"
+        />
+        <HudBox
+          className="is-br"
+          label="Time since first entry"
+          value={first ? withCommas(seconds(first.published)) : "···,···,···"}
+          unit="sec."
+        />
+        <StarChart channels={CHANNELS} posts={sorted} now={now} leaving={leaving} />
+      </section>
 
-    return (
-      <main className={this.state.leaving ? "journal-page holo-ui is-leaving" : "journal-page holo-ui"} onClickCapture={this.onClickCapture}>
-        <header className="journal-top">
-          <a className="journal-home" href="/">
-            <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
-          </a>
-          <h1 className="journal-title">Thoughts</h1>
-        </header>
+      <section className="journal-log" aria-label="All entries">
+        <h2 className="journal-log-title">
+          <span>Entry log</span>
+          <small>{sorted ? `${pad(sorted.length)} records` : "Loading records"}</small>
+        </h2>
+        <ol className="journal-log-list">
+          {entries.map(({ post, index, number }) => (
+            <li key={post.slug} style={{ "--i": index }}>
+              <a
+                href={`/journal/${post.slug}`}
+                className={index === selected ? "journal-entry is-selected" : "journal-entry"}
+                onPointerEnter={(e) => e.pointerType === "mouse" && setSelected(index)}
+                onFocus={() => setSelected(index)}
+              >
+                <span className="journal-entry-id">
+                  <small>Entry</small>
+                  <strong>{pad(number)}</strong>
+                </span>
+                <span className="journal-entry-main">
+                  <span className="journal-entry-title">{post.title}</span>
+                  <span className="journal-entry-sub">{post.subtitle}</span>
+                </span>
+                <span className="journal-entry-date">{stamp(post.published)}</span>
+                <span className="journal-entry-go" aria-hidden="true">
+                  Read &rsaquo;
+                </span>
+              </a>
+            </li>
+          ))}
+        </ol>
+      </section>
+    </main>
+  );
+};
 
-        <section className="journal-screen" aria-label="Journal index">
-          <HudBox className="is-tl" label="Journal index" note="on ML-01 original" />
-          <HudBox
-            className="is-tr"
-            label="Time since last entry"
-            value={latest ? withCommas(seconds(latest.published)) : "···,···,···"}
-            unit="sec."
-          />
-          <HudBox
-            className="is-bl"
-            label={`Entries no. ${sorted ? pad(sorted.length) : "···"}`}
-            note="on ML-01 original"
-          />
-          <HudBox
-            className="is-br"
-            label="Time since first entry"
-            value={first ? withCommas(seconds(first.published)) : "···,···,···"}
-            unit="sec."
-          />
-          <StarChart channels={CHANNELS} posts={sorted} now={this.state.now} leaving={this.state.leaving} />
-        </section>
-
-        <section className="journal-log" aria-label="All entries">
-          <h2 className="journal-log-title">
-            <span>Entry log</span>
-            <small>{sorted ? `${pad(sorted.length)} records` : "Loading records"}</small>
-          </h2>
-          <ol className="journal-log-list">
-            {entries.map(({ post, index, number }) => (
-              <li key={post.slug} style={{ "--i": index }}>
-                <a
-                  href={`/journal/${post.slug}`}
-                  className={index === selected ? "journal-entry is-selected" : "journal-entry"}
-                  onPointerEnter={(e) => e.pointerType === "mouse" && this.select(index)}
-                  onFocus={() => this.select(index)}
-                >
-                  <span className="journal-entry-id">
-                    <small>Entry</small>
-                    <strong>{pad(number)}</strong>
-                  </span>
-                  <span className="journal-entry-main">
-                    <span className="journal-entry-title">{post.title}</span>
-                    <span className="journal-entry-sub">{post.subtitle}</span>
-                  </span>
-                  <span className="journal-entry-date">{stamp(post.published)}</span>
-                  <span className="journal-entry-go" aria-hidden="true">
-                    Read &rsaquo;
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        </section>
-      </main>
-    );
-  }
-}
-
-const mapStateToProps = (state) => ({
-  posts: state.app.posts,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  getPosts: () => dispatch(getPosts()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Journal));
+export default Journal;

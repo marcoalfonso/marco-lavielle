@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { connect } from 'react-redux'
+import React, { useEffect, useRef, useState } from 'react'
+import { useSelector } from 'react-redux'
 import BrushName from './BrushName'
 import PaintingStage from './PaintingStage'
 
@@ -35,149 +35,136 @@ const shuffle = (list) => {
   return out
 }
 
-export class Art extends Component {
-  state = { index: 0, paintings: shuffle(this.props.paintings), menuOpen: false }
+const Art = () => {
+  const all = useSelector((state) => state.app.paintings)
+  const [paintings] = useState(() => shuffle(all))
+  const [index, setIndex] = useState(0)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const [small] = useState(isSmallScreen)
+  const menuRef = useRef(null)
+  const latest = useRef({ index, paintings })
+  latest.current = { index, paintings }
 
-  menuRef = React.createRef()
+  const imageSrc = (painting) => (small ? smallSrc(painting) : painting.link)
 
-  small = isSmallScreen()
-
-  imageSrc = (painting) => (this.small ? smallSrc(painting) : painting.link)
-
-  componentDidMount() {
-    window.addEventListener('keydown', this.onKeyDown)
-    document.addEventListener('pointerdown', this.onOutside)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.onKeyDown)
-    document.removeEventListener('pointerdown', this.onOutside)
-  }
+  const next = () => setIndex((i) => (i + 1) % paintings.length)
+  const prev = () => setIndex((i) => (i - 1 + paintings.length) % paintings.length)
 
   // phones: the menu is a pill that drops the links down over the page
-  toggleMenu = () => this.setState(({ menuOpen }) => ({ menuOpen: !menuOpen }))
+  const toggleMenu = () => setMenuOpen((open) => !open)
+  const closeMenu = () => setMenuOpen(false)
 
-  closeMenu = () => this.setState({ menuOpen: false })
-
-  onOutside = (e) => {
-    if (this.state.menuOpen && this.menuRef.current && !this.menuRef.current.contains(e.target)) this.closeMenu()
-  }
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') closeMenu()
+      else if (e.key === 'ArrowRight') next()
+      else if (e.key === 'ArrowLeft') prev()
+    }
+    const onOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) closeMenu()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    document.addEventListener('pointerdown', onOutside)
+    return () => {
+      window.removeEventListener('keydown', onKeyDown)
+      document.removeEventListener('pointerdown', onOutside)
+    }
+  }, [])
 
   // Once the painting on show has loaded, fetch its neighbours so switching
   // doesn't wait on the network (not before: they'd compete with it).
-  preloadAround = () => {
-    const { index, paintings, menuOpen } = this.state
+  const preloadAround = () => {
+    const { index: at, paintings: list } = latest.current
     ;[1, -1].forEach((step) => {
       const img = new Image()
-      img.src = this.imageSrc(paintings[(index + step + paintings.length) % paintings.length])
+      img.src = imageSrc(list[(at + step + list.length) % list.length])
     })
   }
 
-  onKeyDown = (e) => {
-    if (e.key === 'Escape') this.closeMenu()
-    else if (e.key === 'ArrowRight') this.onClickForward()
-    else if (e.key === 'ArrowLeft') this.onClickBack()
-  }
+  const painting = paintings[index]
+  const forSale = painting.status === 'For Sale'
 
-  onClickForward = () => {
-    this.setState(({ index, paintings }) => ({ index: (index + 1) % paintings.length }))
-  }
-
-  onClickBack = () => {
-    this.setState(({ index, paintings }) => ({ index: (index - 1 + paintings.length) % paintings.length }))
-  }
-
-  render() {
-    const { index, paintings, menuOpen } = this.state
-    const painting = paintings[index]
-    const forSale = painting.status === 'For Sale'
-
-    return (
-      <div className="art-page">
-        <header className="art-menu">
-          <a href="/" className="art-name" aria-label="Marco Lavielle, home">
-            <BrushName className="art-name-svg" />
-          </a>
-          <div className={menuOpen ? 'art-menu-drop is-open' : 'art-menu-drop'} ref={this.menuRef}>
-            <button
-              type="button"
-              className="art-menu-toggle"
-              aria-expanded={menuOpen}
-              aria-controls="art-nav"
-              onClick={this.toggleMenu}
-            >
-              <span className="art-menu-toggle-icon" aria-hidden="true">
-                <span />
-                <span />
-              </span>
-              {menuOpen ? 'Close' : 'Menu'}
-            </button>
-            <nav className="art-nav" id="art-nav">
-              {NAV.map((item, i) => (
-                <a
-                  key={item.href}
-                  href={item.href}
-                  className={item.active ? 'active' : undefined}
-                  aria-current={item.active ? 'page' : undefined}
-                  onClick={this.closeMenu}
-                >
-                  <span className="art-nav-index">{pad(i + 1)}</span>
-                  {item.label}
-                </a>
-              ))}
-            </nav>
-          </div>
-        </header>
-
-        <PaintingStage
-          src={this.imageSrc(painting)}
-          spillSrc={smallSrc(painting)}
-          scale={painting.scale}
-          name={paintingName(painting)}
-          index={index}
-          onLoaded={this.preloadAround}
-          onNext={this.onClickForward}
-          onPrev={this.onClickBack}
-        />
-
-        <footer className="art-hud">
-          <div className="art-hud-status">
-            <dl className={forSale ? 'art-status is-for-sale' : 'art-status'}>
-              <dt>Status</dt>
-              <dd>
-                <span className="art-status-dot" aria-hidden="true" />
-                {forSale ? 'For sale' : painting.status}
-              </dd>
-            </dl>
-            {forSale && (
-              <a
-                className="art-enquire"
-                href={`mailto:marcoalfonso@gmail.com?subject=${encodeURIComponent(`Painting enquiry: ${paintingName(painting)}`)}`}
-              >
-                Enquire
-              </a>
-            )}
-          </div>
-          <div className="art-controls">
-            <button type="button" className="art-arrow" onClick={this.onClickBack} aria-label="Previous painting">
-              <span aria-hidden="true">&lsaquo;</span>
-            </button>
-            <span className="art-counter" aria-live="polite">
-              <span className="art-counter-current">{pad(index + 1)}</span>
-              <span className="art-counter-total"> / {pad(paintings.length)}</span>
+  return (
+    <div className="art-page">
+      <header className="art-menu">
+        <a href="/" className="art-name" aria-label="Marco Lavielle, home">
+          <BrushName className="art-name-svg" />
+        </a>
+        <div className={menuOpen ? 'art-menu-drop is-open' : 'art-menu-drop'} ref={menuRef}>
+          <button
+            type="button"
+            className="art-menu-toggle"
+            aria-expanded={menuOpen}
+            aria-controls="art-nav"
+            onClick={toggleMenu}
+          >
+            <span className="art-menu-toggle-icon" aria-hidden="true">
+              <span />
+              <span />
             </span>
-            <button type="button" className="art-arrow" onClick={this.onClickForward} aria-label="Next painting">
-              <span aria-hidden="true">&rsaquo;</span>
-            </button>
-          </div>
-        </footer>
-      </div>
-    )
-  }
+            {menuOpen ? 'Close' : 'Menu'}
+          </button>
+          <nav className="art-nav" id="art-nav">
+            {NAV.map((item, i) => (
+              <a
+                key={item.href}
+                href={item.href}
+                className={item.active ? 'active' : undefined}
+                aria-current={item.active ? 'page' : undefined}
+                onClick={closeMenu}
+              >
+                <span className="art-nav-index">{pad(i + 1)}</span>
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </header>
+
+      <PaintingStage
+        src={imageSrc(painting)}
+        spillSrc={smallSrc(painting)}
+        scale={painting.scale}
+        name={paintingName(painting)}
+        index={index}
+        onLoaded={preloadAround}
+        onNext={next}
+        onPrev={prev}
+      />
+
+      <footer className="art-hud">
+        <div className="art-hud-status">
+          <dl className={forSale ? 'art-status is-for-sale' : 'art-status'}>
+            <dt>Status</dt>
+            <dd>
+              <span className="art-status-dot" aria-hidden="true" />
+              {forSale ? 'For sale' : painting.status}
+            </dd>
+          </dl>
+          {forSale && (
+            <a
+              className="art-enquire"
+              href={`mailto:marcoalfonso@gmail.com?subject=${encodeURIComponent(`Painting enquiry: ${paintingName(painting)}`)}`}
+            >
+              Enquire
+            </a>
+          )}
+        </div>
+        <div className="art-controls">
+          <button type="button" className="art-arrow" onClick={prev} aria-label="Previous painting">
+            <span aria-hidden="true">&lsaquo;</span>
+          </button>
+          <span className="art-counter" aria-live="polite">
+            <span className="art-counter-current">{pad(index + 1)}</span>
+            <span className="art-counter-total"> / {pad(paintings.length)}</span>
+          </span>
+          <button type="button" className="art-arrow" onClick={next} aria-label="Next painting">
+            <span aria-hidden="true">&rsaquo;</span>
+          </button>
+        </div>
+      </footer>
+    </div>
+  )
 }
 
-const mapStateToProps = state => ({
-  paintings: state.app.paintings,
-})
-
-export default connect(mapStateToProps)(Art)
+export default Art

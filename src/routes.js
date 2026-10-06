@@ -1,5 +1,5 @@
 import React from 'react'
-import { withRouter, Switch, Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 import PrivateRoute from 'PrivateRoute'
 
 import Homepage from './pages/Homepage/Homepage'
@@ -35,6 +35,4 @@ export const RoutesContainer = () => (
   </Switch>
 )
 
-const RootContainer = withRouter(RoutesContainer)
-
-export default RootContainer
+export default RoutesContainer

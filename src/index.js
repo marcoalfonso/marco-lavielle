@@ -9,19 +9,15 @@ import configureStore from './store'
 
 const store = configureStore()
 
-export class App extends React.Component {
-  render() {
-    return (
-      <Provider store={store}>
-        <CookiesProvider>
-          <BrowserRouter>
-            <RootContainer />
-          </BrowserRouter>
-        </CookiesProvider>
-      </Provider>
-    )
-  }
-}
+export const App = () => (
+  <Provider store={store}>
+    <CookiesProvider>
+      <BrowserRouter>
+        <RootContainer />
+      </BrowserRouter>
+    </CookiesProvider>
+  </Provider>
+)
 
 ReactDOM.render(<App />, document.getElementById('app'))
 if (module.hot) module.hot.accept();

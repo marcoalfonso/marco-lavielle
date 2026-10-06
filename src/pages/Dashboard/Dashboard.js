@@ -1,6 +1,6 @@
-import React, { Component } from "react";
-import { Link, withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import { getPosts, getClients, deleteClient, deletePost } from "actions/appActions";
 import HoloPanel from "components/holo/HoloPanel";
@@ -13,39 +13,39 @@ const pad = (n) => String(n).padStart(2, "0");
 
 // Delete asks twice: the first click arms it ("Confirm"), a second within a
 // few seconds deletes.
-class DeleteButton extends Component {
-  state = { armed: false, busy: false };
+const DeleteButton = ({ name, onDelete }) => {
+  const [armed, setArmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const timer = useRef(null);
 
-  componentWillUnmount() {
-    clearTimeout(this.timer);
-  }
+  useEffect(() => () => clearTimeout(timer.current), []);
 
-  onClick = () => {
-    if (!this.state.armed) {
-      this.setState({ armed: true });
-      this.timer = setTimeout(() => this.setState({ armed: false }), 3500);
+  const onClick = () => {
+    if (!armed) {
+      setArmed(true);
+      timer.current = setTimeout(() => setArmed(false), 3500);
       return;
     }
-    clearTimeout(this.timer);
-    this.setState({ busy: true });
-    this.props.onDelete().catch(() => this.setState({ busy: false, armed: false }));
+    clearTimeout(timer.current);
+    setBusy(true);
+    onDelete().catch(() => {
+      setBusy(false);
+      setArmed(false);
+    });
   };
 
-  render() {
-    const { armed, busy } = this.state;
-    return (
-      <button
-        type="button"
-        className={`holo-button is-danger is-small${armed ? " is-armed" : ""}${busy ? " is-busy" : ""}`}
-        onClick={this.onClick}
-        disabled={busy}
-        aria-label={armed ? `Confirm delete ${this.props.name}` : `Delete ${this.props.name}`}
-      >
-        {armed ? "Confirm" : "Delete"}
-      </button>
-    );
-  }
-}
+  return (
+    <button
+      type="button"
+      className={`holo-button is-danger is-small${armed ? " is-armed" : ""}${busy ? " is-busy" : ""}`}
+      onClick={onClick}
+      disabled={busy}
+      aria-label={armed ? `Confirm delete ${name}` : `Delete ${name}`}
+    >
+      {armed ? "Confirm" : "Delete"}
+    </button>
+  );
+};
 
 const ItemList = ({ items, empty, viewHref, editHref, onDelete, nameOf }) => {
   if (!items) return <p className="admin-empty">Loading…</p>;
@@ -72,84 +72,71 @@ const ItemList = ({ items, empty, viewHref, editHref, onDelete, nameOf }) => {
   );
 };
 
-export class Dashboard extends Component {
-  state = { message: null };
+const Dashboard = () => {
+  const dispatch = useDispatch();
+  const posts = useSelector((state) => state.app.posts);
+  const clients = useSelector((state) => state.app.clients);
+  const [message, setMessage] = useState(null);
 
-  componentDidMount() {
-    this.props.getPosts();
-    this.props.getClients();
-  }
+  useEffect(() => {
+    dispatch(getPosts());
+    dispatch(getClients());
+  }, [dispatch]);
 
-  remove = (action, item) =>
-    action(item._id).catch((err) => {
-      this.setState({ message: describeError(err) });
+  const remove = (action, item) =>
+    dispatch(action(item._id)).catch((err) => {
+      setMessage(describeError(err));
       throw err;
     });
 
-  render() {
-    const { posts, clients } = this.props;
-    const { message } = this.state;
-    return (
-      <AdminLayout kicker="Admin" title="Dashboard">
-        {message && (
-          <p className="admin-message" role="alert">
-            {message}
-          </p>
-        )}
-        <div className="admin-grid">
-          <HoloPanel className="admin-panel">
-            <header className="admin-panel-head">
-              <h2 className="admin-panel-title">
-                Posts <span className="admin-count">{posts ? pad(posts.length) : "··"}</span>
-              </h2>
-              <Link className="holo-button is-small" to="/admin/post">
-                New post
-              </Link>
-            </header>
-            <ItemList
-              items={posts && newestFirst(posts)}
-              empty="No posts yet."
-              nameOf={(post) => post.title}
-              viewHref={(post) => `/journal/${post.slug}`}
-              editHref={(post) => `/admin/post/${post._id}`}
-              onDelete={(post) => this.remove(this.props.deletePost, post)}
-            />
-          </HoloPanel>
+  return (
+    <AdminLayout kicker="Admin" title="Dashboard">
+      {message && (
+        <p className="admin-message" role="alert">
+          {message}
+        </p>
+      )}
+      <div className="admin-grid">
+        <HoloPanel className="admin-panel">
+          <header className="admin-panel-head">
+            <h2 className="admin-panel-title">
+              Posts <span className="admin-count">{posts ? pad(posts.length) : "··"}</span>
+            </h2>
+            <Link className="holo-button is-small" to="/admin/post">
+              New post
+            </Link>
+          </header>
+          <ItemList
+            items={posts && newestFirst(posts)}
+            empty="No posts yet."
+            nameOf={(post) => post.title}
+            viewHref={(post) => `/journal/${post.slug}`}
+            editHref={(post) => `/admin/post/${post._id}`}
+            onDelete={(post) => remove(deletePost, post)}
+          />
+        </HoloPanel>
 
-          <HoloPanel className="admin-panel">
-            <header className="admin-panel-head">
-              <h2 className="admin-panel-title">
-                Clients <span className="admin-count">{clients ? pad(clients.length) : "··"}</span>
-              </h2>
-              <Link className="holo-button is-small" to="/admin/client">
-                New client
-              </Link>
-            </header>
-            <ItemList
-              items={clients && newestFirst(clients)}
-              empty="No clients yet."
-              nameOf={(client) => client.name}
-              viewHref={() => "/software"}
-              editHref={(client) => `/admin/client/${client._id}`}
-              onDelete={(client) => this.remove(this.props.deleteClient, client)}
-            />
-          </HoloPanel>
-        </div>
-      </AdminLayout>
-    );
-  }
-}
+        <HoloPanel className="admin-panel">
+          <header className="admin-panel-head">
+            <h2 className="admin-panel-title">
+              Clients <span className="admin-count">{clients ? pad(clients.length) : "··"}</span>
+            </h2>
+            <Link className="holo-button is-small" to="/admin/client">
+              New client
+            </Link>
+          </header>
+          <ItemList
+            items={clients && newestFirst(clients)}
+            empty="No clients yet."
+            nameOf={(client) => client.name}
+            viewHref={() => "/software"}
+            editHref={(client) => `/admin/client/${client._id}`}
+            onDelete={(client) => remove(deleteClient, client)}
+          />
+        </HoloPanel>
+      </div>
+    </AdminLayout>
+  );
+};
 
-const mapStateToProps = (state) => ({
-  posts: state.app.posts,
-  clients: state.app.clients,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  getPosts: () => dispatch(getPosts()),
-  getClients: () => dispatch(getClients()),
-  deletePost: (id) => dispatch(deletePost(id)),
-  deleteClient: (id) => dispatch(deleteClient(id)),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Dashboard));
+export default Dashboard;

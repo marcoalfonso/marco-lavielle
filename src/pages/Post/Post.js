@@ -1,6 +1,6 @@
-import React, { Component, useRef } from "react";
-import { withRouter } from "react-router-dom";
-import { connect } from "react-redux";
+import React, { useEffect, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import { getPostBySlug, getPosts } from "actions/appActions";
 import HoloPanel from "components/holo/HoloPanel";
@@ -46,128 +46,118 @@ const EntryGlobe = () => {
   );
 };
 
-export class Post extends Component {
-  state = { progress: 0 };
-
-  componentDidMount() {
-    loadOrbitron();
-    document.documentElement.classList.add("entry-html");
-    this.load();
-    if (!this.props.posts) this.props.getPosts();
-    window.addEventListener("scroll", this.onScroll, { passive: true });
-    window.addEventListener("resize", this.onScroll);
-  }
-
-  componentDidUpdate(prevProps) {
-    if (prevProps.match.params.post !== this.props.match.params.post) {
-      this.load();
-      window.scrollTo(0, 0);
-    }
-    if (prevProps.post !== this.props.post) this.onScroll();
-  }
-
-  componentWillUnmount() {
-    document.documentElement.classList.remove("entry-html");
-    window.removeEventListener("scroll", this.onScroll);
-    window.removeEventListener("resize", this.onScroll);
-    cancelAnimationFrame(this.raf);
-  }
-
-  load = () => this.props.getPostBySlug(this.props.match.params.post);
+const Post = () => {
+  const { post: slug } = useParams();
+  const dispatch = useDispatch();
+  const current = useSelector((state) => state.app.post);
+  const posts = useSelector((state) => state.app.posts);
+  const [progress, setProgress] = useState(0);
+  const raf = useRef(null);
+  const firstSlug = useRef(true);
 
   // how far through the post the reader is, for the bar along the top
-  onScroll = () => {
-    cancelAnimationFrame(this.raf);
-    this.raf = requestAnimationFrame(() => {
+  const onScroll = () => {
+    cancelAnimationFrame(raf.current);
+    raf.current = requestAnimationFrame(() => {
       const max = document.documentElement.scrollHeight - window.innerHeight;
-      this.setState({ progress: max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 1 });
+      setProgress(max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 1);
     });
   };
 
-  render() {
-    const { posts } = this.props;
-    const slug = this.props.match.params.post;
-    const post = this.props.post && this.props.post.slug === slug ? this.props.post : null;
-    // oldest first, so entries are numbered in the order they were written
-    const ordered = posts ? [...posts].sort((a, b) => (a.published || "").localeCompare(b.published || "")) : [];
-    const at = ordered.findIndex((p) => p.slug === slug);
-    const older = at > 0 ? ordered[at - 1] : null;
-    const newer = at >= 0 && at < ordered.length - 1 ? ordered[at + 1] : null;
-    const words = post ? wordCount(post.body) : 0;
-    const minutes = Math.max(1, Math.round(words / 220));
+  useEffect(() => {
+    loadOrbitron();
+    document.documentElement.classList.add("entry-html");
+    if (!posts) dispatch(getPosts());
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      document.documentElement.classList.remove("entry-html");
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(raf.current);
+    };
+  }, []);
 
-    return (
-      <main className="entry-page holo-ui">
-        <div className="entry-progress" aria-hidden="true">
-          <span style={{ transform: `scaleX(${this.state.progress})` }} />
+  // this entry, and another one when the address changes (from the top)
+  useEffect(() => {
+    dispatch(getPostBySlug(slug));
+    if (firstSlug.current) firstSlug.current = false;
+    else window.scrollTo(0, 0);
+  }, [slug]);
+
+  // the post's arrival changes the page's length
+  useEffect(onScroll, [current]);
+
+  const post = current && current.slug === slug ? current : null;
+  // oldest first, so entries are numbered in the order they were written
+  const ordered = posts ? [...posts].sort((a, b) => (a.published || "").localeCompare(b.published || "")) : [];
+  const at = ordered.findIndex((p) => p.slug === slug);
+  const older = at > 0 ? ordered[at - 1] : null;
+  const newer = at >= 0 && at < ordered.length - 1 ? ordered[at + 1] : null;
+  const words = post ? wordCount(post.body) : 0;
+  const minutes = Math.max(1, Math.round(words / 220));
+
+  return (
+    <main className="entry-page holo-ui">
+      <div className="entry-progress" aria-hidden="true">
+        <span style={{ transform: `scaleX(${progress})` }} />
+      </div>
+
+      <header className="entry-top">
+        <a className="entry-back" href="/journal">
+          <span aria-hidden="true">&lsaquo;</span> Journal
+        </a>
+        <span className="entry-section">Thoughts</span>
+      </header>
+
+      <section className="entry-head">
+        <EntryGlobe />
+        <div className="entry-head-text">
+          <p className="entry-kicker">
+            <span>Entry {at >= 0 ? pad(at + 1) : "···"}</span>
+            <span>{post ? stamp(post.published) : "····.··.··"}</span>
+            {post && <span>{minutes} min read</span>}
+          </p>
+          <h1 className="entry-title">{post ? post.title : " "}</h1>
+          {post && post.subtitle && <p className="entry-subtitle">{post.subtitle}</p>}
+          {post && post.author && <p className="entry-author">By {post.author}</p>}
         </div>
+      </section>
 
-        <header className="entry-top">
-          <a className="entry-back" href="/journal">
-            <span aria-hidden="true">&lsaquo;</span> Journal
+      <HoloPanel as="article" className="entry-panel">
+        {post ? (
+          <div className="entry-body" dangerouslySetInnerHTML={{ __html: post.body }} />
+        ) : (
+          <p className="entry-loading">Loading entry…</p>
+        )}
+      </HoloPanel>
+
+      <nav className="entry-nav" aria-label="More entries">
+        {older ? (
+          <a className="entry-nav-link is-older" href={`/journal/${older.slug}`}>
+            <small>‹ Previous entry</small>
+            <strong>{older.title}</strong>
           </a>
-          <span className="entry-section">Thoughts</span>
-        </header>
+        ) : (
+          <span />
+        )}
+        {newer ? (
+          <a className="entry-nav-link is-newer" href={`/journal/${newer.slug}`}>
+            <small>Next entry ›</small>
+            <strong>{newer.title}</strong>
+          </a>
+        ) : (
+          <span />
+        )}
+      </nav>
 
-        <section className="entry-head">
-          <EntryGlobe />
-          <div className="entry-head-text">
-            <p className="entry-kicker">
-              <span>Entry {at >= 0 ? pad(at + 1) : "···"}</span>
-              <span>{post ? stamp(post.published) : "····.··.··"}</span>
-              {post && <span>{minutes} min read</span>}
-            </p>
-            <h1 className="entry-title">{post ? post.title : " "}</h1>
-            {post && post.subtitle && <p className="entry-subtitle">{post.subtitle}</p>}
-            {post && post.author && <p className="entry-author">By {post.author}</p>}
-          </div>
-        </section>
+      <p className="entry-foot">
+        <a href="/journal">All entries</a>
+        <span aria-hidden="true">·</span>
+        <a href="/about">About</a>
+      </p>
+    </main>
+  );
+};
 
-        <HoloPanel as="article" className="entry-panel">
-          {post ? (
-            <div className="entry-body" dangerouslySetInnerHTML={{ __html: post.body }} />
-          ) : (
-            <p className="entry-loading">Loading entry…</p>
-          )}
-        </HoloPanel>
-
-        <nav className="entry-nav" aria-label="More entries">
-          {older ? (
-            <a className="entry-nav-link is-older" href={`/journal/${older.slug}`}>
-              <small>‹ Previous entry</small>
-              <strong>{older.title}</strong>
-            </a>
-          ) : (
-            <span />
-          )}
-          {newer ? (
-            <a className="entry-nav-link is-newer" href={`/journal/${newer.slug}`}>
-              <small>Next entry ›</small>
-              <strong>{newer.title}</strong>
-            </a>
-          ) : (
-            <span />
-          )}
-        </nav>
-
-        <p className="entry-foot">
-          <a href="/journal">All entries</a>
-          <span aria-hidden="true">·</span>
-          <a href="/about">About</a>
-        </p>
-      </main>
-    );
-  }
-}
-
-const mapStateToProps = (state) => ({
-  post: state.app.post,
-  posts: state.app.posts,
-});
-
-const mapDispatchToProps = (dispatch) => ({
-  getPostBySlug: (slug) => dispatch(getPostBySlug(slug)),
-  getPosts: () => dispatch(getPosts()),
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(Post));
+export default Post;
