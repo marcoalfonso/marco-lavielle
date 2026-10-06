@@ -41,7 +41,6 @@
     "react-cookie": "^8.1.2",
     "react-dom": "^16.14.0",
     "react-redux": "^7.1.1",
-    "react-resize-detector": "^6.0.1-rc.5",
     "react-router": "^4.2.0",
     "react-router-dom": "5.2.0",
     "react-toastify": "^6.0.9",

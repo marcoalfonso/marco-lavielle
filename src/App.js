@@ -1,52 +1,45 @@
-import React, { Component } from "react";
-import { connect } from "react-redux";
-import { withRouter } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
-import ReactResizeDetector from "react-resize-detector";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
 import { setDevice } from "actions/appActions";
 
 import Routes from "./routes";
 
-export class App extends Component {
-  componentDidMount() {
+const MOBILE_BELOW = 812; // px of page width
+
+const App = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
     document.documentElement.classList.add("detected");
     document.documentElement.classList.add("cursor");
     document.body.classList.add("loaded");
     document.body.classList.add("home");
     document.body.classList.add("detected");
-  }
+  }, []);
 
-  render() {
-    return (
-      <ReactResizeDetector
-        handleWidth
-        onResize={(width) => {
-          if (width < 812 && width !== 0) {
-            document.documentElement.classList.remove("desktop");
-            document.body.classList.remove("desktop");
-            document.documentElement.classList.add("mobile");
-            document.body.classList.add("mobile");
-            this.props.setDevice("mobile");
-          } else {
-            document.documentElement.classList.remove("mobile");
-            document.body.classList.remove("mobile");
-            document.documentElement.classList.add("desktop");
-            document.body.classList.add("desktop");
-            this.props.setDevice("desktop");
-          }
-        }}
-      >
-        {/* <ToastContainer autoClose={4000} /> */}
-        <Routes />
-      </ReactResizeDetector>
-    );
-  }
-}
+  // "mobile" or "desktop" on <html> and <body> (and in the store), by the
+  // page's width, kept up to date as the window resizes
+  useEffect(() => {
+    let device = null;
+    const update = () => {
+      const width = document.documentElement.clientWidth;
+      if (!width) return;
+      const next = width < MOBILE_BELOW ? "mobile" : "desktop";
+      if (next === device) return;
+      device = next;
+      const other = next === "mobile" ? "desktop" : "mobile";
+      [document.documentElement, document.body].forEach((el) => {
+        el.classList.remove(other);
+        el.classList.add(next);
+      });
+      dispatch(setDevice(next));
+    };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
+  }, [dispatch]);
 
-const mapStateToProps = (state) => ({});
+  return <Routes />;
+};
 
-const mapDispatchToProps = (dispatch) => ({
-  setDevice: (device) => dispatch(setDevice(device)),
-});
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(App));
+export default App;
