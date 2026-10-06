@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { COLORS, matte } from "./materials.js";
+import { COLORS, NEON, matte, glow, outline, canvasTexture } from "./materials.js";
 
 // Model coordinates: ground at y = 0, wheel centres at y = 0.62, nose on +X.
 // The physics body origin sits 0.96 above the ground at rest, so the body
@@ -12,12 +12,13 @@ export const createCarModel = (scene) => {
   body.position.y = BODY_OFFSET_Y;
   group.add(body);
 
-  const paint = matte(COLORS.carBody, { shininess: 40 });
+  const paint = matte(COLORS.carBody, { shininess: 70, specular: 0x2a5a78 });
   const darkPaint = matte(COLORS.carDark, { shininess: 30 });
-  const glass = matte(COLORS.glass, { transparent: true, opacity: 0.75, shininess: 80 });
+  const glass = glow(COLORS.glass, 0.25, { transparent: true, opacity: 0.55, shininess: 80 });
   const tireMat = matte(COLORS.tire);
-  const hubMat = matte(COLORS.hub);
-  const trimMat = matte(0x5a564e);
+  const hubMat = glow(COLORS.hub, 0.9);
+  const trimMat = matte(0x121e2c);
+  const neonMat = glow(NEON.holo, 1.2);
 
   const box = (w, h, d, mat, x, y, z, cast = true) => {
     const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat);
@@ -27,7 +28,9 @@ export const createCarModel = (scene) => {
     return m;
   };
 
-  box(4.6, 0.9, 2.3, paint, 0, 1.0, 0);
+  outline(box(4.6, 0.9, 2.3, paint, 0, 1.0, 0), NEON.holo, 0.9);
+  // neon strips along both sides
+  [1.16, -1.16].forEach((z) => box(4.2, 0.07, 0.04, neonMat, 0, 1.2, z, false));
   box(1.5, 0.35, 2.1, darkPaint, 1.5, 1.6, 0);
   // wheel arches
   [1.55, -1.55].forEach((x) =>
@@ -65,8 +68,8 @@ export const createCarModel = (scene) => {
   [2.4, -2.4].forEach((x) => box(0.3, 0.4, 2.35, trimMat, x, 0.8, 0));
 
   // lights
-  const headMat = matte(0xfff3c0, { emissive: 0xffe9a8, emissiveIntensity: 0.4 });
-  const tailMat = matte(0xd14b3a, { emissive: 0xff2a10, emissiveIntensity: 0.25 });
+  const headMat = matte(NEON.ice, { emissive: NEON.holo, emissiveIntensity: 0.4 });
+  const tailMat = matte(NEON.pink, { emissive: NEON.pink, emissiveIntensity: 0.25 });
   const reverseMat = matte(0xf5f2ea, { emissive: 0xffffff, emissiveIntensity: 0 });
   [0.8, -0.8].forEach((z) => {
     box(0.15, 0.3, 0.4, headMat, 2.32, 1.35, z, false);
@@ -76,9 +79,9 @@ export const createCarModel = (scene) => {
 
   // driver (sits on the right-hand seat, z = +0.55)
   const DZ = 0.55;
-  const shirt = matte(0x6f8094);
-  const skin = matte(0xe8c3a0);
-  const cap = matte(0xe2c14d);
+  const shirt = matte(0x1b3044);
+  const skin = matte(0xc9a88c);
+  const cap = glow(NEON.cyan, 0.8);
   const torso = box(0.44, 0.72, 0.6, shirt, -0.78, 2.56, DZ);
   torso.rotation.z = -0.12; // leaning back into the seat
   const head = new THREE.Mesh(new THREE.IcosahedronGeometry(0.3, 1), skin);
@@ -106,7 +109,7 @@ export const createCarModel = (scene) => {
   body.add(wheelPivot);
   const wheelSpin = new THREE.Group();
   wheelPivot.add(wheelSpin);
-  const wheelMat = matte(0x2f2c28);
+  const wheelMat = matte(0x0e1824);
   wheelSpin.add(new THREE.Mesh(new THREE.TorusGeometry(WHEEL_R, 0.045, 6, 18), wheelMat));
   const hubCap = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.06, 8), wheelMat);
   hubCap.rotation.x = Math.PI / 2;
@@ -134,8 +137,8 @@ export const createCarModel = (scene) => {
 
   // legs: thighs along the cushion, knees bent under the wheel, feet in the
   // footwell below the dashboard
-  const pants = matte(0x3f4a5c);
-  const shoe = matte(0x2f2c28);
+  const pants = matte(0x14202e);
+  const shoe = matte(0x0a1018);
   const limb = (mat, from, to, thickness) => {
     const mesh = new THREE.Mesh(unitBox, mat);
     place(mesh, from, to);
@@ -199,13 +202,13 @@ export const createCarModel = (scene) => {
   const antenna = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.045, 2.4, 5), trimMat);
   antenna.position.y = 1.2;
   antennaPivot.add(antenna);
-  const flag = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 0), matte(COLORS.pinStripe));
+  const flag = new THREE.Mesh(new THREE.IcosahedronGeometry(0.16, 0), glow(NEON.holo, 1.2));
   flag.position.y = 2.4;
   antennaPivot.add(flag);
   const spring = { x: 0, z: 0, vx: 0, vz: 0 };
 
   // headlights: one spot + two soft beams, only visible at night
-  const headlight = new THREE.SpotLight(0xfff1c8, 0, 55, 0.55, 0.6, 1.2);
+  const headlight = new THREE.SpotLight(0xbff6ff, 0, 55, 0.55, 0.6, 1.2);
   headlight.position.set(2.4, 1.4, 0);
   headlight.target.position.set(14, -1.5, 0);
   body.add(headlight);
@@ -223,7 +226,7 @@ export const createCarModel = (scene) => {
   beamGeo.rotateZ(Math.PI / 2 + 0.12);
   const beamMat = new THREE.MeshBasicMaterial({
     vertexColors: true,
-    color: 0xfff1c8,
+    color: NEON.holo,
     transparent: true,
     opacity: 0,
     depthWrite: false,
@@ -235,6 +238,23 @@ export const createCarModel = (scene) => {
     beam.position.set(2.4, 1.35, z);
     body.add(beam);
   });
+
+  // underglow: a pool of cyan light on the ground under the car
+  const underTex = canvasTexture(128, 128, (ctx) => {
+    const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(0, 191, 243, 0.9)");
+    g.addColorStop(0.55, "rgba(0, 191, 243, 0.3)");
+    g.addColorStop(1, "rgba(0, 191, 243, 0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+  });
+  const under = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.5, 4.6),
+    new THREE.MeshBasicMaterial({ map: underTex, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
+  under.rotation.x = -Math.PI / 2;
+  under.position.y = 0.06;
+  body.add(under);
 
   scene.add(group);
 
@@ -248,6 +268,7 @@ export const createCarModel = (scene) => {
     const w = new THREE.Group();
     const tire = new THREE.Mesh(wheelGeo, tireMat);
     tire.castShadow = true;
+    outline(tire, NEON.cyan, 0.7, 40);
     w.add(tire);
     w.add(new THREE.Mesh(hubGeo, hubMat));
     w.add(new THREE.Mesh(spokeGeo, hubMat));

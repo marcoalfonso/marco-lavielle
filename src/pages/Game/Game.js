@@ -1,6 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from "react";
+import HoloPanel from "components/holo/HoloPanel";
+import loadOrbitron from "components/fonts/loadOrbitron";
 import { createGame } from "./engine/createGame";
 import { TOTAL_CRYSTALS } from "./engine/layout";
+import "components/holo/holo.css";
+import "./Game.css";
+
+// The playground: drive a little neon world, knock the name over, collect
+// the crystals. The HUD and its cards are drawn in the site's holo style.
 
 const isMobile = () =>
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -29,7 +36,48 @@ const formatTime = (s) => {
   return `${m}:${sec}`;
 };
 
-const HoldButton = ({ label, name, glyph, pressed, onChange, className = "" }) => {
+// line icons for the HUD buttons
+const Icon = ({ name }) => {
+  const common = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", "aria-hidden": true };
+  if (name === "sound")
+    return (
+      <svg {...common}>
+        <path d="M4 9v6h4l5 4V5L8 9H4z" />
+        <path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12" />
+      </svg>
+    );
+  if (name === "muted")
+    return (
+      <svg {...common}>
+        <path d="M4 9v6h4l5 4V5L8 9H4z" />
+        <path d="M17 9l5 6M22 9l-5 6" />
+      </svg>
+    );
+  if (name === "reset")
+    return (
+      <svg {...common}>
+        <path d="M4 12a8 8 0 1 0 2.4-5.7" />
+        <path d="M4 4v4.5h4.5" />
+      </svg>
+    );
+  if (name === "help")
+    return (
+      <svg {...common}>
+        <circle cx="12" cy="12" r="9" />
+        <path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.8-2.4 2.2-2.4 3.8" />
+        <path d="M12 17.2h.01" />
+      </svg>
+    );
+  // arrows: up, down, left, right
+  const turn = { up: 0, right: 90, down: 180, left: 270 }[name];
+  return (
+    <svg {...common} width={26} height={26} style={{ transform: `rotate(${turn}deg)` }}>
+      <path d="M12 19V5M6 11l6-6 6 6" />
+    </svg>
+  );
+};
+
+const HoldButton = ({ label, name, children, pressed, onChange, className = "" }) => {
   const start = (e) => {
     e.preventDefault();
     onChange(name, true);
@@ -40,7 +88,7 @@ const HoldButton = ({ label, name, glyph, pressed, onChange, className = "" }) =
   };
   return (
     <div
-      className={`mobile-ctrl-btn ${pressed ? "is-pressed" : ""} ${className}`}
+      className={`game-pad-btn ${pressed ? "is-pressed" : ""} ${className}`}
       aria-label={label}
       onTouchStart={start}
       onTouchEnd={end}
@@ -49,9 +97,29 @@ const HoldButton = ({ label, name, glyph, pressed, onChange, className = "" }) =
       onMouseUp={end}
       onMouseLeave={(e) => pressed && end(e)}
     >
-      {glyph}
+      {children}
     </div>
   );
+};
+
+// waits (briefly) for the display font, so the world's painted labels use it
+const fontReady = () => {
+  loadOrbitron();
+  if (!document.fonts || !document.fonts.load) return Promise.resolve();
+  // the font is only known once its stylesheet has arrived
+  const link = document.getElementById("orbitron-font");
+  const sheet =
+    link && !link.sheet
+      ? new Promise((resolve) => {
+          link.addEventListener("load", resolve, { once: true });
+          link.addEventListener("error", resolve, { once: true });
+        })
+      : Promise.resolve();
+  const timeout = new Promise((resolve) => setTimeout(resolve, 3000));
+  return Promise.race([
+    sheet.then(() => Promise.all([document.fonts.load("700 64px Orbitron"), document.fonts.load("600 32px Orbitron")])),
+    timeout,
+  ]).catch(() => {});
 };
 
 const CarGame = () => {
@@ -64,7 +132,6 @@ const CarGame = () => {
   const [toasts, setToasts] = useState([]);
   const [zone, setZone] = useState(null);
   const [flipped, setFlipped] = useState(false);
-  const [nightMode, setNightMode] = useState(false);
   const [muted, setMuted] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [intro, setIntro] = useState(true);
@@ -78,31 +145,37 @@ const CarGame = () => {
   }, []);
 
   useEffect(() => {
-    if (!mountRef.current) return undefined;
-    const game = createGame(mountRef.current, {
-      isMobile: mobile,
-      callbacks: {
-        onCrystal: (n) => {
-          setScore(n);
-          if (n < TOTAL_CRYSTALS) toast(`💎 ${n} / ${TOTAL_CRYSTALS}`);
+    document.documentElement.classList.add("game-html");
+    let game = null;
+    let cancelled = false;
+    fontReady().then(() => {
+      if (cancelled || !mountRef.current) return;
+      game = createGame(mountRef.current, {
+        isMobile: mobile,
+        callbacks: {
+          onCrystal: (n) => {
+            setScore(n);
+            if (n < TOTAL_CRYSTALS) toast(`Crystal ${n} / ${TOTAL_CRYSTALS}`);
+          },
+          onWin: ({ time }) => {
+            const best = readBest();
+            const isBest = best === null || time < best;
+            if (isBest) writeBest(time);
+            setTimeout(() => setWin({ time, best: isBest ? time : best, isBest }), 1200);
+          },
+          onZone: setZone,
+          onToast: toast,
+          onFlipped: setFlipped,
+          onHud: setHud,
+          onMute: setMuted,
         },
-        onWin: ({ time }) => {
-          const best = readBest();
-          const isBest = best === null || time < best;
-          if (isBest) writeBest(time);
-          setTimeout(() => setWin({ time, best: isBest ? time : best, isBest }), 1200);
-        },
-        onZone: setZone,
-        onToast: toast,
-        onFlipped: setFlipped,
-        onHud: setHud,
-        onNight: setNightMode,
-        onMute: setMuted,
-      },
+      });
+      gameRef.current = game;
     });
-    gameRef.current = game;
     return () => {
-      game.dispose();
+      cancelled = true;
+      document.documentElement.classList.remove("game-html");
+      if (game) game.dispose();
       gameRef.current = null;
     };
   }, [mobile, toast]);
@@ -110,8 +183,11 @@ const CarGame = () => {
   // Dismiss the intro card on the first interaction
   useEffect(() => {
     if (!intro) return undefined;
-    const dismiss = () => setIntro(false);
-    const timer = setTimeout(dismiss, 7000);
+    const dismiss = (e) => {
+      if (e && e.target && e.target.closest && e.target.closest(".game-home")) return;
+      setIntro(false);
+    };
+    const timer = setTimeout(dismiss, 8000);
     window.addEventListener("keydown", dismiss);
     window.addEventListener("pointerdown", dismiss);
     return () => {
@@ -128,357 +204,165 @@ const CarGame = () => {
   const call = (fn) => () => gameRef.current && gameRef.current[fn]();
 
   return (
-    <div className={`cargame-root ${nightMode ? "is-night" : ""}`}>
-      <div ref={mountRef} className="cargame-canvas" />
-      <div className="cargame-vignette" />
+    <div className={`game-root holo-ui${mobile ? " is-touch" : ""}`}>
+      <div ref={mountRef} className="game-canvas" />
+      <div className="game-vignette" aria-hidden="true" />
 
-      {/* top-left: progress */}
-      <div className="hud-group hud-left">
-        <div className="hud-pill">
-          <span className="hud-icon">💎</span>
-          {score}/{TOTAL_CRYSTALS}
+      <a className="game-home" href="/">
+        <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
+      </a>
+
+      {/* progress */}
+      <div className="game-readouts">
+        <div className="game-readout">
+          <span className="game-readout-label">Crystals</span>
+          <span className="game-readout-value">
+            {String(score).padStart(2, "0")}
+            <small> / {String(TOTAL_CRYSTALS).padStart(2, "0")}</small>
+          </span>
         </div>
-        <div className="hud-pill hud-muted">
-          <span className="hud-icon">⏱</span>
-          {formatTime(hud.time)}
+        <div className="game-readout">
+          <span className="game-readout-label">Time</span>
+          <span className="game-readout-value">{formatTime(hud.time)}</span>
         </div>
       </div>
 
-      {/* top-right: toggles */}
-      <div className="hud-group hud-right">
-        <button type="button" className="hud-btn" title="Day / night (N)" onClick={call("toggleNight")}>
-          {nightMode ? "☀️" : "🌙"}
+      {/* toggles */}
+      <div className="game-tools">
+        <button type="button" className="game-tool" title="Sound (M)" aria-label={muted ? "Sound on" : "Mute"} onClick={call("toggleMute")}>
+          <Icon name={muted ? "muted" : "sound"} />
         </button>
-        <button type="button" className="hud-btn" title="Sound (M)" onClick={call("toggleMute")}>
-          {muted ? "🔇" : "🔊"}
+        <button type="button" className="game-tool" title="Reset car (R)" aria-label="Reset car" onClick={call("resetCar")}>
+          <Icon name="reset" />
         </button>
-        <button type="button" className="hud-btn" title="Reset car (R)" onClick={call("resetCar")}>
-          ↺
-        </button>
-        <button type="button" className="hud-btn" title="Help" onClick={() => setHelpOpen((v) => !v)}>
-          ?
+        <button
+          type="button"
+          className={helpOpen ? "game-tool is-on" : "game-tool"}
+          title="Help"
+          aria-label="Help"
+          aria-expanded={helpOpen}
+          onClick={() => setHelpOpen((v) => !v)}
+        >
+          <Icon name="help" />
         </button>
       </div>
 
       {!mobile && (
-        <div className={`hud-speed ${hud.boosting ? "is-boost" : ""}`}>
-          <span className="hud-speed-value">{hud.speed}</span>
-          <span className="hud-speed-unit">km/h</span>
+        <div className={`game-speed ${hud.boosting ? "is-boost" : ""}`}>
+          <span className="game-speed-value">{String(hud.speed).padStart(3, "0")}</span>
+          <span className="game-speed-unit">km/h{hud.boosting ? " · boost" : ""}</span>
         </div>
       )}
 
-      <div className="hud-toasts">
+      <div className="game-toasts" aria-live="polite">
         {toasts.map((t) => (
-          <div key={t.id} className="hud-toast">
+          <div key={t.id} className="game-toast">
             {t.text}
           </div>
         ))}
       </div>
 
       {zone && (
-        <button type="button" className="hud-zone" onClick={call("openActivePad")}>
-          <span className="hud-zone-title">{zone.title}</span>
-          <span className="hud-zone-cta">{mobile ? "Tap to open →" : "Press Enter ⏎ to open"}</span>
+        <button type="button" className="game-zone" onClick={call("openActivePad")}>
+          <span className="game-zone-title">{zone.title}</span>
+          <span className="game-zone-cta">{mobile ? "Tap to open ›" : "Press Enter to open ›"}</span>
         </button>
       )}
 
       {flipped && !zone && (
-        <button type="button" className="hud-zone hud-flip" onClick={call("resetCar")}>
-          <span className="hud-zone-title">Upside down?</span>
-          <span className="hud-zone-cta">{mobile ? "Tap to flip back" : "Press R to flip back"}</span>
+        <button type="button" className="game-zone" onClick={call("resetCar")}>
+          <span className="game-zone-title">Upside down?</span>
+          <span className="game-zone-cta">{mobile ? "Tap to flip back" : "Press R to flip back"}</span>
         </button>
       )}
 
       {intro && (
-        <div className="hud-card hud-intro">
-          <h3>🚙 Marco Lavielle</h3>
-          <p>A little world to drive around. Knock over the letters, bowl a strike, score a goal, fly through the hoop — and collect all {TOTAL_CRYSTALS} crystals.</p>
-          <p className="hud-hint">
+        <HoloPanel as="div" className="game-card game-intro">
+          <p className="holo-kicker">Playground · ML-01</p>
+          <h1 className="holo-title game-card-title">Marco Lavielle</h1>
+          <p>
+            A little world to drive around. Knock over the letters, bowl a strike, score a goal, fly through the hoop,
+            and collect all {TOTAL_CRYSTALS} crystals.
+          </p>
+          <p className="game-hint">
             {mobile ? "Tap anywhere to start" : "Arrows / WASD to drive · Shift boost · Space drift · press any key"}
           </p>
-        </div>
+        </HoloPanel>
       )}
 
       {helpOpen && (
-        <div className="hud-card hud-help" onClick={() => setHelpOpen(false)}>
-          <h3>Controls</h3>
+        <HoloPanel as="div" className="game-card game-help" onClick={() => setHelpOpen(false)}>
+          <p className="holo-kicker">Controls</p>
           <ul>
             <li><b>↑ ↓ ← →</b> / <b>WASD</b> drive</li>
             <li><b>Shift</b> boost · <b>Space</b> handbrake drift</li>
-            <li><b>H</b> horn · <b>R</b> reset / flip · <b>N</b> night · <b>M</b> mute</li>
+            <li><b>H</b> horn · <b>R</b> reset / flip · <b>M</b> mute</li>
             <li><b>Enter</b> open a project pad · scroll to zoom</li>
           </ul>
-          <h3>Things to do</h3>
+          <p className="holo-kicker">Things to do</p>
           <ul>
-            <li>🎳 Bowl a strike in the playground</li>
-            <li>⚽ Push the ball into a goal in the stadium</li>
-            <li>🎯 Jump through the golden hoop in the jump park</li>
-            <li>🧱 Smash the brick wall, topple the dominoes</li>
-            <li>💎 Follow the light beams to all {TOTAL_CRYSTALS} crystals</li>
+            <li>Bowl a strike in the playground</li>
+            <li>Push the ball into a goal in the stadium</li>
+            <li>Jump through the glowing hoop in the jump park</li>
+            <li>Smash the brick wall, topple the dominoes</li>
+            <li>Follow the beams of light to all {TOTAL_CRYSTALS} crystals</li>
           </ul>
-          <p className="hud-hint">psst… ↑ ↑ ↓ ↓ ← → ← → B A</p>
-        </div>
+          <p className="game-hint">psst… ↑ ↑ ↓ ↓ ← → ← → B A</p>
+        </HoloPanel>
       )}
 
       {win && (
-        <div className="hud-card hud-win">
-          <h2>🎉 You found them all!</h2>
-          <p className="hud-win-time">{formatTime(win.time)}</p>
-          <p>{win.isBest ? "New best time!" : `Best: ${formatTime(win.best)}`}</p>
-          <div className="hud-win-actions">
-            <button type="button" onClick={() => window.location.reload()}>
-              Play again
-            </button>
-            <button type="button" onClick={() => setWin(null)}>
-              Keep driving
-            </button>
-            <button type="button" onClick={() => (window.location.href = "/")}>
-              Back to site
-            </button>
-          </div>
+        <div className="game-win-backdrop">
+          <HoloPanel as="div" className="game-card game-win" role="dialog" aria-label="All crystals found">
+            <p className="holo-kicker">All {TOTAL_CRYSTALS} crystals found</p>
+            <p className="game-win-time">{formatTime(win.time)}</p>
+            <p className="game-win-best">{win.isBest ? "New best time" : `Best ${formatTime(win.best)}`}</p>
+            <div className="game-win-actions">
+              <button type="button" className="holo-button" onClick={() => window.location.reload()}>
+                Play again
+              </button>
+              <button type="button" className="holo-button is-quiet" onClick={() => setWin(null)}>
+                Keep driving
+              </button>
+              <a className="holo-button is-quiet" href="/">
+                Back to site
+              </a>
+            </div>
+          </HoloPanel>
         </div>
       )}
 
       {mobile && (
         <>
-          <div className="mobile-ctrl-cluster steer">
-            <HoldButton label="Steer left" name="left" glyph="←" pressed={!!pressed.left} onChange={setVirtual} />
-            <HoldButton label="Steer right" name="right" glyph="→" pressed={!!pressed.right} onChange={setVirtual} />
+          <div className="game-pad steer">
+            <HoldButton label="Steer left" name="left" pressed={!!pressed.left} onChange={setVirtual}>
+              <Icon name="left" />
+            </HoldButton>
+            <HoldButton label="Steer right" name="right" pressed={!!pressed.right} onChange={setVirtual}>
+              <Icon name="right" />
+            </HoldButton>
           </div>
-          <div className="mobile-ctrl-cluster extras">
-            <HoldButton label="Boost" name="boost" glyph="⚡" pressed={!!pressed.boost} onChange={setVirtual} className="small" />
-            <HoldButton label="Drift" name="brake" glyph="✋" pressed={!!pressed.brake} onChange={setVirtual} className="small" />
-            <HoldButton label="Horn" name="horn" glyph="📣" pressed={!!pressed.horn} onChange={setVirtual} className="small" />
+          <div className="game-pad extras">
+            <HoldButton label="Boost" name="boost" pressed={!!pressed.boost} onChange={setVirtual} className="small">
+              Boost
+            </HoldButton>
+            <HoldButton label="Drift" name="brake" pressed={!!pressed.brake} onChange={setVirtual} className="small">
+              Drift
+            </HoldButton>
+            <HoldButton label="Horn" name="horn" pressed={!!pressed.horn} onChange={setVirtual} className="small">
+              Horn
+            </HoldButton>
           </div>
-          <div className="mobile-ctrl-cluster throttle">
-            <HoldButton label="Accelerate" name="up" glyph="↑" pressed={!!pressed.up} onChange={setVirtual} />
-            <HoldButton label="Reverse" name="down" glyph="↓" pressed={!!pressed.down} onChange={setVirtual} />
+          <div className="game-pad throttle">
+            <HoldButton label="Accelerate" name="up" pressed={!!pressed.up} onChange={setVirtual}>
+              <Icon name="up" />
+            </HoldButton>
+            <HoldButton label="Reverse" name="down" pressed={!!pressed.down} onChange={setVirtual}>
+              <Icon name="down" />
+            </HoldButton>
           </div>
         </>
       )}
-
-      <style>{`
-        .cargame-root {
-          /* pinned to the viewport: 100vw/100vh in normal flow overflowed
-             by the body margin and the scrollbar width */
-          position: fixed;
-          inset: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          z-index: 999;
-          font-family: Arial, sans-serif;
-          color: #46423a;
-          user-select: none;
-          -webkit-user-select: none;
-        }
-        .cargame-canvas { width: 100%; height: 100%; }
-        .cargame-canvas canvas { display: block; }
-        .cargame-vignette {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-          background: radial-gradient(ellipse at center, rgba(0,0,0,0) 55%, rgba(70,66,58,0.22) 100%);
-          transition: background 1s ease;
-        }
-        .is-night .cargame-vignette {
-          background: radial-gradient(ellipse at center, rgba(0,0,0,0) 45%, rgba(8,10,24,0.55) 100%);
-        }
-        .hud-group {
-          position: absolute;
-          top: ${mobile ? "14px" : "20px"};
-          display: flex;
-          gap: 8px;
-          z-index: 5;
-        }
-        .hud-left { left: ${mobile ? "14px" : "20px"}; }
-        .hud-right { right: ${mobile ? "14px" : "20px"}; }
-        .hud-pill, .hud-btn, .hud-speed, .hud-toast, .hud-card, .hud-zone {
-          background: rgba(255,253,247,0.92);
-          border: 1px solid rgba(70,66,58,0.12);
-          box-shadow: 0 4px 14px rgba(70,66,58,0.18);
-          color: #46423a;
-          backdrop-filter: blur(6px);
-          -webkit-backdrop-filter: blur(6px);
-        }
-        .hud-pill {
-          display: flex;
-          align-items: center;
-          gap: 7px;
-          font-weight: bold;
-          font-size: ${mobile ? "14px" : "17px"};
-          padding: ${mobile ? "7px 12px" : "10px 18px"};
-          border-radius: 999px;
-          font-variant-numeric: tabular-nums;
-        }
-        .hud-muted { font-weight: 600; }
-        .hud-icon { font-size: ${mobile ? "16px" : "19px"}; }
-        .hud-btn {
-          width: ${mobile ? "38px" : "44px"};
-          height: ${mobile ? "38px" : "44px"};
-          border-radius: 50%;
-          font-size: ${mobile ? "16px" : "19px"};
-          font-weight: 900;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0;
-          transition: transform 0.12s ease;
-        }
-        .hud-btn:hover { transform: scale(1.08); }
-        .hud-btn:active { transform: scale(0.94); }
-        .hud-speed {
-          position: absolute;
-          left: 20px;
-          bottom: 20px;
-          padding: 10px 18px;
-          border-radius: 16px;
-          display: flex;
-          align-items: baseline;
-          gap: 6px;
-          font-variant-numeric: tabular-nums;
-          transition: background 0.2s ease, color 0.2s ease;
-        }
-        .hud-speed.is-boost { background: rgba(232,88,28,0.92); color: #fffdf7; }
-        .hud-speed-value { font-size: 26px; font-weight: 900; min-width: 48px; text-align: right; }
-        .hud-speed-unit { font-size: 13px; font-weight: 700; opacity: 0.75; }
-        .hud-toasts {
-          position: absolute;
-          top: ${mobile ? "64px" : "84px"};
-          left: 50%;
-          transform: translateX(-50%);
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 8px;
-          pointer-events: none;
-          z-index: 6;
-        }
-        .hud-toast {
-          padding: ${mobile ? "9px 16px" : "12px 22px"};
-          border-radius: 999px;
-          font-weight: 900;
-          font-size: ${mobile ? "15px" : "19px"};
-          white-space: nowrap;
-          animation: hud-pop 2.4s ease forwards;
-        }
-        @keyframes hud-pop {
-          0% { opacity: 0; transform: translateY(-10px) scale(0.85); }
-          10% { opacity: 1; transform: translateY(0) scale(1.06); }
-          16% { transform: scale(1); }
-          85% { opacity: 1; }
-          100% { opacity: 0; transform: translateY(-6px); }
-        }
-        .hud-zone {
-          position: absolute;
-          left: 50%;
-          bottom: ${mobile ? "118px" : "34px"};
-          transform: translateX(-50%);
-          padding: 14px 26px;
-          border-radius: 18px;
-          border: 2px solid #e2c14d;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          cursor: pointer;
-          z-index: 6;
-          animation: hud-rise 0.3s ease;
-          font-family: inherit;
-        }
-        .hud-flip { border-color: rgba(70,66,58,0.3); }
-        @keyframes hud-rise {
-          from { opacity: 0; transform: translate(-50%, 12px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .hud-zone-title { font-size: ${mobile ? "17px" : "21px"}; font-weight: 900; letter-spacing: 1px; }
-        .hud-zone-cta { font-size: 13px; font-weight: 700; opacity: 0.7; }
-        .hud-card {
-          position: absolute;
-          left: 50%;
-          transform: translateX(-50%);
-          border-radius: 18px;
-          padding: ${mobile ? "14px 18px" : "20px 28px"};
-          line-height: 1.5;
-          text-align: center;
-          z-index: 7;
-          max-width: ${mobile ? "88vw" : "500px"};
-          box-sizing: border-box;
-          box-shadow: 0 10px 30px rgba(70,66,58,0.22);
-        }
-        .hud-card h2, .hud-card h3 { margin: 0 0 8px 0; }
-        .hud-card h3 { font-size: ${mobile ? "17px" : "20px"}; }
-        .hud-card p { margin: 6px 0; font-size: ${mobile ? "13px" : "15px"}; }
-        .hud-hint { opacity: 0.65; font-weight: 700; }
-        .hud-intro { top: ${mobile ? "64px" : "84px"}; animation: hud-rise-card 0.5s ease; }
-        @keyframes hud-rise-card {
-          from { opacity: 0; transform: translate(-50%, -10px); }
-          to { opacity: 1; transform: translate(-50%, 0); }
-        }
-        .hud-help { top: ${mobile ? "64px" : "84px"}; text-align: left; cursor: pointer; }
-        .hud-help ul { margin: 0 0 12px 0; padding-left: 18px; font-size: ${mobile ? "13px" : "15px"}; }
-        .hud-win {
-          top: 50%;
-          transform: translate(-50%, -50%);
-          border: 3px solid #e2c14d;
-          padding: ${mobile ? "22px 18px" : "30px 40px"};
-        }
-        .hud-win h2 { font-size: ${mobile ? "24px" : "34px"}; }
-        .hud-win-time { font-size: ${mobile ? "34px" : "48px"}; font-weight: 900; margin: 4px 0 !important; font-variant-numeric: tabular-nums; }
-        .hud-win-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 14px; }
-        .hud-win-actions button {
-          font-family: inherit;
-          font-weight: 800;
-          font-size: 15px;
-          padding: 10px 16px;
-          border-radius: 999px;
-          border: 1px solid rgba(70,66,58,0.25);
-          background: #fffdf7;
-          color: #46423a;
-          cursor: pointer;
-        }
-        .hud-win-actions button:first-child { background: #e8581c; color: #fffdf7; border-color: #b6430f; }
-        .mobile-ctrl-btn {
-          width: 66px;
-          height: 66px;
-          border-radius: 18px;
-          border: 1px solid rgba(70,66,58,0.35);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 30px;
-          font-weight: 900;
-          color: #55514a;
-          touch-action: none;
-          cursor: pointer;
-          background: linear-gradient(180deg, #fffdf7 0%, #ece5d4 100%);
-          box-shadow: 0 6px 14px rgba(70,66,58,0.3), inset 0 1px 0 rgba(255,255,255,0.6);
-          transition: transform 0.08s ease, background 0.08s ease, box-shadow 0.08s ease;
-        }
-        .mobile-ctrl-btn.small { width: 50px; height: 50px; font-size: 22px; border-radius: 14px; }
-        .mobile-ctrl-btn.is-pressed {
-          transform: scale(0.9);
-          background: linear-gradient(180deg, #e2c14d 0%, #d1a934 100%);
-          box-shadow: 0 2px 6px rgba(70,66,58,0.35), inset 0 2px 4px rgba(0,0,0,0.15);
-        }
-        .mobile-ctrl-cluster { position: fixed; display: flex; gap: 12px; z-index: 1000; }
-        .mobile-ctrl-cluster.steer {
-          left: calc(env(safe-area-inset-left, 0px) + 16px);
-          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
-        }
-        .mobile-ctrl-cluster.throttle {
-          right: calc(env(safe-area-inset-right, 0px) + 16px);
-          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
-          flex-direction: column;
-        }
-        .mobile-ctrl-cluster.extras {
-          right: calc(env(safe-area-inset-right, 0px) + 96px);
-          bottom: calc(env(safe-area-inset-bottom, 0px) + 22px);
-          flex-direction: column;
-          gap: 10px;
-        }
-      `}</style>
     </div>
   );
 };

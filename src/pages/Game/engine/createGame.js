@@ -6,7 +6,7 @@ import { buildProps } from "./props.js";
 import { createEffects } from "./effects.js";
 import { createAudio } from "./audio.js";
 import { createCarModel } from "./carModel.js";
-import { COLORS, windUniform } from "./materials.js";
+import { COLORS, NEON, windUniform } from "./materials.js";
 import { SPAWN, CRYSTALS, TOTAL_CRYSTALS } from "./layout.js";
 
 const CAMERA_OFFSET = new THREE.Vector3(18, 21, 18);
@@ -30,21 +30,15 @@ const GAME_KEYS = new Set([
   "Space",
 ]);
 
-const DAY = {
+// The world is always dark: the lights are the neon, the lit windows, the
+// lamps and the stars.
+const LIGHT = {
   sky: new THREE.Color(COLORS.world),
-  hemiSky: new THREE.Color(0xffffff),
-  hemiGround: new THREE.Color(0xc8c2b4),
-  hemi: 0.52,
-  sun: new THREE.Color(0xfff6e0),
-  sunI: 0.56,
-};
-const NIGHT = {
-  sky: new THREE.Color(COLORS.worldNight),
-  hemiSky: new THREE.Color(0x8a9ad6),
-  hemiGround: new THREE.Color(0x2a2c3a),
-  hemi: 0.26,
-  sun: new THREE.Color(0x9fb3ff),
-  sunI: 0.16,
+  hemiSky: new THREE.Color(0x5f8fc0),
+  hemiGround: new THREE.Color(0x0a1420),
+  hemi: 0.75,
+  sun: new THREE.Color(0x9fdcff),
+  sunI: 0.42,
 };
 
 export const createGame = (container, { isMobile, callbacks }) => {
@@ -55,7 +49,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     onToast: () => {},
     onFlipped: () => {},
     onHud: () => {},
-    onNight: () => {},
     onMute: () => {},
     ...callbacks,
   };
@@ -64,8 +57,8 @@ export const createGame = (container, { isMobile, callbacks }) => {
   // Renderer / scene / camera / lights
   // ------------------------------------------------------------------
   const scene = new THREE.Scene();
-  scene.background = DAY.sky.clone();
-  scene.fog = new THREE.Fog(DAY.sky.clone(), 90, 230);
+  scene.background = LIGHT.sky.clone();
+  scene.fog = new THREE.Fog(LIGHT.sky.clone(), 80, 220);
 
   const width = () => container.clientWidth || window.innerWidth;
   const height = () => container.clientHeight || window.innerHeight;
@@ -78,9 +71,9 @@ export const createGame = (container, { isMobile, callbacks }) => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
 
-  const hemi = new THREE.HemisphereLight(DAY.hemiSky, DAY.hemiGround, DAY.hemi);
+  const hemi = new THREE.HemisphereLight(LIGHT.hemiSky, LIGHT.hemiGround, LIGHT.hemi);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(DAY.sun, DAY.sunI);
+  const sun = new THREE.DirectionalLight(LIGHT.sun, LIGHT.sunI);
   const SUN_OFFSET = new THREE.Vector3(40, 80, 26);
   sun.castShadow = true;
   const S = 55;
@@ -124,23 +117,23 @@ export const createGame = (container, { isMobile, callbacks }) => {
   // ------------------------------------------------------------------
   const crystalGeo = new THREE.OctahedronGeometry(1, 0);
   const crystalMat = new THREE.MeshPhongMaterial({
-    color: 0xffd700,
-    emissive: 0xc9a227,
-    emissiveIntensity: 0.45,
+    color: NEON.ice,
+    emissive: NEON.holo,
+    emissiveIntensity: 0.8,
     shininess: 90,
     flatShading: true,
   });
   const ringMat = new THREE.MeshBasicMaterial({
-    color: 0xe2c14d,
+    color: NEON.holo,
     transparent: true,
-    opacity: 0.45,
+    opacity: 0.55,
     side: THREE.DoubleSide,
     depthWrite: false,
   });
   const beamMat = new THREE.MeshBasicMaterial({
-    color: 0xffe28a,
+    color: NEON.cyan,
     transparent: true,
-    opacity: 0.16,
+    opacity: 0.34,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   });
@@ -173,7 +166,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   arrowGeo.rotateX(-Math.PI / 2);
   const arrow = new THREE.Mesh(
     arrowGeo,
-    new THREE.MeshBasicMaterial({ color: 0xe2c14d, transparent: true, opacity: 0.85, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: NEON.holo, transparent: true, opacity: 0.85, depthWrite: false }),
   );
   arrow.scale.setScalar(1.3);
   scene.add(arrow);
@@ -184,8 +177,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   const keys = {};
   const virtual = {};
   let konami = 0;
-  let nightTarget = 0;
-  let night = 0;
+  const night = 1; // the lights the world used to switch on at night stay on
   let muted = false;
   let activePad = null;
 
@@ -194,16 +186,12 @@ export const createGame = (container, { isMobile, callbacks }) => {
   const openPad = (pad) => {
     if (!pad || pad.kind !== "link") return;
     audio.chime(4);
-    cb.onToast(`Opening ${pad.title.toLowerCase()}…`);
+    cb.onToast(`Opening ${pad.title.toLowerCase()}`);
     setTimeout(() => {
       window.location.href = pad.href;
     }, 350);
   };
 
-  const toggleNight = () => {
-    nightTarget = nightTarget ? 0 : 1;
-    cb.onNight(!!nightTarget);
-  };
   const toggleMute = () => {
     muted = !muted;
     audio.setMuted(muted);
@@ -225,11 +213,10 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (konami === KONAMI.length) {
         konami = 0;
         props.ballRain(car.chassisBody.position.x, car.chassisBody.position.z);
-        cb.onToast("🎊 It's raining balls!");
+        cb.onToast("It's raining balls");
         audio.fanfare();
       }
       if (e.code === "KeyR") resetCar();
-      if (e.code === "KeyN") toggleNight();
       if (e.code === "KeyM") toggleMute();
       if (e.code === "KeyH") horn(true);
       if (e.code === "Enter") openPad(activePad);
@@ -271,7 +258,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     } else {
       car.unflip();
     }
-    effects.burst({ x: p.x, y: p.y, z: p.z }, { count: 25, power: 5, up: 5, colors: [0xf5f2ea, COLORS.dust] });
+    effects.burst({ x: p.x, y: p.y, z: p.z }, { count: 25, power: 5, up: 5, colors: [NEON.ice, NEON.cyan] });
   };
 
   // ------------------------------------------------------------------
@@ -290,8 +277,9 @@ export const createGame = (container, { isMobile, callbacks }) => {
           y: 16 + Math.random() * 12,
           z: p.z + (Math.random() - 0.5) * 40,
         };
-        const hue = Math.random();
-        const colors = [0, 0.08, 0.16].map((o) => new THREE.Color().setHSL((hue + o) % 1, 0.85, 0.6).getHex());
+        // the site's blues: cyan through to ice and electric blue
+        const hue = 0.5 + Math.random() * 0.12;
+        const colors = [0, 0.03, 0.06].map((o) => new THREE.Color().setHSL(hue + o, 0.9, 0.62).getHex());
         effects.burst(pos, { count: 70, power: 16, up: 4, colors, life: 2.2 });
         audio.impact("ball", 0.5, null);
       }, i * 320);
@@ -302,7 +290,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     c.collected = true;
     collected++;
     scene.remove(c.mesh, c.ring, c.beam);
-    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [0xffd700, 0xe2c14d, 0xfff3c0] });
+    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [NEON.holo, NEON.ice, NEON.cyan] });
     audio.chime(collected);
     cb.onCrystal(collected, TOTAL_CRYSTALS);
     if (collected === TOTAL_CRYSTALS && !won) {
@@ -318,13 +306,13 @@ export const createGame = (container, { isMobile, callbacks }) => {
     while (events.length) {
       const { type, payload } = events.shift();
       if (type === "strike") {
-        cb.onToast("🎳 STRIKE!");
+        cb.onToast("Strike");
         audio.fanfare();
         effects.burst({ x: -50, y: 3, z: -46 }, { count: 120, power: 12, up: 12 });
       } else if (type === "pins") {
-        cb.onToast(`🎳 ${payload.down} / ${payload.total} pins`);
+        cb.onToast(`${payload.down} / ${payload.total} pins down`);
       } else if (type === "goal") {
-        cb.onToast(payload.goals > 1 ? `⚽ GOAL! (${payload.goals})` : "⚽ GOAL!");
+        cb.onToast(payload.goals > 1 ? `Goal · ${payload.goals}` : "Goal");
         audio.fanfare();
         effects.burst(payload, { count: 140, power: 14, up: 14 });
       }
@@ -343,19 +331,19 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hit && !pad.active && pad.kind === "reset") {
         if (pad.id === "bowling-reset") {
           props.resetBowling();
-          cb.onToast("🎳 Pins reset");
+          cb.onToast("Pins reset");
         } else {
           props.resetGroup("letters");
           props.resetGroup("dominoes");
           props.resetGroup("bricks");
           props.resetGroup("crates");
           props.resetGroup("cones");
-          cb.onToast("✨ Everything back in place");
+          cb.onToast("Everything back in place");
         }
         audio.chime(2);
       }
       pad.active = hit;
-      pad.baseMat.opacity = hit ? 0.75 + Math.sin(time * 8) * 0.12 : 0.5 + night * 0.25;
+      pad.baseMat.opacity = hit ? 0.5 + Math.sin(time * 8) * 0.12 : 0.22;
       if (hit && pad.kind === "link") inside = pad;
     });
     if (inside !== activePad) {
@@ -376,7 +364,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hoopSide[i] !== 0 && s !== 0 && s !== hoopSide[i]) {
         const inPlane = Math.hypot(hoopRel.x - side * n.x, hoopRel.y, hoopRel.z - side * n.z);
         if (inPlane < h.r - 0.4) {
-          cb.onToast("🎯 Through the hoop!");
+          cb.onToast("Through the hoop");
           audio.whoosh();
           audio.chime(5);
           effects.burst(h.mesh.position, { count: 110, power: 10, up: 8 });
@@ -386,26 +374,11 @@ export const createGame = (container, { isMobile, callbacks }) => {
     });
   };
 
-  // ------------------------------------------------------------------
-  // Day / night blend
-  // ------------------------------------------------------------------
-  const skyColor = new THREE.Color();
-  const applyNight = (k) => {
-    skyColor.copy(DAY.sky).lerp(NIGHT.sky, k);
-    scene.background.copy(skyColor);
-    scene.fog.color.copy(skyColor);
-    world.ground.material.color.set(COLORS.world).lerp(new THREE.Color(0x3a3f55), k * 0.6);
-    hemi.color.copy(DAY.hemiSky).lerp(NIGHT.hemiSky, k);
-    hemi.groundColor.copy(DAY.hemiGround).lerp(NIGHT.hemiGround, k);
-    hemi.intensity = DAY.hemi + (NIGHT.hemi - DAY.hemi) * k;
-    sun.color.copy(DAY.sun).lerp(NIGHT.sun, k);
-    sun.intensity = DAY.sunI + (NIGHT.sunI - DAY.sunI) * k;
-    world.night.windows.mat.emissiveIntensity = k * 1.1;
-    world.night.lamps.emissiveIntensity = 0.15 + k * 1.8;
-    world.night.glows.forEach((m) => (m.opacity = k * 0.9));
-    world.night.stars.mat.opacity = k;
-    beamMat.opacity = 0.16 + k * 0.18;
-  };
+  // the night lights, on for good
+  world.night.windows.mat.emissiveIntensity = 1.1;
+  world.night.lamps.emissiveIntensity = 1.6;
+  world.night.glows.forEach((m) => (m.opacity = 0.75));
+  world.night.stars.mat.opacity = 0.9;
 
   // ------------------------------------------------------------------
   // Main loop
@@ -456,10 +429,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     const state = car.state;
     forward.set(1, 0, 0).applyQuaternion(carModel.group.quaternion);
     right.set(0, 0, 1).applyQuaternion(carModel.group.quaternion);
-
-    // night blend
-    night += (nightTarget - night) * Math.min(1, dt * 1.6);
-    applyNight(night);
 
     carModel.update({ chassisBody: body, vehicle: car.vehicle, state, dt, night });
 
@@ -606,7 +575,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
   if (process.env.NODE_ENV !== "production") {
     window.__carGame = {
       place: (x, z, yaw = SPAWN.yaw) => car.place(x, 2, z, yaw),
-      toggleNight,
       scene,
       car,
       inspect: (x, y, z, lookY = 1.5) => {
@@ -631,7 +599,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     },
     openActivePad: () => openPad(activePad),
     resetCar,
-    toggleNight,
     toggleMute,
     dispose: () => {
       cancelAnimationFrame(raf);

@@ -1,7 +1,11 @@
 import * as THREE from "three";
 import {
   COLORS,
+  NEON,
+  DISPLAY_FONT,
   matte,
+  glow,
+  outline,
   windify,
   canvasTexture,
   roundRect,
@@ -41,7 +45,9 @@ const createInstancer = (geometry, material, { cast = true, receive = false } = 
     matrices.push(matrix.clone());
     colors.push(color);
   };
-  const build = (scene) => {
+  // wire: an optional material drawn over the same instances (a glowing
+  // wireframe on the facets)
+  const build = (scene, wire = null) => {
     if (!matrices.length) return null;
     const mesh = new THREE.InstancedMesh(geometry, material, matrices.length);
     matrices.forEach((m, i) => {
@@ -51,6 +57,11 @@ const createInstancer = (geometry, material, { cast = true, receive = false } = 
     mesh.castShadow = cast;
     mesh.receiveShadow = receive;
     scene.add(mesh);
+    if (wire) {
+      const lines = new THREE.InstancedMesh(geometry, wire, matrices.length);
+      matrices.forEach((m, i) => lines.setMatrixAt(i, m));
+      scene.add(lines);
+    }
     return mesh;
   };
   return { add, build };
@@ -123,11 +134,33 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // ------------------------------------------------------------------
   const ground = new THREE.Mesh(
     new THREE.PlaneGeometry(900, 900),
-    new THREE.MeshPhongMaterial({ color: COLORS.world, shininess: 0 }),
+    new THREE.MeshPhongMaterial({ color: COLORS.ground, shininess: 0 }),
   );
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   scene.add(ground);
+
+  // a faint grid of light across the whole floor
+  const gridTex = canvasTexture(128, 128, (ctx, W, H) => {
+    ctx.strokeStyle = "rgba(0, 191, 243, 0.5)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(0, 0, W, H);
+  });
+  gridTex.wrapS = gridTex.wrapT = THREE.RepeatWrapping;
+  gridTex.repeat.set(900 / 6, 900 / 6);
+  const grid = new THREE.Mesh(
+    new THREE.PlaneGeometry(900, 900),
+    new THREE.MeshBasicMaterial({
+      map: gridTex,
+      transparent: true,
+      opacity: 0.32,
+      depthWrite: false,
+      blending: THREE.AdditiveBlending,
+    }),
+  );
+  grid.rotation.x = -Math.PI / 2;
+  grid.position.y = 0.012;
+  scene.add(grid);
 
   const flatMat = (color) => new THREE.MeshPhongMaterial({ color, shininess: 0 });
   const addFlat = (geometry, material, x, z, y = 0.02, yaw = 0) => {
@@ -156,7 +189,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
 
   const roadMat = flatMat(COLORS.road);
   const sidewalkMat = flatMat(COLORS.sidewalk);
-  const lineMat = new THREE.MeshBasicMaterial({ color: COLORS.line });
+  const lineMat = new THREE.MeshBasicMaterial({ color: COLORS.line, transparent: true, opacity: 0.85 });
   const ringLen = RING * 2 + ROAD_W;
   // ring road
   addFlat(new THREE.PlaneGeometry(ringLen, ROAD_W), roadMat, 0, -RING);
@@ -222,15 +255,15 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // plaza
   addFlat(new THREE.CircleGeometry(PLAZA_R, 64), flatMat(COLORS.plaza), 0, 0, 0.035);
   addFlat(
-    new THREE.RingGeometry(PLAZA_R - 0.9, PLAZA_R, 64),
-    flatMat(COLORS.sidewalk),
+    new THREE.RingGeometry(PLAZA_R - 0.35, PLAZA_R, 64),
+    new THREE.MeshBasicMaterial({ color: NEON.cyan, transparent: true, opacity: 0.55 }),
     0,
     0,
     0.04,
   );
   addFlat(
     new THREE.RingGeometry(PLAZA_R - 6.5, PLAZA_R - 6.1, 64),
-    new THREE.MeshBasicMaterial({ color: COLORS.line, transparent: true, opacity: 0.6 }),
+    new THREE.MeshBasicMaterial({ color: NEON.holo, transparent: true, opacity: 0.7 }),
     0,
     0,
     0.04,
@@ -239,21 +272,26 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // ------------------------------------------------------------------
   // Painted ground text: area labels + controls legend
   // ------------------------------------------------------------------
-  const ink = "rgba(70, 66, 58, 0.78)";
+  const ink = "rgba(111, 245, 238, 0.85)";
+  const inkDim = "rgba(111, 245, 238, 0.5)";
   const paintLabel = (text, sub, x, z, w = 18) => {
     const tex = canvasTexture(1024, 256, (ctx, W, H) => {
       ctx.fillStyle = ink;
       ctx.textAlign = "center";
-      ctx.font = "900 118px Arial, sans-serif";
+      ctx.shadowColor = "rgba(0, 191, 243, 0.9)";
+      ctx.shadowBlur = 18;
+      ctx.font = `700 104px ${DISPLAY_FONT}`;
       ctx.fillText(text, W / 2, 120);
       if (sub) {
-        ctx.font = "600 46px Arial, sans-serif";
-        ctx.fillText(sub, W / 2, 200);
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = inkDim;
+        ctx.font = `600 40px ${DISPLAY_FONT}`;
+        ctx.fillText(sub.toUpperCase(), W / 2, 200);
       }
     });
     addFlat(
       new THREE.PlaneGeometry(w, w / 4),
-      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
       x,
       z,
       0.06,
@@ -267,33 +305,34 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
 
   const legendTex = canvasTexture(1024, 512, (ctx, W) => {
     const key = (x, y, w, label, h = 88) => {
-      ctx.fillStyle = "rgba(255, 253, 247, 0.55)";
-      roundRect(ctx, x, y, w, h, 16);
+      ctx.fillStyle = "rgba(0, 191, 243, 0.12)";
+      roundRect(ctx, x, y, w, h, 12);
       ctx.fill();
       ctx.strokeStyle = ink;
-      ctx.lineWidth = 6;
-      roundRect(ctx, x, y, w, h, 16);
+      ctx.lineWidth = 4;
+      roundRect(ctx, x, y, w, h, 12);
       ctx.stroke();
       ctx.fillStyle = ink;
-      ctx.font = `900 ${label.length > 2 ? 34 : 50}px Arial, sans-serif`;
+      ctx.font = `700 ${label.length > 2 ? 30 : 46}px ${DISPLAY_FONT}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(label, x + w / 2, y + h / 2 + 2);
     };
     const caption = (x, y, text) => {
-      ctx.fillStyle = ink;
-      ctx.font = "700 34px Arial, sans-serif";
+      ctx.fillStyle = inkDim;
+      ctx.font = `600 28px ${DISPLAY_FONT}`;
       ctx.textAlign = "center";
       ctx.textBaseline = "alphabetic";
       ctx.fillText(text, x, y);
     };
     if (isMobile) {
       ctx.fillStyle = ink;
-      ctx.font = "900 64px Arial, sans-serif";
+      ctx.font = `700 54px ${DISPLAY_FONT}`;
       ctx.textAlign = "center";
-      ctx.fillText("Use the buttons to drive", W / 2, 200);
-      ctx.font = "700 40px Arial, sans-serif";
-      ctx.fillText("⚡ boost  ·  ✋ drift  ·  📣 horn", W / 2, 290);
+      ctx.fillText("USE THE BUTTONS TO DRIVE", W / 2, 200);
+      ctx.fillStyle = inkDim;
+      ctx.font = `600 34px ${DISPLAY_FONT}`;
+      ctx.fillText("BOOST  ·  DRIFT  ·  HORN", W / 2, 290);
       return;
     }
     key(160, 70, 92, "↑");
@@ -305,18 +344,16 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     caption(505, 250, "BOOST");
     key(630, 120, 250, "SPACE");
     caption(755, 250, "DRIFT");
-    key(60, 360, 88, "H");
-    caption(200, 418, "HORN");
-    key(300, 360, 88, "R");
-    caption(446, 418, "RESET");
-    key(560, 360, 88, "N");
-    caption(698, 418, "NIGHT");
-    key(790, 360, 88, "M");
-    caption(930, 418, "MUTE");
+    key(120, 360, 88, "H");
+    caption(270, 418, "HORN");
+    key(410, 360, 88, "R");
+    caption(565, 418, "RESET");
+    key(700, 360, 88, "M");
+    caption(850, 418, "MUTE");
   });
   addFlat(
     new THREE.PlaneGeometry(20, 10),
-    new THREE.MeshBasicMaterial({ map: legendTex, transparent: true, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ map: legendTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
     15,
     15,
     0.06,
@@ -339,7 +376,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   const windowLitMat = matte(COLORS.window, { emissive: COLORS.windowLit, emissiveIntensity: 0 });
   const winDark = createInstancer(windowGeo, windowDarkMat, { cast: false });
   const winLit = createInstancer(windowGeo, windowLitMat, { cast: false });
-  const roofBitMat = matte(0x8f8a80);
+  const roofBitMat = matte(0x18283a);
 
   BUILDINGS.forEach((b) => {
     const walls = new THREE.Mesh(
@@ -349,6 +386,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     walls.position.set(b.x, b.h / 2, b.z);
     walls.castShadow = true;
     walls.receiveShadow = true;
+    outline(walls, NEON.cyan, 0.7);
     scene.add(walls);
 
     const roof = new THREE.Mesh(
@@ -357,15 +395,18 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     );
     roof.position.set(b.x, b.h + 0.3, b.z);
     roof.castShadow = true;
+    outline(roof, NEON.holo, 0.85);
     scene.add(roof);
 
     // rooftop clutter: AC units / water tank
     const ac = new THREE.Mesh(new THREE.BoxGeometry(2.2, 1.2, 1.6), roofBitMat);
     ac.position.set(b.x - b.w * 0.2, b.h + 1.2, b.z + b.d * 0.15);
     ac.castShadow = true;
+    outline(ac, NEON.cyan, 0.5);
     scene.add(ac);
     if (b.h > 20) {
       const tank = new THREE.Mesh(new THREE.CylinderGeometry(1.3, 1.3, 2.4, 10), matte(COLORS.wood));
+      outline(tank, NEON.cyan, 0.5);
       tank.position.set(b.x + b.w * 0.2, b.h + 2.6, b.z - b.d * 0.15);
       tank.castShadow = true;
       scene.add(tank);
@@ -404,14 +445,14 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   const pineTrunkGeo = new THREE.CylinderGeometry(0.4, 0.6, 3, 7);
   const blobGeo = new THREE.IcosahedronGeometry(1, 1);
   const coneGeo = new THREE.ConeGeometry(1, 1, 8);
-  const leafMat = windify(matte(0xffffff), 0.22, "whole");
-  const pineMat = windify(matte(0xffffff), 0.14, "whole");
+  const leafMat = windify(matte(0xffffff, { emissive: 0x03222a, shininess: 60 }), 0.22, "whole");
+  const pineMat = windify(matte(0xffffff, { emissive: 0x031c26, shininess: 60 }), 0.14, "whole");
   const trunks = createInstancer(trunkGeo, trunkMat);
   const pineTrunks = createInstancer(pineTrunkGeo, trunkMat);
   const blobs = createInstancer(blobGeo, leafMat);
   const cones = createInstancer(coneGeo, pineMat);
-  const leafColors = [COLORS.leaf, COLORS.leafDark, 0x86ad6e, 0x7a9d62];
-  const pineColors = [COLORS.pine, 0x4f7c5a, 0x668f6b];
+  const leafColors = [COLORS.leaf, COLORS.leafDark, 0x0e4250, 0x0a3644];
+  const pineColors = [COLORS.pine, 0x0b2a3a, 0x0e3a4c];
 
   const trees = [];
   const addLeafy = (x, z, s, collide = true) => {
@@ -476,10 +517,17 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     (rng() < 0.55 ? addPine : addLeafy)(x, z, s, inside);
     placed++;
   }
+  // the trees' facets drawn in light, swaying with them
+  const wireMat = (amount, opacity = 0.32) =>
+    windify(
+      new THREE.MeshBasicMaterial({ color: NEON.cyan, wireframe: true, transparent: true, opacity, depthWrite: false }),
+      amount,
+      "whole",
+    );
   trunks.build(scene);
   pineTrunks.build(scene);
-  blobs.build(scene);
-  cones.build(scene);
+  blobs.build(scene, wireMat(0.22));
+  cones.build(scene, wireMat(0.14));
 
   // bushes + rocks
   const bushes = createInstancer(new THREE.IcosahedronGeometry(1, 0), matte(COLORS.bush));
@@ -497,8 +545,8 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       bushes.add(compose(x, s * 0.5, z, 0, rng() * 3, 0, s, s * 0.7, s));
     }
   }
-  bushes.build(scene);
-  rocks.build(scene);
+  bushes.build(scene, new THREE.MeshBasicMaterial({ color: NEON.cyan, wireframe: true, transparent: true, opacity: 0.22, depthWrite: false }));
+  rocks.build(scene, new THREE.MeshBasicMaterial({ color: NEON.cyan, wireframe: true, transparent: true, opacity: 0.28, depthWrite: false }));
 
   // grass tufts + flowers (visual only, sway in the wind)
   const tuftGeo = new THREE.ConeGeometry(0.28, 1.3, 3);
@@ -508,11 +556,11 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   });
   const flowerGeo = new THREE.IcosahedronGeometry(0.28, 0);
   flowerGeo.translate(0, 1.0, 0);
-  const flowers = createInstancer(flowerGeo, windify(matte(0xffffff), 0.22, "height"), {
+  const flowers = createInstancer(flowerGeo, windify(new THREE.MeshBasicMaterial({ color: 0xffffff }), 0.22, "height"), {
     cast: false,
   });
-  const grassColors = [COLORS.grass, 0x86a070, 0xa3b88a, 0x7f9a6a];
-  const flowerColors = [0xf5f2ea, 0xe2c14d, 0xe59a8a, 0xc9a0d6];
+  const grassColors = [COLORS.grass, 0x0a2f36, 0x0f4850, 0x0b343a];
+  const flowerColors = [NEON.holo, NEON.cyan, NEON.ice, 0x7fb8ff];
   const tuftTarget = isMobile ? 1100 : 2600;
   let tufts = 0;
   guard = 0;
@@ -543,13 +591,13 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // Street lamps (+ ground glow pools that fade in at night)
   // ------------------------------------------------------------------
   const poleMat = matte(COLORS.pole);
-  const lampMat = matte(0xf3e9c8, { emissive: 0xffd98a, emissiveIntensity: 0.15 });
+  const lampMat = matte(NEON.ice, { emissive: NEON.holo, emissiveIntensity: 0.15 });
   night.lamps = lampMat;
   const glowTex = canvasTexture(128, 128, (ctx) => {
     const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
-    g.addColorStop(0, "rgba(255, 222, 150, 1)");
-    g.addColorStop(0.5, "rgba(255, 210, 130, 0.35)");
-    g.addColorStop(1, "rgba(255, 200, 120, 0)");
+    g.addColorStop(0, "rgba(111, 245, 238, 0.9)");
+    g.addColorStop(0.5, "rgba(0, 191, 243, 0.3)");
+    g.addColorStop(1, "rgba(0, 191, 243, 0)");
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 128, 128);
   });
@@ -604,10 +652,12 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     const seat = new THREE.Mesh(new THREE.BoxGeometry(3, 0.2, 1), woodMat);
     seat.position.y = 0.8;
     seat.castShadow = true;
+    outline(seat, NEON.cyan, 0.6);
     bench.add(seat);
     const back = new THREE.Mesh(new THREE.BoxGeometry(3, 0.9, 0.15), woodMat);
     back.position.set(0, 1.4, 0.45);
     back.castShadow = true;
+    outline(back, NEON.cyan, 0.6);
     bench.add(back);
     [-1.3, 1.3].forEach((lx) => {
       const leg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.9), poleMat);
@@ -623,31 +673,34 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // ------------------------------------------------------------------
   // Fountain with animated spray
   // ------------------------------------------------------------------
-  const stoneMat = matte(0xb5afa3);
+  const stoneMat = matte(0x101b28);
   const fountain = new THREE.Group();
   const basin = new THREE.Mesh(new THREE.CylinderGeometry(6, 6.5, 1, 18), stoneMat);
   basin.position.y = 0.5;
   basin.castShadow = true;
   basin.receiveShadow = true;
+  outline(basin, NEON.cyan, 0.7, 40);
   fountain.add(basin);
-  const waterMat = matte(0x7db4c9, { transparent: true, opacity: 0.85, shininess: 80 });
+  const waterMat = glow(NEON.cyan, 0.55, { transparent: true, opacity: 0.6, shininess: 80 });
   const water = new THREE.Mesh(new THREE.CylinderGeometry(5.4, 5.4, 0.2, 18), waterMat);
   water.position.y = 1.0;
   fountain.add(water);
-  const column = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 3.2, 9), matte(0xc4beb2));
+  const column = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 3.2, 9), matte(0x13202e));
+  outline(column, NEON.cyan, 0.5, 40);
   column.position.y = 2.2;
   column.castShadow = true;
   fountain.add(column);
   const topBowl = new THREE.Mesh(new THREE.CylinderGeometry(2.2, 1.6, 0.6, 11), stoneMat);
   topBowl.position.y = 3.9;
   topBowl.castShadow = true;
+  outline(topBowl, NEON.holo, 0.7, 40);
   fountain.add(topBowl);
   fountain.position.set(FOUNTAIN.x, 0, FOUNTAIN.z);
   scene.add(fountain);
   physics.addStaticCylinder(FOUNTAIN.x, FOUNTAIN.z, 6.5, 2.4);
 
   const DROPS = 90;
-  const dropMat = new THREE.MeshBasicMaterial({ color: 0xcfe7f0, transparent: true, opacity: 0.85 });
+  const dropMat = new THREE.MeshBasicMaterial({ color: NEON.holo, transparent: true, opacity: 0.85 });
   const drops = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(0.14, 0), dropMat, DROPS);
   const dropState = Array.from({ length: DROPS }, (_, i) => ({ t: i / DROPS, a: rng() * Math.PI * 2, s: 0.8 + rng() * 0.4 }));
   scene.add(drops);
@@ -675,11 +728,13 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   const pitchTex = canvasTexture(1024, 740, (ctx, W, H) => {
     const stripes = 10;
     for (let i = 0; i < stripes; i++) {
-      ctx.fillStyle = i % 2 ? "#a9bf8e" : "#b3c898";
+      ctx.fillStyle = i % 2 ? "#06121a" : "#081720";
       ctx.fillRect((i * W) / stripes, 0, W / stripes + 1, H);
     }
-    ctx.strokeStyle = "rgba(255,255,255,0.85)";
-    ctx.lineWidth = 8;
+    ctx.strokeStyle = "rgba(111,245,238,0.9)";
+    ctx.shadowColor = "rgba(0,191,243,1)";
+    ctx.shadowBlur = 14;
+    ctx.lineWidth = 6;
     const m = 20;
     ctx.strokeRect(m, m, W - 2 * m, H - 2 * m);
     ctx.beginPath();
@@ -692,22 +747,22 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     const boxH = (GOAL.width / PITCH.d) * H * 1.6;
     ctx.strokeRect(m, H / 2 - boxH / 2, 120, boxH);
     ctx.strokeRect(W - m - 120, H / 2 - boxH / 2, 120, boxH);
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
+    ctx.fillStyle = "rgba(111,245,238,0.9)";
     ctx.beginPath();
     ctx.arc(W / 2, H / 2, 10, 0, Math.PI * 2);
     ctx.fill();
   });
   addFlat(
     new THREE.PlaneGeometry(PITCH.w, PITCH.d),
-    new THREE.MeshPhongMaterial({ map: pitchTex, shininess: 0 }),
+    new THREE.MeshBasicMaterial({ map: pitchTex }),
     PITCH.x,
     PITCH.z,
     0.03,
   );
 
-  const postMat = matte(0xf5f2ea);
+  const postMat = glow(NEON.ice, 0.8);
   const netTex = canvasTexture(128, 128, (ctx) => {
-    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.strokeStyle = "rgba(0,191,243,0.75)";
     ctx.lineWidth = 3;
     for (let i = 0; i <= 128; i += 16) {
       ctx.beginPath();
@@ -770,9 +825,9 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // Bowling lane
   // ------------------------------------------------------------------
   const laneTex = canvasTexture(1024, 180, (ctx, W, H) => {
-    ctx.fillStyle = "#d8c29a";
+    ctx.fillStyle = "#07111b";
     ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(160, 128, 80, 0.35)";
+    ctx.strokeStyle = "rgba(0, 191, 243, 0.22)";
     ctx.lineWidth = 2;
     for (let y = 0; y < H; y += 18) {
       ctx.beginPath();
@@ -780,7 +835,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       ctx.lineTo(W, y);
       ctx.stroke();
     }
-    ctx.fillStyle = "rgba(180, 70, 50, 0.7)";
+    ctx.fillStyle = "rgba(111, 245, 238, 0.85)";
     for (let i = 0; i < 5; i++) {
       const x = W * 0.45;
       const y = H * (0.2 + i * 0.15);
@@ -794,14 +849,15 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   const laneLen = Math.abs(BOWLING.lane.x1 - BOWLING.lane.x0);
   addFlat(
     new THREE.PlaneGeometry(laneLen, BOWLING.lane.width),
-    new THREE.MeshPhongMaterial({ map: laneTex, shininess: 20 }),
+    new THREE.MeshBasicMaterial({ map: laneTex }),
     (BOWLING.lane.x0 + BOWLING.lane.x1) / 2,
     BOWLING.lane.z,
     0.03,
   );
   // gutters (low curbs that keep the ball roughly on the lane)
   [-1, 1].forEach((s) => {
-    const curb = new THREE.Mesh(new THREE.BoxGeometry(laneLen * 0.55, 0.4, 0.4), matte(0x9c9588));
+    const curb = new THREE.Mesh(new THREE.BoxGeometry(laneLen * 0.55, 0.4, 0.4), matte(0x0f1a27));
+    outline(curb, NEON.cyan, 0.7);
     const cx = BOWLING.lane.x1 + laneLen * 0.275;
     const cz = BOWLING.lane.z + (s * (BOWLING.lane.width + 0.4)) / 2;
     curb.position.set(cx, 0.2, cz);
@@ -814,13 +870,14 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // Ramps + hoop
   // ------------------------------------------------------------------
   const rampMat = matte(COLORS.ramp);
-  const stripeMat = new THREE.MeshBasicMaterial({ color: 0xf5f2ea });
+  const stripeMat = new THREE.MeshBasicMaterial({ color: NEON.holo });
   RAMPS.forEach((r) => {
     const mesh = new THREE.Mesh(prismGeometry(prismProfile(r), r.width), rampMat);
     mesh.position.set(r.x, 0, r.z);
     mesh.rotation.y = r.yaw;
     mesh.castShadow = true;
     mesh.receiveShadow = true;
+    outline(mesh, NEON.cyan, 0.85);
     scene.add(mesh);
     if (r.type === "ramp") {
       // white chevrons painted on the slope
@@ -841,7 +898,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     physics.addRamp(r);
   });
 
-  const hoopMat = matte(0xe2c14d, { emissive: 0xc9a227, emissiveIntensity: 0.35, shininess: 60 });
+  const hoopMat = glow(NEON.holo, 1.1, { shininess: 60 });
   const hoops = HOOPS.map((h) => {
     const mesh = new THREE.Mesh(new THREE.TorusGeometry(h.r, 0.32, 8, 40), hoopMat);
     mesh.position.set(h.x, h.y, h.z);
@@ -862,60 +919,90 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   // ------------------------------------------------------------------
   const pads = PADS.map((p) => {
     const tex = canvasTexture(512, 512, (ctx, W, H) => {
-      ctx.strokeStyle = p.kind === "link" ? "rgba(255,253,247,0.95)" : ink;
-      ctx.lineWidth = 18;
-      ctx.setLineDash([46, 26]);
-      roundRect(ctx, 24, 24, W - 48, H - 48, 40);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.fillStyle = p.kind === "link" ? "rgba(255,253,247,0.95)" : ink;
+      ctx.strokeStyle = ink;
+      ctx.shadowColor = "rgba(0, 191, 243, 1)";
+      ctx.shadowBlur = 16;
+      ctx.lineWidth = 10;
+      // HUD corner brackets rather than a full frame
+      const m = 30;
+      const L = 110;
+      [
+        [m, m, 1, 1],
+        [W - m, m, -1, 1],
+        [m, H - m, 1, -1],
+        [W - m, H - m, -1, -1],
+      ].forEach(([x, y, dx, dy]) => {
+        ctx.beginPath();
+        ctx.moveTo(x, y + dy * L);
+        ctx.lineTo(x, y);
+        ctx.lineTo(x + dx * L, y);
+        ctx.stroke();
+      });
+      ctx.fillStyle = ink;
       ctx.textAlign = "center";
-      ctx.font = `900 ${p.title.length > 8 ? 58 : 76}px Arial, sans-serif`;
+      ctx.font = `700 ${p.title.length > 8 ? 50 : 66}px ${DISPLAY_FONT}`;
       ctx.fillText(p.title, W / 2, H / 2 + 6);
-      ctx.font = "700 40px Arial, sans-serif";
-      ctx.fillText(p.kind === "link" ? (isMobile ? "tap to open" : "ENTER ⏎") : "drive in", W / 2, H / 2 + 80);
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = inkDim;
+      ctx.font = `600 32px ${DISPLAY_FONT}`;
+      ctx.fillText(p.kind === "link" ? (isMobile ? "TAP TO OPEN" : "ENTER ⏎") : "DRIVE IN", W / 2, H / 2 + 80);
     });
     const baseMat = new THREE.MeshBasicMaterial({
-      color: p.kind === "link" ? new THREE.Color(p.color) : new THREE.Color(0xe2c14d),
+      color: p.kind === "link" ? NEON.cyan : NEON.holo,
       transparent: true,
-      opacity: 0.55,
+      opacity: 0.22,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
     });
     const base = addFlat(new THREE.PlaneGeometry(p.size, p.size), baseMat, p.x, p.z, 0.05, Q);
-    const labelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+    const labelMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
     addFlat(new THREE.PlaneGeometry(p.size, p.size), labelMat, p.x, p.z, 0.065, Q);
 
     if (p.kind === "link") {
       const bx = p.x - 5.5;
       const bz = p.z - 5.5;
       const boardTex = canvasTexture(1024, 600, (ctx, W, H) => {
-        ctx.fillStyle = "#fffdf7";
+        // a holo screen: dark glass, scan lines, a lit title
+        const bg = ctx.createLinearGradient(0, 0, 0, H);
+        bg.addColorStop(0, "#071725");
+        bg.addColorStop(1, "#03080f");
+        ctx.fillStyle = bg;
         ctx.fillRect(0, 0, W, H);
-        ctx.fillStyle = p.color;
-        ctx.fillRect(0, 0, W, 90);
-        ctx.fillStyle = "#46423a";
+        ctx.fillStyle = "rgba(111, 245, 238, 0.05)";
+        for (let y = 0; y < H; y += 6) ctx.fillRect(0, y, W, 2);
+        ctx.strokeStyle = "rgba(111, 245, 238, 0.85)";
+        ctx.lineWidth = 6;
+        ctx.strokeRect(14, 14, W - 28, H - 28);
         ctx.textAlign = "center";
-        ctx.font = "900 150px Arial, sans-serif";
+        ctx.fillStyle = "rgba(0, 191, 243, 0.9)";
+        ctx.font = `700 34px ${DISPLAY_FONT}`;
+        ctx.fillText("· PROJECT ·", W / 2, 120);
+        ctx.shadowColor = "rgba(0, 191, 243, 1)";
+        ctx.shadowBlur = 24;
+        ctx.fillStyle = "#eafcff";
+        ctx.font = `700 ${p.title.length > 6 ? 118 : 140}px ${DISPLAY_FONT}`;
         ctx.fillText(p.title, W / 2, 300);
-        ctx.font = "600 56px Arial, sans-serif";
-        ctx.fillStyle = "#6b675f";
+        ctx.shadowBlur = 0;
+        ctx.font = `500 46px ${DISPLAY_FONT}`;
+        ctx.fillStyle = "rgba(204, 228, 236, 0.8)";
         ctx.fillText(p.subtitle, W / 2, 400);
-        ctx.font = "700 44px Arial, sans-serif";
-        ctx.fillStyle = p.color;
-        ctx.fillText("drive onto the pad ↓", W / 2, 520);
+        ctx.font = `700 36px ${DISPLAY_FONT}`;
+        ctx.fillStyle = "rgba(111, 245, 238, 0.95)";
+        ctx.fillText("DRIVE ONTO THE PAD ↓", W / 2, 520);
       });
-      const frameMat = matte(0x5a564e);
+      const frameMat = matte(0x0e1a28);
       const board = new THREE.Mesh(new THREE.BoxGeometry(11, 6.4, 0.4), [
         frameMat,
         frameMat,
         frameMat,
         frameMat,
-        new THREE.MeshPhongMaterial({ map: boardTex, shininess: 5 }),
+        new THREE.MeshBasicMaterial({ map: boardTex }),
         frameMat,
       ]);
       board.position.set(bx, 7, bz);
       board.rotation.y = Q;
       board.castShadow = true;
+      outline(board, NEON.cyan, 0.8);
       scene.add(board);
       const postGeo = new THREE.BoxGeometry(0.45, 3.9, 0.45);
       [-4, 4].forEach((o) => {
@@ -925,6 +1012,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
         post.position.set(px, 1.95, pz);
         post.rotation.y = Q;
         post.castShadow = true;
+        outline(post, NEON.cyan, 0.5);
         scene.add(post);
         physics.addStaticBox(px, 1.95, pz, 0.5, 3.9, 0.5, Q);
       });
@@ -933,35 +1021,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     return { ...p, baseMat, active: false };
   });
 
-  // ------------------------------------------------------------------
-  // Clouds drifting overhead
-  // ------------------------------------------------------------------
-  const cloudMat = matte(COLORS.cloud, { transparent: true, opacity: 0.95 });
-  const cloudGeo = new THREE.IcosahedronGeometry(1, 0);
-  const clouds = [];
-  for (let i = 0; i < (isMobile ? 6 : 11); i++) {
-    const cloud = new THREE.Group();
-    const puffs = 3 + Math.floor(rng() * 4);
-    for (let j = 0; j < puffs; j++) {
-      const puff = new THREE.Mesh(cloudGeo, cloudMat);
-      const s = 3 + rng() * 3.5;
-      puff.scale.set(s, s * 0.7, s);
-      puff.position.set(j * 3.6 - puffs * 1.8, rng() * 1.5, (rng() - 0.5) * 4);
-      cloud.add(puff);
-    }
-    cloud.position.set((rng() - 0.5) * 300, 42 + rng() * 14, (rng() - 0.5) * 300);
-    cloud.userData.speed = 1.5 + rng() * 2;
-    scene.add(cloud);
-    clouds.push(cloud);
-  }
-  updaters.push((time, dt) => {
-    clouds.forEach((c) => {
-      c.position.x += c.userData.speed * dt;
-      if (c.position.x > 170) c.position.x = -170;
-    });
-  });
-
-  // Stars for the night sky (hidden by day)
+  // Stars
   const starGeo = new THREE.BufferGeometry();
   const starPos = [];
   for (let i = 0; i < 500; i++) {
@@ -975,7 +1035,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   }
   starGeo.setAttribute("position", new THREE.Float32BufferAttribute(starPos, 3));
   const starMat = new THREE.PointsMaterial({
-    color: 0xffffff,
+    color: NEON.ice,
     size: 2.2,
     sizeAttenuation: false,
     transparent: true,
