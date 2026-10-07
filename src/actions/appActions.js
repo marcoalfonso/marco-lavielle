@@ -8,7 +8,19 @@ import {
   SET_CLIENT,
   SET_DEVICE
 } from 'constants/constants'
-import { toast } from 'react-toastify'
+import notify from 'components/notify/notify'
+
+// api() resolves even when a request fails (marking the response with
+// `error`); requests whose failure the caller must see go through this, which
+// turns a failure into a rejection carrying the response
+const orFail = response => {
+  if (response && response.error) {
+    const err = new Error(response.errorMessage || 'Request failed')
+    err.response = response
+    throw err
+  }
+  return response
+}
 
 export const sendingRequest = loading => ({ type: SENDING_REQUEST, loading })
 
@@ -76,12 +88,9 @@ export const signin = (formData, history) => dispatch => {
     url: `/login`,
     data: JSON.stringify(formData)
   })
+  .then(orFail)
   .then(response => {
-    if (response.data.success) {
-      dispatch(setUser(response.data.user))
-    } else {
-      toast.error('Username/Password combination incorrect')
-    }
+    if (response.data.success) dispatch(setUser(response.data.user))
     return response
   })
 }
@@ -89,45 +98,53 @@ export const signin = (formData, history) => dispatch => {
 export const setUser = user => ({ type: SET_USER, user: user })
 
 export const createPost = (formData) => dispatch => {
-  return api({ 
+  return api({
     method: 'POST',
     url: `/api/posts`,
     data: JSON.stringify(formData)
   })
+  .then(orFail)
   .then(response => {
+    notify('Post saved')
     return response
   })
 }
 
 export const editPost = (formData) => dispatch => {
-  return api({ 
+  return api({
     method: 'PUT',
     url: `/api/posts`,
     data: JSON.stringify(formData)
   })
+  .then(orFail)
   .then(response => {
+    notify('Post saved')
     return response
   })
 }
 
 export const createClient = (formData) => dispatch => {
-  return api({ 
+  return api({
     method: 'POST',
     url: `/api/clients`,
     data: JSON.stringify(formData)
   })
+  .then(orFail)
   .then(response => {
+    notify('Client saved')
     return response
   })
 }
 
 export const editClient = (formData) => dispatch => {
-  return api({ 
+  return api({
     method: 'PUT',
     url: `/api/clients`,
     data: JSON.stringify(formData)
   })
+  .then(orFail)
   .then(response => {
+    notify('Client saved')
     return response
   })
 }
@@ -137,8 +154,9 @@ export const deletePost = (id) => dispatch => {
     method: 'DELETE',
     url: `/api/posts/${id}`
   })
+  .then(orFail)
   .then(response => {
-    toast.success('Post deleted')
+    notify('Post deleted')
     dispatch(getPosts())
     return response
   })
@@ -149,8 +167,9 @@ export const deleteClient = (id) => dispatch => {
     method: 'DELETE',
     url: `/api/clients/${id}`
   })
+  .then(orFail)
   .then(response => {
-    toast.success('Client deleted')
+    notify('Client deleted')
     dispatch(getClients())
     return response
   })

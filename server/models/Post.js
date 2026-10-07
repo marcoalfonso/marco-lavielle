@@ -1,7 +1,7 @@
-var mongoose = require('mongoose'),
-	monguurl = require('monguurl');
+const mongoose = require('mongoose');
+const slugPlugin = require('./plugins/slug');
 
-var postSchema = mongoose.Schema({
+const postSchema = new mongoose.Schema({
 	title: {type:String, required:'{PATH} is required!'},
 	slug: { type:String, index: { unique: true } },
 	subtitle: {type:String, required:'{PATH} is required!'},
@@ -12,21 +12,18 @@ var postSchema = mongoose.Schema({
 	body: {type:String}
 });
 
-postSchema.plugin(monguurl({
-  source: 'title',
-  target: 'slug'
-}));
+postSchema.plugin(slugPlugin, { source: 'title', target: 'slug' });
 
-var Post = mongoose.model('Post', postSchema);
+const Post = mongoose.model('Post', postSchema);
 
-function createDefaultPosts() {
-	Post.find({}).exec(function(err, collection) {
-		if(collection.length === 0) {
-			Post.create({title: 'Hello World', 
-				subtitle: 'Welcome To My Blog', 
-				body: "<p>Hi, welcome to my blog. I hope the code snippets you find in here will be useful in your coding journey. I also post stock images that can be used in your website under the creative commons licence. \n\nHopefully you will find some of these helpful. :)</p>"});
-		}
+// An empty database starts with a welcome post.
+Post.createDefaultPosts = async () => {
+	if ((await Post.countDocuments()) > 0) return;
+	await Post.create({
+		title: 'Hello World',
+		subtitle: 'Welcome To My Blog',
+		body: "<p>Hi, welcome to my blog. I hope the code snippets you find in here will be useful in your coding journey. I also post stock images that can be used in your website under the creative commons licence. \n\nHopefully you will find some of these helpful. :)</p>",
 	});
-}
+};
 
-exports.createDefaultPosts = createDefaultPosts;
+module.exports = Post;

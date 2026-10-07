@@ -1,64 +1,45 @@
-//ROUTES
+const express = require('express');
+const auth = require('./auth');
+const users = require('../controllers/users');
+const clients = require('../controllers/clients');
+const posts = require('../controllers/posts');
 
-var auth = require('./auth'),
-	users = require('../controllers/users'),
-	clients = require('../controllers/clients'),
-	posts = require('../controllers/posts'),
-	mongoose = require('mongoose'),
-	User = mongoose.model('User');
+const router = express.Router();
+const admin = auth.requiresRole('admin');
 
-module.exports = function(app) {
+router.get('/api/users', admin, users.getUsers);
+router.post('/api/users', admin, users.createUser);
+router.put('/api/users', auth.requiresApiLogin, users.updateUser);
 
-	app.get('/api/users', auth.requiresRole('admin'), users.getUsers);
+router.get('/api/clients', clients.getClients);
+router.post('/api/clients', admin, clients.createClient);
+router.put('/api/clients', admin, clients.updateClient);
+router.get('/api/clients/:id', clients.getClientById);
+router.delete('/api/clients/:id', admin, clients.deleteClientById);
 
-	app.post('/api/users', auth.requiresRole('admin'), users.createUser);
+router.get('/api/posts', posts.getPosts);
+router.post('/api/posts', admin, posts.createPost);
+router.put('/api/posts', admin, posts.updatePost);
+router.get('/api/posts/slug/:slug', posts.getPostBySlug);
+router.get('/api/posts/:id', posts.getPostById);
+router.delete('/api/posts/:id', admin, posts.deletePostById);
 
-	app.put('/api/users', auth.requiresApiLogin, users.updateUser);
+router.post('/login', auth.authenticate);
+router.post('/logout', (req, res, next) => {
+	req.logout((err) => (err ? next(err) : res.end()));
+});
 
-	app.get('/api/clients', clients.getClients);
+router.all('/api/{*rest}', (req, res) => res.sendStatus(404));
 
-	app.post('/api/clients', auth.requiresRole('admin'), clients.createClient);
+// pages: Art has its own template; everything else is the React app
+router.get('/art', (req, res) => res.render('index-art.ejs'));
+router.get('/{*rest}', (req, res) => res.render('index-react.ejs', { bootstrappedUser: req.user }));
 
-	app.put('/api/clients', auth.requiresRole('admin'), clients.updateClient);
+// anything that throws (or rejects) ends up here
+router.use((err, req, res, next) => {
+	console.error(err);
+	if (res.headersSent) return next(err);
+	res.status(500).send({ reason: 'Something went wrong' });
+});
 
-	app.get('/api/clients/:id', clients.getClientById);
-
-	app.get('/api/clients/:slug', clients.getClientBySlug);
-
-	app.delete('/api/clients/:id', auth.requiresRole('admin'), clients.deleteClientById);
-
-	app.post('/api/posts', auth.requiresRole('admin'), posts.createPost);
-
-	app.get('/api/posts', posts.getPosts);
-
-	app.get('/api/posts/:id', posts.getPostById);
-
-	app.get('/api/posts/slug/:slug', posts.getPostBySlug);
-
-	app.delete('/api/posts/:id', auth.requiresRole('admin'), posts.deletePostById);
-
-	app.put('/api/posts', auth.requiresRole('admin'), posts.updatePost);
-
-  app.get('/art', function(req, res) {
-		res.render('index-art.ejs');
-	});
-
-	app.post('/login', auth.authenticate);
-
-	app.post('/logout', function(req, res, next) {
-		req.logout(function(err) {
-			if (err) { return next(err); }
-			res.end();
-		});
-	});
-
-	app.all('/api/*', function(req, res) {
-		res.send(404);
-	});
-
-	app.get('*', function(req, res) {
-		res.render('index-react.ejs', {
-			bootstrappedUser: req.user
-		});
-	});
-};
+module.exports = router;
