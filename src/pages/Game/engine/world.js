@@ -17,6 +17,8 @@ import {
   PLAZA_R,
   BOUNDARY,
   RAMPS,
+  LAUNCH_PADS,
+  COURSE,
   HOOPS,
   BUILDINGS,
   FOUNTAIN,
@@ -111,7 +113,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       w: Math.abs(BOWLING.lane.x1 - BOWLING.lane.x0) + 8,
       d: BOWLING.lane.width + 6,
     },
-    { x: DOMINOES.cx, z: DOMINOES.cz, r: DOMINOES.r + 4 },
+    { x: DOMINOES.cx, z: DOMINOES.cz, r: 19 },
     { x: CRATES.x, z: CRATES.z, r: 7 },
     { x: BRICK_WALL.x, z: BRICK_WALL.z, w: BRICK_WALL.cols * 2 + 8, d: 10 },
     ...PADS.map((p) => ({ x: p.x, z: p.z, r: p.size * 0.8 + 3 })),
@@ -120,7 +122,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       z: p.z - 5.5,
       r: 7,
     })),
-    ...RAMPS.map((r) => ({ x: r.x, z: r.z, r: Math.max(r.len, r.width) * 0.75 + 2 })),
+    ...LAUNCH_PADS.map((p) => ({ x: p.x, z: p.z, r: 7 })),
     ...BUILDINGS.map((b) => ({ x: b.x, z: b.z, w: b.w + 6, d: b.d + 6 })),
     { x: SPAWN.x, z: SPAWN.z, r: 10 },
     { x: BLACK_HOLE.x, z: BLACK_HOLE.z, r: BLACK_HOLE.pull + 2 },
@@ -199,77 +201,32 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     return mesh;
   };
 
-  // space lanes: dark, see-through strips with glowing edges
-  const roadMat = new THREE.MeshBasicMaterial({ color: COLORS.road, transparent: true, opacity: 0.78 });
-  const sidewalkMat = new THREE.MeshBasicMaterial({
-    color: NEON.violet,
-    transparent: true,
-    opacity: 0.16,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
+  // no roads in space: faint orbit rings round the docking platform, each
+  // dotted with a few marker lights travelling along it
+  const ORBITS = [
+    { r: 48, color: NEON.violet, opacity: 0.32, speed: 0.05 },
+    { r: 80, color: NEON.cyan, opacity: 0.28, speed: -0.035 },
+    { r: 104, color: NEON.magenta, opacity: 0.2, speed: 0.025 },
+  ];
+  ORBITS.forEach((o) => {
+    addFlat(
+      new THREE.RingGeometry(o.r - 0.18, o.r + 0.18, 160),
+      new THREE.MeshBasicMaterial({ color: o.color, transparent: true, opacity: o.opacity, depthWrite: false, blending: THREE.AdditiveBlending }),
+      0,
+      0,
+      0.03,
+    );
+    const markers = new THREE.Group();
+    for (let i = 0; i < 6; i++) {
+      const a = (i / 6) * Math.PI * 2;
+      const dot = new THREE.Mesh(new THREE.CircleGeometry(0.55, 16), new THREE.MeshBasicMaterial({ color: o.color }));
+      dot.rotation.x = -Math.PI / 2;
+      dot.position.set(Math.cos(a) * o.r, 0.05, Math.sin(a) * o.r);
+      markers.add(dot);
+    }
+    scene.add(markers);
+    updaters.push((time, dt) => (markers.rotation.y += dt * o.speed));
   });
-  const lineMat = new THREE.MeshBasicMaterial({ color: COLORS.line, transparent: true, opacity: 0.85 });
-  const ringLen = RING * 2 + ROAD_W;
-  // ring road
-  addFlat(new THREE.PlaneGeometry(ringLen, ROAD_W), roadMat, 0, -RING);
-  addFlat(new THREE.PlaneGeometry(ringLen, ROAD_W), roadMat, 0, RING);
-  addFlat(new THREE.PlaneGeometry(ROAD_W, ringLen), roadMat, -RING, 0);
-  addFlat(new THREE.PlaneGeometry(ROAD_W, ringLen), roadMat, RING, 0);
-  // spokes
-  const spokeLen = RING - PLAZA_R + 2;
-  const spokeMid = PLAZA_R - 2 + spokeLen / 2;
-  addFlat(new THREE.PlaneGeometry(ROAD_W, spokeLen), roadMat, 0, -spokeMid);
-  addFlat(new THREE.PlaneGeometry(ROAD_W, spokeLen), roadMat, 0, spokeMid);
-  addFlat(new THREE.PlaneGeometry(spokeLen, ROAD_W), roadMat, -spokeMid, 0);
-  addFlat(new THREE.PlaneGeometry(spokeLen, ROAD_W), roadMat, spokeMid, 0);
-
-  // sidewalks
-  const swW = 2.5;
-  const innerEdge = RING - ROAD_W / 2 - swW / 2;
-  const outerEdge = RING + ROAD_W / 2 + swW / 2;
-  [
-    [innerEdge, innerEdge * 2 + swW],
-    [outerEdge, outerEdge * 2 + swW],
-  ].forEach(([off, len]) => {
-    addFlat(new THREE.PlaneGeometry(len, swW), sidewalkMat, 0, -off, 0.025);
-    addFlat(new THREE.PlaneGeometry(len, swW), sidewalkMat, 0, off, 0.025);
-    addFlat(new THREE.PlaneGeometry(swW, len), sidewalkMat, -off, 0, 0.025);
-    addFlat(new THREE.PlaneGeometry(swW, len), sidewalkMat, off, 0, 0.025);
-  });
-  const spokeSwLen = RING - ROAD_W / 2 - swW - PLAZA_R + 1;
-  const spokeSwMid = PLAZA_R - 1 + spokeSwLen / 2;
-  const lateral = ROAD_W / 2 + swW / 2;
-  [-1, 1].forEach((s) => {
-    [-lateral, lateral].forEach((l) => {
-      addFlat(new THREE.PlaneGeometry(swW, spokeSwLen), sidewalkMat, l, s * spokeSwMid, 0.025);
-      addFlat(new THREE.PlaneGeometry(spokeSwLen, swW), sidewalkMat, s * spokeSwMid, l, 0.025);
-    });
-  });
-
-  // dashed centre lines (one instanced mesh)
-  const dash = createInstancer(new THREE.PlaneGeometry(3.4, 0.32), lineMat, { cast: false });
-  for (let t = -RING + 8; t <= RING - 8; t += 8) {
-    [-RING, RING].forEach((c) => {
-      dash.add(compose(t, 0.04, c, -Math.PI / 2));
-      dash.add(compose(c, 0.04, t, -Math.PI / 2, 0, Math.PI / 2));
-    });
-  }
-  for (let t = PLAZA_R + 4; t <= RING - 10; t += 8) {
-    [-t, t].forEach((v) => {
-      dash.add(compose(0, 0.04, v, -Math.PI / 2, 0, Math.PI / 2));
-      dash.add(compose(v, 0.04, 0, -Math.PI / 2));
-    });
-  }
-  // zebra crossings where spokes meet the ring
-  const zebraAt = RING - ROAD_W / 2 - 3.5;
-  for (let i = -2; i <= 2; i++) {
-    const o = i * 2.2;
-    dash.add(compose(o, 0.045, -zebraAt, -Math.PI / 2, 0, Math.PI / 2, 1.1, 2.4, 1));
-    dash.add(compose(o, 0.045, zebraAt, -Math.PI / 2, 0, Math.PI / 2, 1.1, 2.4, 1));
-    dash.add(compose(-zebraAt, 0.045, o, -Math.PI / 2, 0, 0, 1.1, 2.4, 1));
-    dash.add(compose(zebraAt, 0.045, o, -Math.PI / 2, 0, 0, 1.1, 2.4, 1));
-  }
-  dash.build(scene).receiveShadow = true;
 
   // plaza
   // the middle: a docking platform
@@ -318,9 +275,9 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       Q,
     );
   };
-  paintLabel("CARGO BAY", "satellites · blocks · monoliths", -30, -30, 18, "255, 179, 71");
+  paintLabel("CARGO BAY", "satellites · cargo · ring course", -30, -30, 18, "255, 179, 71");
   paintLabel("STAR PORTS", "fly onto a pad", 30, -24, 18, "0, 191, 243");
-  paintLabel("LAUNCH ZONE", "full thrust ahead", -28, 30, 18, "157, 255, 107");
+  paintLabel("LAUNCH ZONE", "fly onto a launch pad", -28, 30, 18, "157, 255, 107");
   paintLabel("ORBIT ARENA", "push the planet into a portal", 28, 28, 18, "255, 79, 216");
   paintLabel("EVENT HORIZON", "keep your distance", 78, 70, 18, "155, 107, 255");
 
@@ -411,6 +368,8 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       ctx.fillRect(0, 0, 128, 128);
     });
   const planetMoons = [];
+  const planets = [];
+  const PLANET_NAMES = ["Corvax", "Nyxara", "Halcyon", "Ember-9", "Viridia", "Lumen", "Oberon", "Talos", "Quill"];
   BUILDINGS.forEach((b, i) => {
     const [base, band, deep] = PLANET_TINTS[b.c % PLANET_TINTS.length];
     const r = Math.max(6, Math.min(11, b.h * 0.34));
@@ -446,7 +405,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     planet.rotation.z = 0.25 - bandRng() * 0.5;
     planet.castShadow = true;
     scene.add(planet);
-    updaters.push((time, dt) => (planet.rotation.y += dt * (0.05 + (i % 3) * 0.03)));
+    updaters.push((time, dt) => (planet.rotation.y += dt * (0.05 + (i % 3) * 0.03 + (planets[i] ? planets[i].spin : 0))));
     // atmosphere
     const halo = new THREE.Sprite(
       new THREE.SpriteMaterial({ map: glowTexFor(base), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
@@ -454,6 +413,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     halo.scale.setScalar(r * 2.9);
     halo.position.copy(planet.position);
     scene.add(halo);
+    planets.push({ name: PLANET_NAMES[i % PLANET_NAMES.length], x: b.x, z: b.z, r, mesh: planet, halo, color: base, spin: 0 });
     if (i % 2 === 0) {
       // a ring, banded from the inside out
       const ringTex = canvasTexture(256, 8, (ctx, W) => {
@@ -567,7 +527,7 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     const x = (rng() - 0.5) * 2 * 128;
     const z = (rng() - 0.5) * 2 * 128;
     const m = Math.max(Math.abs(x), Math.abs(z));
-    if (m < RING + ROAD_W / 2 + swW + 3) continue;
+    if (m < RING + ROAD_W / 2 + 5.5) continue;
     if (!isClear(x, z, 2)) continue;
     if (trees.some((t) => Math.hypot(t.x - x, t.z - z) < 6.5)) continue;
     const s = 0.9 + rng() * 0.6;
@@ -620,10 +580,9 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   if (sparkMesh) sparkMesh.material.transparent = true;
 
   // ------------------------------------------------------------------
-  // Street lamps (+ ground glow pools that fade in at night)
+  // Beacons: lights floating along the orbit rings, each a lit core in a
+  // spinning frame, in the accent colours, with a pool of light below
   // ------------------------------------------------------------------
-  const poleMat = matte(COLORS.pole);
-  // beacons: each in one of the accent colours, with a pool of its light
   const glowTex = canvasTexture(128, 128, (ctx) => {
     const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
     g.addColorStop(0, "rgba(255, 255, 255, 0.9)");
@@ -632,79 +591,43 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
     ctx.fillStyle = g;
     ctx.fillRect(0, 0, 128, 128);
   });
-  const lampMats = ACCENTS.map((c) => new THREE.MeshBasicMaterial({ color: c }));
   const glowMats = ACCENTS.map(
     (c) =>
-      new THREE.MeshBasicMaterial({
-        map: glowTex,
-        color: c,
-        transparent: true,
-        opacity: 0.6,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
+      new THREE.MeshBasicMaterial({ map: glowTex, color: c, transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }),
   );
-  const poleGeo = new THREE.CylinderGeometry(0.15, 0.22, 7, 7);
-  const armGeo = new THREE.BoxGeometry(0.15, 0.15, 2);
-  const bulbGeo = new THREE.SphereGeometry(0.38, 8, 6);
-  const glowGeo = new THREE.PlaneGeometry(11, 11);
-  LAMPS.forEach(({ x, z }, li) => {
-    const lampMat = lampMats[li % lampMats.length];
-    const glowMat = glowMats[li % glowMats.length];
-    const lamp = new THREE.Group();
-    const pole = new THREE.Mesh(poleGeo, poleMat);
-    pole.position.y = 3.5;
-    pole.castShadow = true;
-    lamp.add(pole);
-    // arm reaches toward the nearest road centre line
-    let best = null;
-    [0, RING, -RING].forEach((c) => {
-      if (!best || Math.abs(c - x) < Math.abs(best.d)) best = { axis: "x", d: c - x };
-      if (Math.abs(c - z) < Math.abs(best.d)) best = { axis: "z", d: c - z };
-    });
-    const toRoad =
-      best.axis === "x"
-        ? new THREE.Vector2(Math.sign(best.d), 0)
-        : new THREE.Vector2(0, Math.sign(best.d));
-    const arm = new THREE.Mesh(armGeo, poleMat);
-    arm.position.set(toRoad.x, 6.9, toRoad.y);
-    arm.rotation.y = toRoad.x !== 0 ? Math.PI / 2 : 0;
-    lamp.add(arm);
-    const bulb = new THREE.Mesh(bulbGeo, lampMat);
-    bulb.position.set(toRoad.x * 2, 6.75, toRoad.y * 2);
-    lamp.add(bulb);
-    lamp.position.set(x, 0, z);
-    scene.add(lamp);
-    addFlat(glowGeo, glowMat, x + toRoad.x * 2, z + toRoad.y * 2, 0.07);
-    physics.addStaticCylinder(x, z, 0.35, 7);
+  const beaconCore = new THREE.OctahedronGeometry(0.55, 0);
+  const beaconFrame = new THREE.OctahedronGeometry(1.1, 0);
+  const glowGeo = new THREE.PlaneGeometry(10, 10);
+  const beacons = [];
+  [
+    [48, 8, 0.2],
+    [80, 12, 0.5],
+  ].forEach(([r, n, offset]) => {
+    for (let i = 0; i < n; i++) {
+      const a = ((i + offset) / n) * Math.PI * 2;
+      const x = Math.cos(a) * r;
+      const z = Math.sin(a) * r;
+      if (!isClear(x, z, -2)) continue;
+      const k = beacons.length % ACCENTS.length;
+      const group = new THREE.Group();
+      group.position.set(x, 4.2, z);
+      group.add(new THREE.Mesh(beaconCore, new THREE.MeshBasicMaterial({ color: ACCENTS[k] })));
+      const frame = new THREE.Mesh(
+        beaconFrame,
+        new THREE.MeshBasicMaterial({ color: ACCENTS[k], wireframe: true, transparent: true, opacity: 0.7 }),
+      );
+      group.add(frame);
+      scene.add(group);
+      addFlat(glowGeo, glowMats[k], x, z, 0.07);
+      beacons.push({ group, frame, phase: i * 0.8 });
+    }
   });
-
-  // benches around the plaza
-  const woodMat = matte(COLORS.wood);
-  [0.35, 1.2, 2.6, 4.1, 5.3].forEach((a) => {
-    const r = PLAZA_R - 2.5;
-    const x = Math.cos(a) * r;
-    const z = Math.sin(a) * r;
-    const bench = new THREE.Group();
-    const seat = new THREE.Mesh(new THREE.BoxGeometry(3, 0.2, 1), woodMat);
-    seat.position.y = 0.8;
-    seat.castShadow = true;
-    outline(seat, NEON.cyan, 0.6);
-    bench.add(seat);
-    const back = new THREE.Mesh(new THREE.BoxGeometry(3, 0.9, 0.15), woodMat);
-    back.position.set(0, 1.4, 0.45);
-    back.castShadow = true;
-    outline(back, NEON.cyan, 0.6);
-    bench.add(back);
-    [-1.3, 1.3].forEach((lx) => {
-      const leg = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.8, 0.9), poleMat);
-      leg.position.set(lx, 0.4, 0);
-      bench.add(leg);
+  updaters.push((time, dt) => {
+    beacons.forEach((b) => {
+      b.frame.rotation.y += dt * 0.9;
+      b.frame.rotation.x += dt * 0.4;
+      b.group.position.y = 4.2 + Math.sin(time * 1.6 + b.phase) * 0.35;
     });
-    bench.position.set(x, 0, z);
-    bench.rotation.y = -a - Math.PI / 2;
-    scene.add(bench);
-    physics.addStaticBox(x, 0.7, z, 3, 1.4, 1.2, -a - Math.PI / 2);
   });
 
   // ------------------------------------------------------------------
@@ -799,30 +722,24 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   });
 
   // ------------------------------------------------------------------
-  // Stadium pitch + goals
+  // Orbit Arena (where the football pitch was): a field of light with a
+  // wormhole at each end; push the planet ball through one
   // ------------------------------------------------------------------
-  const pitchTex = canvasTexture(1024, 740, (ctx, W, H) => {
-    const stripes = 10;
-    for (let i = 0; i < stripes; i++) {
-      ctx.fillStyle = i % 2 ? "#0e0820" : "#120a28";
-      ctx.fillRect((i * W) / stripes, 0, W / stripes + 1, H);
-    }
-    ctx.strokeStyle = "rgba(255,79,216,0.9)";
+  const arenaTex = canvasTexture(1024, 740, (ctx, W, H) => {
+    ctx.strokeStyle = "rgba(255,79,216,0.85)";
     ctx.shadowColor = "rgba(255,79,216,1)";
     ctx.shadowBlur = 14;
     ctx.lineWidth = 6;
-    const m = 20;
-    ctx.strokeRect(m, m, W - 2 * m, H - 2 * m);
-    ctx.beginPath();
-    ctx.moveTo(W / 2, m);
-    ctx.lineTo(W / 2, H - m);
+    roundRect(ctx, 24, 24, W - 48, H - 48, 160);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(W / 2, H / 2, 95, 0, Math.PI * 2);
-    ctx.stroke();
-    const boxH = (GOAL.width / PITCH.d) * H * 1.6;
-    ctx.strokeRect(m, H / 2 - boxH / 2, 120, boxH);
-    ctx.strokeRect(W - m - 120, H / 2 - boxH / 2, 120, boxH);
+    // concentric orbits round the middle
+    ctx.lineWidth = 3;
+    [90, 170, 250].forEach((r, i) => {
+      ctx.strokeStyle = `rgba(${i % 2 ? "155,107,255" : "255,79,216"}, ${0.55 - i * 0.12})`;
+      ctx.beginPath();
+      ctx.ellipse(W / 2, H / 2, r * 1.2, r, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    });
     ctx.fillStyle = "rgba(255,79,216,0.9)";
     ctx.beginPath();
     ctx.arc(W / 2, H / 2, 10, 0, Math.PI * 2);
@@ -830,152 +747,11 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
   });
   addFlat(
     new THREE.PlaneGeometry(PITCH.w, PITCH.d),
-    new THREE.MeshBasicMaterial({ map: pitchTex }),
+    new THREE.MeshBasicMaterial({ map: arenaTex, transparent: true, depthWrite: false }),
     PITCH.x,
     PITCH.z,
     0.03,
   );
-
-  const postMat = glow(NEON.amber, 0.9);
-  const netTex = canvasTexture(128, 128, (ctx) => {
-    ctx.strokeStyle = "rgba(255,179,71,0.7)";
-    ctx.lineWidth = 3;
-    for (let i = 0; i <= 128; i += 16) {
-      ctx.beginPath();
-      ctx.moveTo(i, 0);
-      ctx.lineTo(i, 128);
-      ctx.moveTo(0, i);
-      ctx.lineTo(128, i);
-      ctx.stroke();
-    }
-  });
-  netTex.wrapS = netTex.wrapT = THREE.RepeatWrapping;
-  const netMatFor = (w, h) => {
-    const t = netTex.clone();
-    t.needsUpdate = true;
-    t.repeat.set(w / 1.2, h / 1.2);
-    return new THREE.MeshBasicMaterial({
-      map: t,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
-  };
-  [-1, 1].forEach((side) => {
-    const lineX = PITCH.x + (side * PITCH.w) / 2;
-    const backX = lineX + side * GOAL.depth;
-    const g = new THREE.Group();
-    const postGeo = new THREE.CylinderGeometry(0.22, 0.22, GOAL.height, 8);
-    [-1, 1].forEach((s) => {
-      const post = new THREE.Mesh(postGeo, postMat);
-      post.position.set(lineX, GOAL.height / 2, PITCH.z + (s * GOAL.width) / 2);
-      post.castShadow = true;
-      g.add(post);
-      physics.addStaticCylinder(lineX, PITCH.z + (s * GOAL.width) / 2, 0.3, GOAL.height);
-      // side net
-      const sideNet = new THREE.Mesh(new THREE.PlaneGeometry(GOAL.depth, GOAL.height), netMatFor(GOAL.depth, GOAL.height));
-      sideNet.position.set((lineX + backX) / 2, GOAL.height / 2, PITCH.z + (s * GOAL.width) / 2);
-      g.add(sideNet);
-      physics.addStaticBox((lineX + backX) / 2, GOAL.height / 2, PITCH.z + (s * (GOAL.width + 0.4)) / 2, GOAL.depth, GOAL.height, 0.4);
-    });
-    const bar = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.22, GOAL.width, 8), postMat);
-    bar.rotation.x = Math.PI / 2;
-    bar.position.set(lineX, GOAL.height, PITCH.z);
-    bar.castShadow = true;
-    g.add(bar);
-    physics.addStaticBox(lineX, GOAL.height, PITCH.z, 0.4, 0.4, GOAL.width);
-    const backNet = new THREE.Mesh(new THREE.PlaneGeometry(GOAL.width, GOAL.height), netMatFor(GOAL.width, GOAL.height));
-    backNet.rotation.y = Math.PI / 2;
-    backNet.position.set(backX, GOAL.height / 2, PITCH.z);
-    g.add(backNet);
-    physics.addStaticBox(backX + side * 0.2, GOAL.height / 2, PITCH.z, 0.4, GOAL.height, GOAL.width);
-    const topNet = new THREE.Mesh(new THREE.PlaneGeometry(GOAL.depth, GOAL.width), netMatFor(GOAL.depth, GOAL.width));
-    topNet.rotation.x = -Math.PI / 2;
-    topNet.position.set((lineX + backX) / 2, GOAL.height, PITCH.z);
-    g.add(topNet);
-    physics.addStaticBox((lineX + backX) / 2, GOAL.height + 0.2, PITCH.z, GOAL.depth, 0.4, GOAL.width);
-    scene.add(g);
-  });
-
-  // ------------------------------------------------------------------
-  // Bowling lane
-  // ------------------------------------------------------------------
-  const laneTex = canvasTexture(1024, 180, (ctx, W, H) => {
-    ctx.fillStyle = "#0d0a1e";
-    ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(255, 179, 71, 0.22)";
-    ctx.lineWidth = 2;
-    for (let y = 0; y < H; y += 18) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(W, y);
-      ctx.stroke();
-    }
-    ctx.fillStyle = "rgba(255, 179, 71, 0.9)";
-    for (let i = 0; i < 5; i++) {
-      const x = W * 0.45;
-      const y = H * (0.2 + i * 0.15);
-      ctx.beginPath();
-      ctx.moveTo(x - 30, y);
-      ctx.lineTo(x, y - 12);
-      ctx.lineTo(x, y + 12);
-      ctx.fill();
-    }
-  });
-  const laneLen = Math.abs(BOWLING.lane.x1 - BOWLING.lane.x0);
-  addFlat(
-    new THREE.PlaneGeometry(laneLen, BOWLING.lane.width),
-    new THREE.MeshBasicMaterial({ map: laneTex }),
-    (BOWLING.lane.x0 + BOWLING.lane.x1) / 2,
-    BOWLING.lane.z,
-    0.03,
-  );
-  // gutters (low curbs that keep the ball roughly on the lane)
-  [-1, 1].forEach((s) => {
-    const curb = new THREE.Mesh(new THREE.BoxGeometry(laneLen * 0.55, 0.4, 0.4), matte(0x0f1a27));
-    outline(curb, NEON.amber, 0.8);
-    const cx = BOWLING.lane.x1 + laneLen * 0.275;
-    const cz = BOWLING.lane.z + (s * (BOWLING.lane.width + 0.4)) / 2;
-    curb.position.set(cx, 0.2, cz);
-    curb.castShadow = true;
-    scene.add(curb);
-    physics.addStaticBox(cx, 0.2, cz, laneLen * 0.55, 0.4, 0.4);
-  });
-
-  // ------------------------------------------------------------------
-  // Ramps + hoop
-  // ------------------------------------------------------------------
-  const rampMat = matte(COLORS.ramp);
-  const stripeMat = new THREE.MeshBasicMaterial({ color: NEON.lime });
-  RAMPS.forEach((r) => {
-    const mesh = new THREE.Mesh(prismGeometry(prismProfile(r), r.width), rampMat);
-    mesh.position.set(r.x, 0, r.z);
-    mesh.rotation.y = r.yaw;
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-    outline(mesh, NEON.lime, 0.85);
-    scene.add(mesh);
-    if (r.type === "ramp") {
-      // white chevrons painted on the slope
-      const slope = Math.atan2(r.h, r.len);
-      for (let i = 0; i < 3; i++) {
-        const t = -0.25 + i * 0.25;
-        const stripe = new THREE.Mesh(new THREE.PlaneGeometry(0.5, r.width * 0.8), stripeMat);
-        const lx = t * r.len;
-        const ly = (r.h * (lx + r.len / 2)) / r.len + 0.03;
-        stripe.position.set(lx, ly, 0);
-        // lay flat, then tilt onto the slope
-        stripe.quaternion.setFromEuler(new THREE.Euler(-Math.PI / 2, 0, 0)).premultiply(
-          new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), slope),
-        );
-        mesh.add(stripe);
-      }
-    }
-    physics.addRamp(r);
-  });
-
-  // the hoop is a portal: a lit ring with a swirl of light inside
-  const hoopMat = glow(NEON.magenta, 1.1, { shininess: 60 });
   const swirlTex = canvasTexture(256, 256, (ctx, W, H) => {
     ctx.translate(W / 2, H / 2);
     for (let k = 0; k < 6; k++) {
@@ -990,14 +766,114 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       ctx.stroke();
     }
   });
-  const hoops = HOOPS.map((h) => {
-    const mesh = new THREE.Mesh(new THREE.TorusGeometry(h.r, 0.32, 8, 40), hoopMat);
+  const portalRing = (r, color) => {
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(r, 0.3, 10, 56), glow(color, 1.1, { shininess: 60 }));
     const swirl = new THREE.Mesh(
-      new THREE.CircleGeometry(h.r - 0.2, 40),
+      new THREE.CircleGeometry(r - 0.2, 48),
       new THREE.MeshBasicMaterial({ map: swirlTex, transparent: true, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }),
     );
-    mesh.add(swirl);
+    ring.add(swirl);
     updaters.push((time, dt) => (swirl.rotation.z -= dt * 1.8));
+    return ring;
+  };
+  // wormholes standing on each goal line, facing along the arena
+  [-1, 1].forEach((side) => {
+    const r = GOAL.width / 2;
+    const wormhole = portalRing(r, side < 0 ? NEON.violet : NEON.magenta);
+    wormhole.scale.y = GOAL.height / r;
+    wormhole.position.set(PITCH.x + (side * PITCH.w) / 2 + side * 0.6, GOAL.height, PITCH.z);
+    wormhole.rotation.y = Math.PI / 2;
+    scene.add(wormhole);
+  });
+
+  // ------------------------------------------------------------------
+  // Satellite swarm (where the bowling lane was): the comet starts at the
+  // near end; the satellites hold a ring round the far end
+  // ------------------------------------------------------------------
+  const swarmTex = canvasTexture(256, 256, (ctx, W, H) => {
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.8)";
+    ctx.lineWidth = 3;
+    ctx.setLineDash([10, 8]);
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, 118, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.35)";
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, 70, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+  addFlat(
+    new THREE.PlaneGeometry(16, 16),
+    new THREE.MeshBasicMaterial({ map: swarmTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
+    BOWLING.apex.x,
+    BOWLING.apex.z,
+    0.05,
+  );
+  // a trail of light from the comet's start towards the swarm
+  const trailTex = canvasTexture(512, 32, (ctx, W, H) => {
+    const g = ctx.createLinearGradient(0, 0, W, 0);
+    g.addColorStop(0, "rgba(255, 179, 71, 0)");
+    g.addColorStop(1, "rgba(255, 179, 71, 0.5)");
+    ctx.fillStyle = g;
+    for (let x = 0; x < W; x += 40) ctx.fillRect(x, H / 2 - 3, 24, 6);
+  });
+  addFlat(
+    new THREE.PlaneGeometry(Math.abs(BOWLING.apex.x - BOWLING.ball.x) - 6, 2),
+    new THREE.MeshBasicMaterial({ map: trailTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }),
+    (BOWLING.apex.x + 6 + BOWLING.ball.x) / 2,
+    BOWLING.ball.z,
+    0.05,
+    Math.PI,
+  );
+
+  // ------------------------------------------------------------------
+  // Launch pads (where the ramps were) and the portal ring to fly through
+  // ------------------------------------------------------------------
+  const launchTex = canvasTexture(256, 256, (ctx, W, H) => {
+    const g = ctx.createRadialGradient(W / 2, H / 2, 10, W / 2, H / 2, 128);
+    g.addColorStop(0, "rgba(157, 255, 107, 0.55)");
+    g.addColorStop(1, "rgba(157, 255, 107, 0.02)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(W / 2, H / 2, 124, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = "rgba(157, 255, 107, 0.95)";
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    // chevrons pointing along +X
+    ctx.fillStyle = "rgba(220, 255, 200, 0.95)";
+    [-50, 0, 50].forEach((o) => {
+      ctx.beginPath();
+      ctx.moveTo(W / 2 + o + 26, H / 2);
+      ctx.lineTo(W / 2 + o - 10, H / 2 - 34);
+      ctx.lineTo(W / 2 + o - 10, H / 2 - 16);
+      ctx.lineTo(W / 2 + o + 8, H / 2);
+      ctx.lineTo(W / 2 + o - 10, H / 2 + 16);
+      ctx.lineTo(W / 2 + o - 10, H / 2 + 34);
+      ctx.closePath();
+      ctx.fill();
+    });
+  });
+  const launchPads = LAUNCH_PADS.map((pad) => {
+    const mat = new THREE.MeshBasicMaterial({ map: launchTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+    const yaw = Math.atan2(-pad.dir[1], pad.dir[0]);
+    const mesh = addFlat(new THREE.CircleGeometry(4, 40), mat, pad.x, pad.z, 0.06, yaw);
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.12, 6, 48), new THREE.MeshBasicMaterial({ color: NEON.lime }));
+    ring.rotation.x = Math.PI / 2;
+    ring.position.set(pad.x, 0.3, pad.z);
+    scene.add(ring);
+    updaters.push((time) => {
+      ring.position.y = 0.3 + ((time * 1.2) % 1) * 2.4;
+      ring.material.opacity = 1 - ((time * 1.2) % 1);
+      ring.material.transparent = true;
+    });
+    return { ...pad, mesh };
+  });
+
+  // the portal ring in the launch zone
+  const hoops = HOOPS.map((h) => {
+    const mesh = portalRing(h.r, NEON.lime);
     mesh.position.set(h.x, h.y, h.z);
     mesh.rotation.y = h.yaw;
     mesh.castShadow = true;
@@ -1009,6 +885,31 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       h.mesh.rotation.z = Math.sin(time * 0.8 + i) * 0.08;
       h.mesh.position.y = h.y + Math.sin(time * 1.3 + i) * 0.15;
     });
+  });
+
+  // ------------------------------------------------------------------
+  // The ring course (where the dominoes were): rings standing in a spiral,
+  // to fly through in order; the next one glows
+  // ------------------------------------------------------------------
+  const courseRings = COURSE.map((c, i) => {
+    const mat = new THREE.MeshBasicMaterial({ color: NEON.violet, transparent: true, opacity: 0.55 });
+    const mesh = new THREE.Mesh(new THREE.TorusGeometry(3.2, 0.22, 8, 40), mat);
+    mesh.position.set(c.x, 3.2, c.z);
+    // facing along the spiral, so you fly through it going round
+    mesh.rotation.y = -c.a;
+    scene.add(mesh);
+    const label = canvasTexture(128, 128, (ctx, W, H) => {
+      ctx.fillStyle = "rgba(220, 210, 255, 0.95)";
+      ctx.font = `700 64px ${DISPLAY_FONT}`;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(String(i + 1), W / 2, H / 2 + 4);
+    });
+    const tag = new THREE.Sprite(new THREE.SpriteMaterial({ map: label, transparent: true, depthWrite: false }));
+    tag.scale.setScalar(1.8);
+    tag.position.set(c.x, 7.4, c.z);
+    scene.add(tag);
+    return { ...c, mesh, mat, r: 3.2, y: 3.2, yaw: -c.a };
   });
 
   // ------------------------------------------------------------------
@@ -1104,17 +1005,24 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
       board.castShadow = true;
       outline(board, tintHex.getHex(), 0.8);
       scene.add(board);
-      const postGeo = new THREE.BoxGeometry(0.45, 3.9, 0.45);
-      [-4, 4].forEach((o) => {
-        const px = bx + o * Math.cos(Q);
-        const pz = bz - o * Math.sin(Q);
-        const post = new THREE.Mesh(postGeo, frameMat);
-        post.position.set(px, 1.95, pz);
-        post.rotation.y = Q;
-        post.castShadow = true;
-        outline(post, tintHex.getHex(), 0.5);
-        scene.add(post);
-        physics.addStaticBox(px, 1.95, pz, 0.5, 3.9, 0.5, Q);
+      // no legs: the screen floats, projected by a cone of light from a
+      // small emitter on the floor
+      const emitter = new THREE.Mesh(new THREE.CylinderGeometry(0.9, 1.1, 0.3, 20), glow(tintHex.getHex(), 0.9));
+      emitter.position.set(bx, 0.15, bz);
+      scene.add(emitter);
+      const projGeo = new THREE.CylinderGeometry(4.6, 0.6, 6, 4, 1, true);
+      projGeo.translate(0, 3, 0);
+      const projection = new THREE.Mesh(
+        projGeo,
+        new THREE.MeshBasicMaterial({ color: tintHex, transparent: true, opacity: 0.08, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }),
+      );
+      projection.position.set(bx, 0.3, bz);
+      projection.rotation.y = Q + Math.PI / 4;
+      projection.scale.z = 0.12;
+      scene.add(projection);
+      const phase = bx * 0.1;
+      updaters.push((time) => {
+        board.position.y = 7.4 + Math.sin(time * 1.1 + phase) * 0.3;
       });
     }
     night.pads.push(baseMat);
@@ -1215,5 +1123,5 @@ export const buildWorld = ({ scene, physics, isMobile }) => {
 
   const update = (time, dt) => updaters.forEach((u) => u(time, dt));
 
-  return { update, pads, hoops, night, ground };
+  return { update, pads, hoops, launchPads, courseRings, planets, sun: { x: FOUNTAIN.x, z: FOUNTAIN.z, r: 4 }, night, ground };
 };

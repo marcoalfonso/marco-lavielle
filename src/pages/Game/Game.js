@@ -282,8 +282,8 @@ const CarGame = () => {
           <p className="holo-kicker">Sector ML-01</p>
           <h1 className="holo-title game-card-title">Marco Lavielle</h1>
           <p>
-            A little galaxy to fly around. Knock over the letters, scatter the satellites, push the planet through a
-            portal, keep clear of the black hole, and collect all {TOTAL_CRYSTALS} crystals.
+            A little galaxy to fly around. Knock over the letters, slingshot round the planets, fly the ring course,
+            keep clear of the black hole, and collect all {TOTAL_CRYSTALS} crystals.
           </p>
           <p className="game-hint">
             {mobile ? "Tap anywhere to start" : "Arrows / WASD to fly · Shift boost · Space drift · press any key"}
@@ -302,10 +302,11 @@ const CarGame = () => {
           </ul>
           <p className="holo-kicker">Things to do</p>
           <ul>
-            <li>Knock down all the satellites in the cargo bay</li>
-            <li>Push the planet through a portal in the orbit arena</li>
-            <li>Jump through the portal ring in the launch zone</li>
-            <li>Scatter the cargo blocks, topple the monoliths</li>
+            <li>Fire the comet into the satellite swarm in the cargo bay</li>
+            <li>Fly the ring course in order, 1 to 7</li>
+            <li>Push the planet through a wormhole in the orbit arena</li>
+            <li>Hit a launch pad and fly through the portal ring</li>
+            <li>Skim a planet for a slingshot, but keep clear of the sun</li>
             <li>Brave the black hole: it swallows you and spits you out far away</li>
             <li>Follow the beams of light to all {TOTAL_CRYSTALS} crystals</li>
           </ul>

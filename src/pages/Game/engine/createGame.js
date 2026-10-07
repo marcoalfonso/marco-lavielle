@@ -326,7 +326,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
           cb.onToast("Satellites back in orbit");
         } else {
           props.resetGroup("letters");
-          props.resetGroup("dominoes");
+          resetCourse();
           props.resetGroup("bricks");
           props.resetGroup("crates");
           props.resetGroup("cones");
@@ -343,6 +343,126 @@ export const createGame = (container, { isMobile, callbacks }) => {
       cb.onZone(inside ? { id: inside.id, title: inside.title, href: inside.href } : null);
       if (inside) audio.chime(1);
     }
+  };
+
+  // ------------------------------------------------------------------
+  // Space play: launch pads, the ring course, planet slingshots, the sun
+  // ------------------------------------------------------------------
+  const launchCool = world.launchPads.map(() => 0);
+  const updateLaunchPads = (p, dt) => {
+    world.launchPads.forEach((pad, i) => {
+      launchCool[i] = Math.max(0, launchCool[i] - dt);
+      if (launchCool[i] > 0 || p.y > 3) return;
+      if (Math.hypot(p.x - pad.x, p.z - pad.z) > 4) return;
+      launchCool[i] = 1.2;
+      const v = car.chassisBody.velocity;
+      const along = v.x * pad.dir[0] + v.z * pad.dir[1];
+      const push = Math.max(pad.push, along);
+      v.x = pad.dir[0] * push;
+      v.z = pad.dir[1] * push;
+      v.y = pad.lift;
+      audio.whoosh();
+      effects.burst({ x: pad.x, y: 0.5, z: pad.z }, { count: 50, power: 6, up: 12, colors: [NEON.lime, 0xffffff, NEON.cyan] });
+    });
+  };
+
+  // the ring course: through each ring in order
+  let courseNext = 0;
+  const courseSide = world.courseRings.map(() => 0);
+  const courseRel = new THREE.Vector3();
+  const lightCourse = () => {
+    world.courseRings.forEach((r, i) => {
+      const done = i < courseNext;
+      const next = i === courseNext;
+      r.mat.color.setHex(done ? NEON.lime : next ? NEON.amber : NEON.violet);
+      r.mat.opacity = done ? 0.9 : next ? 1 : 0.4;
+    });
+  };
+  const resetCourse = () => {
+    courseNext = 0;
+    lightCourse();
+  };
+  lightCourse();
+  const updateCourse = (p, time) => {
+    world.courseRings.forEach((r, i) => {
+      r.mesh.scale.setScalar(i === courseNext ? 1 + Math.sin(time * 5) * 0.05 : 1);
+      const n = { x: Math.sin(r.yaw), z: Math.cos(r.yaw) };
+      courseRel.set(p.x - r.x, p.y - r.y, p.z - r.z);
+      const side = courseRel.x * n.x + courseRel.z * n.z;
+      const sgn = Math.sign(side);
+      if (courseSide[i] !== 0 && sgn !== 0 && sgn !== courseSide[i] && Math.abs(side) < 3) {
+        const inPlane = Math.hypot(courseRel.x - side * n.x, courseRel.y, courseRel.z - side * n.z);
+        if (inPlane < r.r + 0.6 && i === courseNext) {
+          courseNext++;
+          lightCourse();
+          audio.chime(courseNext);
+          effects.burst({ x: r.x, y: r.y, z: r.z }, { count: 40, power: 6, up: 5, colors: [NEON.amber, NEON.lime, 0xffffff] });
+          if (courseNext === world.courseRings.length) {
+            cb.onToast("Ring course complete");
+            audio.fanfare();
+            effects.burst({ x: r.x, y: 4, z: r.z }, { count: 160, power: 14, up: 12 });
+            setTimeout(resetCourse, 4000);
+          } else cb.onToast(`Ring ${courseNext} / ${world.courseRings.length}`);
+        }
+      }
+      courseSide[i] = sgn || courseSide[i];
+    });
+  };
+
+  // planets: fly close and one slingshots you round it; it spins up and flares
+  const planetCool = world.planets.map(() => 0);
+  const planetColor = new THREE.Color();
+  const updatePlanets = (p, dt) => {
+    world.planets.forEach((pl, i) => {
+      planetCool[i] = Math.max(0, planetCool[i] - dt);
+      pl.spin = Math.max(0, pl.spin - dt * 0.6);
+      pl.mesh.material.emissiveIntensity = 0.32 + pl.spin * 0.25;
+      pl.halo.scale.setScalar(pl.r * (2.9 + pl.spin * 0.25));
+      if (planetCool[i] > 0) return;
+      const dx = p.x - pl.x;
+      const dz = p.z - pl.z;
+      const d = Math.hypot(dx, dz);
+      if (d > pl.r + 4.5) return;
+      planetCool[i] = 3;
+      pl.spin = 2.4;
+      // a slingshot: thrown along the tangent, the way you were going round
+      const v = car.chassisBody.velocity;
+      const tx = -dz / d;
+      const tz = dx / d;
+      const dir = v.x * tx + v.z * tz >= 0 ? 1 : -1;
+      const speed = Math.max(28, Math.hypot(v.x, v.z) * 1.4);
+      v.x = (tx * dir * 0.8 + (dx / d) * 0.45) * speed;
+      v.z = (tz * dir * 0.8 + (dz / d) * 0.45) * speed;
+      v.y = Math.max(v.y, 6);
+      planetColor.set(pl.color);
+      effects.burst(
+        { x: pl.x + (dx / d) * pl.r, y: pl.r * 0.6, z: pl.z + (dz / d) * pl.r },
+        { count: 90, power: 10, up: 8, colors: [planetColor.getHex(), 0xffffff, NEON.ice] },
+      );
+      audio.whoosh();
+      audio.chime(3 + (i % 4));
+      shake = Math.max(shake, 0.35);
+      cb.onToast(`Slingshot round ${pl.name}`);
+    });
+  };
+
+  // the sun: too close and its heat throws you back
+  let sunCool = 0;
+  const updateSun = (p, dt) => {
+    sunCool = Math.max(0, sunCool - dt);
+    const dx = p.x - world.sun.x;
+    const dz = p.z - world.sun.z;
+    const d = Math.hypot(dx, dz) || 1;
+    if (sunCool > 0 || d > 9.5) return;
+    sunCool = 1.5;
+    const v = car.chassisBody.velocity;
+    v.x = (dx / d) * 26;
+    v.z = (dz / d) * 26;
+    v.y = 8;
+    effects.burst({ x: world.sun.x, y: 4.6, z: world.sun.z }, { count: 120, power: 12, up: 6, colors: [NEON.amber, NEON.coral, 0xfff3c0] });
+    audio.impact("ball", 0.8, null);
+    shake = Math.max(shake, 0.5);
+    cb.onToast("Solar flare · too hot");
   };
 
   const hoopSide = world.hoops.map(() => 0);
@@ -580,6 +700,10 @@ export const createGame = (container, { isMobile, callbacks }) => {
 
     updatePads(p, time);
     updateHoops(p);
+    updateLaunchPads(p, dt);
+    updateCourse(p, time);
+    updatePlanets(p, dt);
+    updateSun(p, dt);
 
     world.update(time, dt);
     blackHole.update(time, dt);
@@ -634,6 +758,10 @@ export const createGame = (container, { isMobile, callbacks }) => {
   if (process.env.NODE_ENV !== "production") {
     window.__carGame = {
       place: (x, z, yaw = SPAWN.yaw) => car.place(x, 2, z, yaw),
+      planets: world.planets,
+      courseRings: world.courseRings,
+      comet: props.comet,
+      planetBall: props.football.body,
       scene,
       car,
       inspect: (x, y, z, lookY = 1.5) => {
