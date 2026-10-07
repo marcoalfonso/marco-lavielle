@@ -51,6 +51,11 @@ export const BUILDINGS = [
 
 export const FOUNTAIN = { x: 17, z: 62, r: 6.8 };
 
+// A black hole in the corner nearest the camera (past the stadium): it pulls
+// the saucer in and spits it out at the far corner.
+export const BLACK_HOLE = { x: 96, z: 96, pull: 24, capture: 3.2 };
+export const EXIT_HOLE = { x: -88, z: -86 };
+
 export const PITCH = { x: 52, z: 48, w: 36, d: 26 }; // goals on the ±X ends
 export const GOAL = { width: 11, height: 4.4, depth: 3.2 };
 
@@ -115,7 +120,7 @@ export const PADS = [
     href: "/about",
     color: "#b09a6e",
   },
-  { id: "bowling-reset", kind: "reset", x: -22, z: -56, size: 6, title: "RESET PINS" },
+  { id: "bowling-reset", kind: "reset", x: -22, z: -56, size: 6, title: "RESET SATS" },
   { id: "props-reset", kind: "reset", x: -14, z: -14, size: 5, title: "RESET NAME" },
 ];
 

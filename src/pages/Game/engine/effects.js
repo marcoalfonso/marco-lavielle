@@ -89,6 +89,8 @@ const createSystem = (scene, geometry, material, max, { gravity = 0, drag = 0.98
   return { emit, update, mesh };
 };
 
+const SPARK_COLORS = [0x00bff3, 0xff4fd8, 0x9b6bff, 0xffb347, 0x6ff5ee];
+
 export const createEffects = (scene, isMobile) => {
   const dust = createSystem(
     scene,
@@ -174,7 +176,7 @@ export const createEffects = (scene, isMobile) => {
       life: 0.9 + Math.random() * 0.5,
       size: 0.6 + Math.random() * 0.5 * strength,
       grow: 1.4,
-      color: COLORS.dust,
+      color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
     });
   };
 
@@ -186,11 +188,11 @@ export const createEffects = (scene, isMobile) => {
       size: 0.9 + Math.random() * 0.6,
       grow: -0.4,
       color: 0xeafcff,
-      color2: 0x00bff3,
+      color2: 0xff4fd8,
     });
   };
 
-  const CONFETTI_COLORS = [0x6ff5ee, 0x00bff3, 0xbff6ff, 0x2a7fff, 0xffffff, 0x4fd8ff];
+  const CONFETTI_COLORS = [0x6ff5ee, 0x00bff3, 0xff4fd8, 0x9b6bff, 0xffb347, 0x9dff6b, 0xffffff];
   const burst = (pos, { count = 80, power = 12, up = 10, colors = CONFETTI_COLORS, life = 2.4 } = {}) => {
     for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;

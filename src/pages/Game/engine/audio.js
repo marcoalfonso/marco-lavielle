@@ -36,7 +36,7 @@ export const createAudio = () => {
     const data = noise.getChannelData(0);
     for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
 
-    // engine: detuned saw + sub square through a lowpass
+    // the saucer's hum: sine + triangle with a slow warble, through a lowpass
     const eGain = ctx.createGain();
     eGain.gain.value = 0;
     const eFilter = ctx.createBiquadFilter();
@@ -44,11 +44,20 @@ export const createAudio = () => {
     eFilter.frequency.value = 400;
     eFilter.Q.value = 3;
     const o1 = ctx.createOscillator();
-    o1.type = "sawtooth";
+    o1.type = "sine";
     const o2 = ctx.createOscillator();
-    o2.type = "square";
+    o2.type = "triangle";
     const o3 = ctx.createOscillator();
-    o3.type = "sawtooth";
+    o3.type = "sine";
+    // the warble: a slow LFO on the pitch
+    const lfo = ctx.createOscillator();
+    lfo.frequency.value = 5.5;
+    const lfoGain = ctx.createGain();
+    lfoGain.gain.value = 9;
+    lfo.connect(lfoGain);
+    lfoGain.connect(o1.frequency);
+    lfoGain.connect(o3.frequency);
+    lfo.start();
     const o3Gain = ctx.createGain();
     o3Gain.gain.value = 0;
     o1.connect(eFilter);
@@ -93,13 +102,13 @@ export const createAudio = () => {
     if (!engine) return;
     const t = ctx.currentTime;
     const rev = Math.min(1.3, speedRatio + (airborne && throttle ? 0.35 : 0));
-    const base = 42 + rev * 95 + Math.abs(throttle) * 10;
+    const base = 120 + rev * 150 + Math.abs(throttle) * 18;
     engine.o1.frequency.setTargetAtTime(base, t, 0.08);
     engine.o2.frequency.setTargetAtTime(base * 0.5, t, 0.08);
     engine.o3.frequency.setTargetAtTime(base * 2.02, t, 0.08);
     engine.o3Gain.gain.setTargetAtTime(boost ? 0.5 : 0, t, 0.1);
     engine.filter.frequency.setTargetAtTime(320 + rev * 900 + (throttle ? 250 : 0), t, 0.1);
-    engine.gain.gain.setTargetAtTime(0.05 + Math.abs(throttle) * 0.05 + rev * 0.03, t, 0.1);
+    engine.gain.gain.setTargetAtTime(0.06 + Math.abs(throttle) * 0.04 + rev * 0.03, t, 0.1);
   };
 
   const setSkid = (amount) => {

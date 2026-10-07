@@ -6,8 +6,9 @@ import { TOTAL_CRYSTALS } from "./engine/layout";
 import "components/holo/holo.css";
 import "./Game.css";
 
-// The playground: drive a little neon world, knock the name over, collect
-// the crystals. The HUD and its cards are drawn in the site's holo style.
+// The playground, in space: fly a saucer round a little galaxy, knock the
+// name over, dodge the black hole, collect the crystals. The HUD and its
+// cards are drawn in the site's holo style.
 
 const isMobile = () =>
   /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
@@ -128,7 +129,7 @@ const CarGame = () => {
   const toastId = useRef(0);
   const [mobile] = useState(isMobile);
   const [score, setScore] = useState(0);
-  const [hud, setHud] = useState({ speed: 0, time: 0, boosting: false });
+  const [hud, setHud] = useState({ warp: 0, time: 0, boosting: false });
   const [toasts, setToasts] = useState([]);
   const [zone, setZone] = useState(null);
   const [flipped, setFlipped] = useState(false);
@@ -249,8 +250,8 @@ const CarGame = () => {
 
       {!mobile && (
         <div className={`game-speed ${hud.boosting ? "is-boost" : ""}`}>
-          <span className="game-speed-value">{String(hud.speed).padStart(3, "0")}</span>
-          <span className="game-speed-unit">km/h{hud.boosting ? " · boost" : ""}</span>
+          <span className="game-speed-unit">Warp{hud.boosting ? " · boost" : ""}</span>
+          <span className="game-speed-value">{hud.warp.toFixed(1)}</span>
         </div>
       )}
 
@@ -272,20 +273,20 @@ const CarGame = () => {
       {flipped && !zone && (
         <button type="button" className="game-zone" onClick={call("resetCar")}>
           <span className="game-zone-title">Upside down?</span>
-          <span className="game-zone-cta">{mobile ? "Tap to flip back" : "Press R to flip back"}</span>
+          <span className="game-zone-cta">{mobile ? "Tap to right the saucer" : "Press R to right the saucer"}</span>
         </button>
       )}
 
       {intro && (
         <HoloPanel as="div" className="game-card game-intro">
-          <p className="holo-kicker">Playground · ML-01</p>
+          <p className="holo-kicker">Sector ML-01</p>
           <h1 className="holo-title game-card-title">Marco Lavielle</h1>
           <p>
-            A little world to drive around. Knock over the letters, bowl a strike, score a goal, fly through the hoop,
-            and collect all {TOTAL_CRYSTALS} crystals.
+            A little galaxy to fly around. Knock over the letters, scatter the satellites, push the planet through a
+            portal, keep clear of the black hole, and collect all {TOTAL_CRYSTALS} crystals.
           </p>
           <p className="game-hint">
-            {mobile ? "Tap anywhere to start" : "Arrows / WASD to drive · Shift boost · Space drift · press any key"}
+            {mobile ? "Tap anywhere to start" : "Arrows / WASD to fly · Shift boost · Space drift · press any key"}
           </p>
         </HoloPanel>
       )}
@@ -294,17 +295,18 @@ const CarGame = () => {
         <HoloPanel as="div" className="game-card game-help" onClick={() => setHelpOpen(false)}>
           <p className="holo-kicker">Controls</p>
           <ul>
-            <li><b>↑ ↓ ← →</b> / <b>WASD</b> drive</li>
+            <li><b>↑ ↓ ← →</b> / <b>WASD</b> fly</li>
             <li><b>Shift</b> boost · <b>Space</b> handbrake drift</li>
             <li><b>H</b> horn · <b>R</b> reset / flip · <b>M</b> mute</li>
             <li><b>Enter</b> open a project pad · scroll to zoom</li>
           </ul>
           <p className="holo-kicker">Things to do</p>
           <ul>
-            <li>Bowl a strike in the playground</li>
-            <li>Push the ball into a goal in the stadium</li>
-            <li>Jump through the glowing hoop in the jump park</li>
-            <li>Smash the brick wall, topple the dominoes</li>
+            <li>Knock down all the satellites in the cargo bay</li>
+            <li>Push the planet through a portal in the orbit arena</li>
+            <li>Jump through the portal ring in the launch zone</li>
+            <li>Scatter the cargo blocks, topple the monoliths</li>
+            <li>Brave the black hole: it swallows you and spits you out far away</li>
             <li>Follow the beams of light to all {TOTAL_CRYSTALS} crystals</li>
           </ul>
           <p className="game-hint">psst… ↑ ↑ ↓ ↓ ← → ← → B A</p>

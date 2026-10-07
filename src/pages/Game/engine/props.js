@@ -3,7 +3,7 @@ import * as CANNON from "cannon-es";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import fontJson from "three/examples/fonts/helvetiker_bold.typeface.json";
-import { COLORS, NEON, matte, glow, outline, canvasTexture } from "./materials.js";
+import { COLORS, NEON, ACCENTS, matte, glow, outline, canvasTexture } from "./materials.js";
 import {
   BOWLING,
   BRICK_WALL,
@@ -125,19 +125,34 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
     [0, 2.4],
   ].map(([x, y]) => new THREE.Vector2(x, y - PIN_H / 2));
   const pinGeo = new THREE.LatheGeometry(pinProfile, 10);
+  const satHullGeo = new THREE.CylinderGeometry(0.34, 0.34, PIN_H * 0.75, 8);
+  const satPanelGeo = new THREE.BoxGeometry(1.0, 1.1, 0.06);
+  const satPanelMat = matte(0x101a3a, { emissive: 0x0a1440, shininess: 90, specular: 0x6f9fff });
+  const satDishGeo = new THREE.ConeGeometry(0.42, 0.3, 14, 1, true);
   const pinMat = glow(COLORS.pin, 0.35, { shininess: 40 });
-  const stripeGeo = new THREE.CylinderGeometry(0.262, 0.226, 0.14, 10, 1, true);
-  const stripeMat = glow(COLORS.pinStripe, 1, { side: THREE.DoubleSide });
   const pins = [];
   const rowSpacing = 1.9;
   for (let row = 0; row < 4; row++) {
     for (let j = 0; j <= row; j++) {
       const x = BOWLING.apex.x - row * rowSpacing * 0.87;
       const z = BOWLING.apex.z + (j - row / 2) * rowSpacing;
-      const mesh = new THREE.Mesh(pinGeo, pinMat);
-      const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-      stripe.position.y = 0.7;
-      mesh.add(stripe);
+      // a little satellite: a body, two solar panels and a dish, the size
+      // of the old pin so it falls the same way
+      const mesh = new THREE.Group();
+      const hull = new THREE.Mesh(satHullGeo, pinMat);
+      mesh.add(hull);
+      const tint = ACCENTS[(row + j) % ACCENTS.length];
+      [-1, 1].forEach((side) => {
+        const panel = new THREE.Mesh(satPanelGeo, satPanelMat);
+        panel.position.set(side * 0.78, 0.25, 0);
+        outline(panel, tint, 0.9);
+        mesh.add(panel);
+      });
+      const dish = new THREE.Mesh(satDishGeo, glow(tint, 0.9, { side: THREE.DoubleSide }));
+      dish.position.y = 1.05;
+      dish.rotation.x = Math.PI;
+      mesh.add(dish);
+      hull.castShadow = true;
       const body = new CANNON.Body({ mass: 0.8, material: materials.prop });
       body.addShape(new CANNON.Cylinder(0.3, 0.45, PIN_H, 10));
       body.position.set(x, PIN_H / 2 + 0.01, z);
@@ -154,9 +169,9 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   ballBody.position.set(BOWLING.ball.x, 1.3, BOWLING.ball.z);
   const bowlingBall = new THREE.Mesh(
     new THREE.IcosahedronGeometry(1.3, 1),
-    matte(0x0b1624, { shininess: 90, specular: 0x3a6a88 }),
+    matte(0x3a1c08, { emissive: NEON.amber, emissiveIntensity: 0.35, shininess: 90, specular: 0xffd6a0 }),
   );
-  outline(bowlingBall, NEON.cyan, 0.75, 1);
+  outline(bowlingBall, NEON.amber, 0.75, 1);
   add({ mesh: bowlingBall, body: ballBody, kind: "ball", group: "bowling", asleep: true });
 
   const pinUp = new CANNON.Vec3();
@@ -189,7 +204,8 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   // Brick wall
   // ------------------------------------------------------------------
   const brickGeo = new THREE.BoxGeometry(1.96, 0.96, 0.96);
-  const brickMats = [matte(COLORS.brick), matte(0x0f2840), matte(0x173a56)];
+  // cargo blocks, in every accent colour
+  const brickMats = ACCENTS.map((c) => matte(0x0c0a1c, { emissive: c, emissiveIntensity: 0.28 }));
   for (let row = 0; row < BRICK_WALL.rows; row++) {
     const offset = row % 2 ? 1 : 0;
     const cols = BRICK_WALL.cols - (row % 2);
@@ -199,8 +215,9 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
       const body = new CANNON.Body({ mass: 1.4, material: materials.prop });
       body.addShape(new CANNON.Box(new CANNON.Vec3(0.98, 0.48, 0.48)));
       body.position.set(x, y, BRICK_WALL.z);
-      const brick = new THREE.Mesh(brickGeo, brickMats[(row + c) % brickMats.length]);
-      outline(brick, NEON.cyan, 0.65);
+      const k = (row * 3 + c) % brickMats.length;
+      const brick = new THREE.Mesh(brickGeo, brickMats[k]);
+      outline(brick, ACCENTS[k], 0.85);
       add({
         mesh: brick,
         body,
@@ -225,7 +242,7 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
     const x = DOMINOES.cx + Math.cos(a) * r;
     const z = DOMINOES.cz + Math.sin(a) * r;
     const mesh = new THREE.Mesh(dominoGeo, dominoMat);
-    outline(mesh, NEON.cyan, 0.6);
+    outline(mesh, NEON.violet, 0.75);
     // pips on both faces
     [0.26, -0.26].forEach((fx) => {
       [-0.8, 0.8].forEach((py) => {
@@ -247,12 +264,12 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   // Crate pyramid
   // ------------------------------------------------------------------
   const crateTex = canvasTexture(128, 128, (ctx) => {
-    ctx.fillStyle = "#0a1622";
+    ctx.fillStyle = "#160e1c";
     ctx.fillRect(0, 0, 128, 128);
-    ctx.strokeStyle = "rgba(0, 191, 243, 0.85)";
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.9)";
     ctx.lineWidth = 6;
     ctx.strokeRect(6, 6, 116, 116);
-    ctx.strokeStyle = "rgba(0, 191, 243, 0.4)";
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.4)";
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(12, 12);
@@ -323,7 +340,7 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
     for (let k = 0; k < 3; k++) centroid.add(vtx.fromBufferAttribute(fpos, i + k));
     centroid.normalize();
     const dark = corners.some((c) => c.dot(centroid) > 0.9);
-    const col = dark ? [0.0, 0.75, 0.95] : [0.05, 0.09, 0.14];
+    const col = dark ? [1.0, 0.31, 0.85] : [0.1, 0.55, 0.62];
     for (let k = 0; k < 3; k++) fcol.push(...col);
   }
   footGeo.setAttribute("color", new THREE.Float32BufferAttribute(fcol, 3));
@@ -373,7 +390,7 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   const rain = [];
   const ballRain = (x, z) => {
     for (let i = 0; i < 40; i++) {
-      const color = new THREE.Color().setHSL(0.5 + Math.random() * 0.12, 0.9, 0.6);
+      const color = new THREE.Color(ACCENTS[Math.floor(Math.random() * ACCENTS.length)]);
       const mesh = new THREE.Mesh(rainGeo, glow(color, 0.6, { shininess: 60 }));
       const body = new CANNON.Body({ mass: 0.6, material: materials.bouncy, linearDamping: 0.1 });
       body.addShape(new CANNON.Sphere(0.7));

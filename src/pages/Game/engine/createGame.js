@@ -5,9 +5,10 @@ import { buildWorld } from "./world.js";
 import { buildProps } from "./props.js";
 import { createEffects } from "./effects.js";
 import { createAudio } from "./audio.js";
-import { createCarModel } from "./carModel.js";
-import { COLORS, NEON, windUniform } from "./materials.js";
-import { SPAWN, CRYSTALS, TOTAL_CRYSTALS } from "./layout.js";
+import { createSaucerModel } from "./saucerModel.js";
+import { createBlackHole } from "./blackHole.js";
+import { COLORS, NEON, ACCENTS, windUniform } from "./materials.js";
+import { SPAWN, CRYSTALS, TOTAL_CRYSTALS, BLACK_HOLE, EXIT_HOLE } from "./layout.js";
 
 const CAMERA_OFFSET = new THREE.Vector3(18, 21, 18);
 const KONAMI = [
@@ -30,16 +31,17 @@ const GAME_KEYS = new Set([
   "Space",
 ]);
 
-// The world is always dark: the lights are the neon, the lit windows, the
-// lamps and the stars.
+// Space: deep indigo, lit by starlight from above and the glow of things.
 const LIGHT = {
   sky: new THREE.Color(COLORS.world),
-  hemiSky: new THREE.Color(0x5f8fc0),
-  hemiGround: new THREE.Color(0x0a1420),
-  hemi: 0.75,
-  sun: new THREE.Color(0x9fdcff),
-  sunI: 0.42,
+  hemiSky: new THREE.Color(0x8f7fe0),
+  hemiGround: new THREE.Color(0x140a2a),
+  hemi: 0.8,
+  sun: new THREE.Color(0xd8e8ff),
+  sunI: 0.5,
 };
+const WARP_IN = 1.3; // s: swallowed
+const WARP_OUT = 0.7; // s: thrown out
 
 export const createGame = (container, { isMobile, callbacks }) => {
   const cb = {
@@ -101,7 +103,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   });
 
   const car = createVehicle(physics, SPAWN);
-  const carModel = createCarModel(scene);
+  const carModel = createSaucerModel(scene);
 
   let shake = 0;
   car.chassisBody.addEventListener("collide", (e) => {
@@ -116,42 +118,32 @@ export const createGame = (container, { isMobile, callbacks }) => {
   // Crystals (+ light beams so you can spot them from afar)
   // ------------------------------------------------------------------
   const crystalGeo = new THREE.OctahedronGeometry(1, 0);
-  const crystalMat = new THREE.MeshPhongMaterial({
-    color: NEON.ice,
-    emissive: NEON.holo,
-    emissiveIntensity: 0.8,
-    shininess: 90,
-    flatShading: true,
-  });
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: NEON.holo,
-    transparent: true,
-    opacity: 0.55,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const beamMat = new THREE.MeshBasicMaterial({
-    color: NEON.cyan,
-    transparent: true,
-    opacity: 0.34,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  });
+  // each crystal in its own colour, beam and all
+  const crystalMats = ACCENTS.map(
+    (c) => new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: c, emissiveIntensity: 0.9, shininess: 90, flatShading: true }),
+  );
+  const ringMats = ACCENTS.map(
+    (c) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }),
+  );
+  const beamMats = ACCENTS.map(
+    (c) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
   const beamGeo = new THREE.CylinderGeometry(0.5, 0.9, 40, 10, 1, true);
   beamGeo.translate(0, 20, 0);
   const crystals = CRYSTALS.map((c, i) => {
-    const mesh = new THREE.Mesh(crystalGeo, crystalMat);
+    const tint = i % ACCENTS.length;
+    const mesh = new THREE.Mesh(crystalGeo, crystalMats[tint]);
     mesh.position.set(c.x, c.y, c.z);
     mesh.castShadow = true;
     scene.add(mesh);
-    const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.3, 28), ringMat);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.3, 28), ringMats[tint]);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(c.x, 0.08, c.z);
     scene.add(ring);
-    const beam = new THREE.Mesh(beamGeo, beamMat);
+    const beam = new THREE.Mesh(beamGeo, beamMats[tint]);
     beam.position.set(c.x, 0, c.z);
     scene.add(beam);
-    return { ...c, mesh, ring, beam, collected: false, phase: i * 0.7 };
+    return { ...c, mesh, ring, beam, color: ACCENTS[tint], collected: false, phase: i * 0.7 };
   });
   let collected = 0;
 
@@ -213,7 +205,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (konami === KONAMI.length) {
         konami = 0;
         props.ballRain(car.chassisBody.position.x, car.chassisBody.position.z);
-        cb.onToast("It's raining balls");
+        cb.onToast("Meteor shower");
         audio.fanfare();
       }
       if (e.code === "KeyR") resetCar();
@@ -290,7 +282,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     c.collected = true;
     collected++;
     scene.remove(c.mesh, c.ring, c.beam);
-    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [NEON.holo, NEON.ice, NEON.cyan] });
+    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [c.color, 0xffffff, NEON.ice] });
     audio.chime(collected);
     cb.onCrystal(collected, TOTAL_CRYSTALS);
     if (collected === TOTAL_CRYSTALS && !won) {
@@ -306,13 +298,13 @@ export const createGame = (container, { isMobile, callbacks }) => {
     while (events.length) {
       const { type, payload } = events.shift();
       if (type === "strike") {
-        cb.onToast("Strike");
+        cb.onToast("All satellites down");
         audio.fanfare();
         effects.burst({ x: -50, y: 3, z: -46 }, { count: 120, power: 12, up: 12 });
       } else if (type === "pins") {
-        cb.onToast(`${payload.down} / ${payload.total} pins down`);
+        cb.onToast(`${payload.down} / ${payload.total} satellites down`);
       } else if (type === "goal") {
-        cb.onToast(payload.goals > 1 ? `Goal · ${payload.goals}` : "Goal");
+        cb.onToast(payload.goals > 1 ? `Through the portal · ${payload.goals}` : "Planet through the portal");
         audio.fanfare();
         effects.burst(payload, { count: 140, power: 14, up: 14 });
       }
@@ -331,7 +323,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hit && !pad.active && pad.kind === "reset") {
         if (pad.id === "bowling-reset") {
           props.resetBowling();
-          cb.onToast("Pins reset");
+          cb.onToast("Satellites back in orbit");
         } else {
           props.resetGroup("letters");
           props.resetGroup("dominoes");
@@ -364,7 +356,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hoopSide[i] !== 0 && s !== 0 && s !== hoopSide[i]) {
         const inPlane = Math.hypot(hoopRel.x - side * n.x, hoopRel.y, hoopRel.z - side * n.z);
         if (inPlane < h.r - 0.4) {
-          cb.onToast("Through the hoop");
+          cb.onToast("Through the portal");
           audio.whoosh();
           audio.chime(5);
           effects.burst(h.mesh.position, { count: 110, power: 10, up: 8 });
@@ -375,10 +367,69 @@ export const createGame = (container, { isMobile, callbacks }) => {
   };
 
   // the night lights, on for good
-  world.night.windows.mat.emissiveIntensity = 1.1;
-  world.night.lamps.emissiveIntensity = 1.6;
-  world.night.glows.forEach((m) => (m.opacity = 0.75));
   world.night.stars.mat.opacity = 0.9;
+
+  // ------------------------------------------------------------------
+  // The black hole: a pull that grows as you get closer. Cross the horizon
+  // and the saucer is swallowed, then thrown out at the far corner.
+  // ------------------------------------------------------------------
+  const blackHole = createBlackHole(scene);
+  let warp = null; // { phase: "in" | "out", t, a, d }
+  let inWell = false;
+  const holeForce = new THREE.Vector2();
+  const handleBlackHole = (dt) => {
+    const b = car.chassisBody;
+    const p = b.position;
+    if (warp && warp.phase === "in") {
+      warp.t += dt;
+      const k = Math.min(1, warp.t / WARP_IN);
+      warp.a += dt * (3 + k * 12);
+      const r = warp.d * (1 - k);
+      car.place(BLACK_HOLE.x + Math.cos(warp.a) * r, 1.4 + k * (blackHole.holeY - 1.4), BLACK_HOLE.z + Math.sin(warp.a) * r, warp.a);
+      carModel.group.scale.setScalar(Math.max(0.04, 1 - k * 0.96));
+      if (k >= 1) {
+        // out the other side, heading for the middle of the map
+        const dx = -EXIT_HOLE.x;
+        const dz = -EXIT_HOLE.z;
+        const len = Math.hypot(dx, dz);
+        car.place(EXIT_HOLE.x, 2.6, EXIT_HOLE.z, Math.atan2(-dz / len, dx / len));
+        b.velocity.set((dx / len) * 26, 4, (dz / len) * 26);
+        warp = { phase: "out", t: 0 };
+        effects.burst({ x: EXIT_HOLE.x, y: 2.4, z: EXIT_HOLE.z }, { count: 140, power: 14, up: 8, colors: ACCENTS });
+        audio.whoosh();
+        audio.chime(6);
+        shake = Math.max(shake, 0.9);
+        cb.onToast("Spat out across the galaxy");
+      }
+      return;
+    }
+    if (warp && warp.phase === "out") {
+      warp.t += dt;
+      const k = Math.min(1, warp.t / WARP_OUT);
+      carModel.group.scale.setScalar(0.04 + k * 0.96);
+      if (k >= 1) warp = null;
+    }
+    const dx = BLACK_HOLE.x - p.x;
+    const dz = BLACK_HOLE.z - p.z;
+    const d = Math.hypot(dx, dz);
+    if (d < BLACK_HOLE.pull) {
+      if (!inWell) {
+        inWell = true;
+        cb.onToast("Gravity well · full thrust to escape");
+      }
+      // stronger the closer you get, with a little swirl
+      const k = 1 - d / BLACK_HOLE.pull;
+      const acc = 62 * k * k + 5 * k;
+      holeForce.set(dx / d, dz / d);
+      b.velocity.x += (holeForce.x - holeForce.y * 0.35) * acc * dt;
+      b.velocity.z += (holeForce.y + holeForce.x * 0.35) * acc * dt;
+      if (d < BLACK_HOLE.capture + 1.4 && !warp) {
+        warp = { phase: "in", t: 0, a: Math.atan2(p.z - BLACK_HOLE.z, p.x - BLACK_HOLE.x), d };
+        audio.whoosh();
+        cb.onToast("Swallowed by the black hole");
+      }
+    } else if (d > BLACK_HOLE.pull + 4) inWell = false;
+  };
 
   // ------------------------------------------------------------------
   // Main loop
@@ -418,6 +469,12 @@ export const createGame = (container, { isMobile, callbacks }) => {
     input.boost = pressed("ShiftLeft", "ShiftRight") || !!virtual.boost;
     input.handbrake = pressed("Space") || !!virtual.brake;
     if (startTime === null && (input.throttle || input.steer)) startTime = performance.now();
+    if (warp && warp.phase === "in") {
+      input.throttle = 0;
+      input.steer = 0;
+      input.boost = false;
+    }
+    handleBlackHole(dt);
 
     car.update(input, dt);
     physics.world.step(1 / 60, dt, 4);
@@ -525,6 +582,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     updateHoops(p);
 
     world.update(time, dt);
+    blackHole.update(time, dt);
     effects.update(dt);
 
     // camera: fixed isometric angle, eases in on load, zooms out with speed
@@ -561,7 +619,8 @@ export const createGame = (container, { isMobile, callbacks }) => {
     if (hudTimer > 0.1) {
       hudTimer = 0;
       cb.onHud({
-        speed: Math.round(Math.abs(state.forwardSpeed) * 3.6),
+        // speed as a warp factor, 0 to 9.9 at full boost
+        warp: Math.min(9.9, (Math.abs(state.forwardSpeed) / VEHICLE.maxSpeedBoost) * 9.9),
         time: won ? elapsed : startTime ? (performance.now() - startTime) / 1000 : 0,
         boosting: state.boosting,
       });
