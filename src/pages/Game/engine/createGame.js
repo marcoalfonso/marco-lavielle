@@ -5,9 +5,10 @@ import { buildWorld } from "./world.js";
 import { buildProps } from "./props.js";
 import { createEffects } from "./effects.js";
 import { createAudio } from "./audio.js";
-import { createCarModel } from "./carModel.js";
-import { COLORS, windUniform } from "./materials.js";
-import { SPAWN, CRYSTALS, TOTAL_CRYSTALS } from "./layout.js";
+import { createSaucerModel } from "./saucerModel.js";
+import { createBlackHole } from "./blackHole.js";
+import { COLORS, NEON, ACCENTS, windUniform } from "./materials.js";
+import { SPAWN, CRYSTALS, TOTAL_CRYSTALS, BLACK_HOLE, EXIT_HOLE } from "./layout.js";
 
 const CAMERA_OFFSET = new THREE.Vector3(18, 21, 18);
 const KONAMI = [
@@ -30,22 +31,17 @@ const GAME_KEYS = new Set([
   "Space",
 ]);
 
-const DAY = {
+// Space: deep indigo, lit by starlight from above and the glow of things.
+const LIGHT = {
   sky: new THREE.Color(COLORS.world),
-  hemiSky: new THREE.Color(0xffffff),
-  hemiGround: new THREE.Color(0xc8c2b4),
-  hemi: 0.52,
-  sun: new THREE.Color(0xfff6e0),
-  sunI: 0.56,
+  hemiSky: new THREE.Color(0x8f7fe0),
+  hemiGround: new THREE.Color(0x140a2a),
+  hemi: 0.8,
+  sun: new THREE.Color(0xd8e8ff),
+  sunI: 0.5,
 };
-const NIGHT = {
-  sky: new THREE.Color(COLORS.worldNight),
-  hemiSky: new THREE.Color(0x8a9ad6),
-  hemiGround: new THREE.Color(0x2a2c3a),
-  hemi: 0.26,
-  sun: new THREE.Color(0x9fb3ff),
-  sunI: 0.16,
-};
+const WARP_IN = 1.3; // s: swallowed
+const WARP_OUT = 0.7; // s: thrown out
 
 export const createGame = (container, { isMobile, callbacks }) => {
   const cb = {
@@ -55,7 +51,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     onToast: () => {},
     onFlipped: () => {},
     onHud: () => {},
-    onNight: () => {},
     onMute: () => {},
     ...callbacks,
   };
@@ -64,8 +59,8 @@ export const createGame = (container, { isMobile, callbacks }) => {
   // Renderer / scene / camera / lights
   // ------------------------------------------------------------------
   const scene = new THREE.Scene();
-  scene.background = DAY.sky.clone();
-  scene.fog = new THREE.Fog(DAY.sky.clone(), 90, 230);
+  scene.background = LIGHT.sky.clone();
+  scene.fog = new THREE.Fog(LIGHT.sky.clone(), 80, 220);
 
   const width = () => container.clientWidth || window.innerWidth;
   const height = () => container.clientHeight || window.innerHeight;
@@ -78,9 +73,9 @@ export const createGame = (container, { isMobile, callbacks }) => {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   container.appendChild(renderer.domElement);
 
-  const hemi = new THREE.HemisphereLight(DAY.hemiSky, DAY.hemiGround, DAY.hemi);
+  const hemi = new THREE.HemisphereLight(LIGHT.hemiSky, LIGHT.hemiGround, LIGHT.hemi);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(DAY.sun, DAY.sunI);
+  const sun = new THREE.DirectionalLight(LIGHT.sun, LIGHT.sunI);
   const SUN_OFFSET = new THREE.Vector3(40, 80, 26);
   sun.castShadow = true;
   const S = 55;
@@ -108,7 +103,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   });
 
   const car = createVehicle(physics, SPAWN);
-  const carModel = createCarModel(scene);
+  const carModel = createSaucerModel(scene);
 
   let shake = 0;
   car.chassisBody.addEventListener("collide", (e) => {
@@ -123,42 +118,32 @@ export const createGame = (container, { isMobile, callbacks }) => {
   // Crystals (+ light beams so you can spot them from afar)
   // ------------------------------------------------------------------
   const crystalGeo = new THREE.OctahedronGeometry(1, 0);
-  const crystalMat = new THREE.MeshPhongMaterial({
-    color: 0xffd700,
-    emissive: 0xc9a227,
-    emissiveIntensity: 0.45,
-    shininess: 90,
-    flatShading: true,
-  });
-  const ringMat = new THREE.MeshBasicMaterial({
-    color: 0xe2c14d,
-    transparent: true,
-    opacity: 0.45,
-    side: THREE.DoubleSide,
-    depthWrite: false,
-  });
-  const beamMat = new THREE.MeshBasicMaterial({
-    color: 0xffe28a,
-    transparent: true,
-    opacity: 0.16,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  });
+  // each crystal in its own colour, beam and all
+  const crystalMats = ACCENTS.map(
+    (c) => new THREE.MeshPhongMaterial({ color: 0xffffff, emissive: c, emissiveIntensity: 0.9, shininess: 90, flatShading: true }),
+  );
+  const ringMats = ACCENTS.map(
+    (c) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }),
+  );
+  const beamMats = ACCENTS.map(
+    (c) => new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0.4, depthWrite: false, blending: THREE.AdditiveBlending }),
+  );
   const beamGeo = new THREE.CylinderGeometry(0.5, 0.9, 40, 10, 1, true);
   beamGeo.translate(0, 20, 0);
   const crystals = CRYSTALS.map((c, i) => {
-    const mesh = new THREE.Mesh(crystalGeo, crystalMat);
+    const tint = i % ACCENTS.length;
+    const mesh = new THREE.Mesh(crystalGeo, crystalMats[tint]);
     mesh.position.set(c.x, c.y, c.z);
     mesh.castShadow = true;
     scene.add(mesh);
-    const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.3, 28), ringMat);
+    const ring = new THREE.Mesh(new THREE.RingGeometry(1.6, 2.3, 28), ringMats[tint]);
     ring.rotation.x = -Math.PI / 2;
     ring.position.set(c.x, 0.08, c.z);
     scene.add(ring);
-    const beam = new THREE.Mesh(beamGeo, beamMat);
+    const beam = new THREE.Mesh(beamGeo, beamMats[tint]);
     beam.position.set(c.x, 0, c.z);
     scene.add(beam);
-    return { ...c, mesh, ring, beam, collected: false, phase: i * 0.7 };
+    return { ...c, mesh, ring, beam, color: ACCENTS[tint], collected: false, phase: i * 0.7 };
   });
   let collected = 0;
 
@@ -173,7 +158,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   arrowGeo.rotateX(-Math.PI / 2);
   const arrow = new THREE.Mesh(
     arrowGeo,
-    new THREE.MeshBasicMaterial({ color: 0xe2c14d, transparent: true, opacity: 0.85, depthWrite: false }),
+    new THREE.MeshBasicMaterial({ color: NEON.holo, transparent: true, opacity: 0.85, depthWrite: false }),
   );
   arrow.scale.setScalar(1.3);
   scene.add(arrow);
@@ -184,8 +169,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
   const keys = {};
   const virtual = {};
   let konami = 0;
-  let nightTarget = 0;
-  let night = 0;
+  const night = 1; // the lights the world used to switch on at night stay on
   let muted = false;
   let activePad = null;
 
@@ -194,16 +178,12 @@ export const createGame = (container, { isMobile, callbacks }) => {
   const openPad = (pad) => {
     if (!pad || pad.kind !== "link") return;
     audio.chime(4);
-    cb.onToast(`Opening ${pad.title.toLowerCase()}…`);
+    cb.onToast(`Opening ${pad.title.toLowerCase()}`);
     setTimeout(() => {
       window.location.href = pad.href;
     }, 350);
   };
 
-  const toggleNight = () => {
-    nightTarget = nightTarget ? 0 : 1;
-    cb.onNight(!!nightTarget);
-  };
   const toggleMute = () => {
     muted = !muted;
     audio.setMuted(muted);
@@ -225,11 +205,10 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (konami === KONAMI.length) {
         konami = 0;
         props.ballRain(car.chassisBody.position.x, car.chassisBody.position.z);
-        cb.onToast("🎊 It's raining balls!");
+        cb.onToast("Meteor shower");
         audio.fanfare();
       }
       if (e.code === "KeyR") resetCar();
-      if (e.code === "KeyN") toggleNight();
       if (e.code === "KeyM") toggleMute();
       if (e.code === "KeyH") horn(true);
       if (e.code === "Enter") openPad(activePad);
@@ -271,7 +250,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     } else {
       car.unflip();
     }
-    effects.burst({ x: p.x, y: p.y, z: p.z }, { count: 25, power: 5, up: 5, colors: [0xf5f2ea, COLORS.dust] });
+    effects.burst({ x: p.x, y: p.y, z: p.z }, { count: 25, power: 5, up: 5, colors: [NEON.ice, NEON.cyan] });
   };
 
   // ------------------------------------------------------------------
@@ -290,8 +269,9 @@ export const createGame = (container, { isMobile, callbacks }) => {
           y: 16 + Math.random() * 12,
           z: p.z + (Math.random() - 0.5) * 40,
         };
-        const hue = Math.random();
-        const colors = [0, 0.08, 0.16].map((o) => new THREE.Color().setHSL((hue + o) % 1, 0.85, 0.6).getHex());
+        // the site's blues: cyan through to ice and electric blue
+        const hue = 0.5 + Math.random() * 0.12;
+        const colors = [0, 0.03, 0.06].map((o) => new THREE.Color().setHSL(hue + o, 0.9, 0.62).getHex());
         effects.burst(pos, { count: 70, power: 16, up: 4, colors, life: 2.2 });
         audio.impact("ball", 0.5, null);
       }, i * 320);
@@ -302,7 +282,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
     c.collected = true;
     collected++;
     scene.remove(c.mesh, c.ring, c.beam);
-    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [0xffd700, 0xe2c14d, 0xfff3c0] });
+    effects.burst(c.mesh.position, { count: 60, power: 8, up: 9, colors: [c.color, 0xffffff, NEON.ice] });
     audio.chime(collected);
     cb.onCrystal(collected, TOTAL_CRYSTALS);
     if (collected === TOTAL_CRYSTALS && !won) {
@@ -318,13 +298,13 @@ export const createGame = (container, { isMobile, callbacks }) => {
     while (events.length) {
       const { type, payload } = events.shift();
       if (type === "strike") {
-        cb.onToast("🎳 STRIKE!");
+        cb.onToast("All satellites down");
         audio.fanfare();
         effects.burst({ x: -50, y: 3, z: -46 }, { count: 120, power: 12, up: 12 });
       } else if (type === "pins") {
-        cb.onToast(`🎳 ${payload.down} / ${payload.total} pins`);
+        cb.onToast(`${payload.down} / ${payload.total} satellites down`);
       } else if (type === "goal") {
-        cb.onToast(payload.goals > 1 ? `⚽ GOAL! (${payload.goals})` : "⚽ GOAL!");
+        cb.onToast(payload.goals > 1 ? `Through the portal · ${payload.goals}` : "Planet through the portal");
         audio.fanfare();
         effects.burst(payload, { count: 140, power: 14, up: 14 });
       }
@@ -343,19 +323,19 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hit && !pad.active && pad.kind === "reset") {
         if (pad.id === "bowling-reset") {
           props.resetBowling();
-          cb.onToast("🎳 Pins reset");
+          cb.onToast("Satellites back in orbit");
         } else {
           props.resetGroup("letters");
-          props.resetGroup("dominoes");
+          resetCourse();
           props.resetGroup("bricks");
           props.resetGroup("crates");
           props.resetGroup("cones");
-          cb.onToast("✨ Everything back in place");
+          cb.onToast("Everything back in place");
         }
         audio.chime(2);
       }
       pad.active = hit;
-      pad.baseMat.opacity = hit ? 0.75 + Math.sin(time * 8) * 0.12 : 0.5 + night * 0.25;
+      pad.baseMat.opacity = hit ? 0.5 + Math.sin(time * 8) * 0.12 : 0.22;
       if (hit && pad.kind === "link") inside = pad;
     });
     if (inside !== activePad) {
@@ -363,6 +343,126 @@ export const createGame = (container, { isMobile, callbacks }) => {
       cb.onZone(inside ? { id: inside.id, title: inside.title, href: inside.href } : null);
       if (inside) audio.chime(1);
     }
+  };
+
+  // ------------------------------------------------------------------
+  // Space play: launch pads, the ring course, planet slingshots, the sun
+  // ------------------------------------------------------------------
+  const launchCool = world.launchPads.map(() => 0);
+  const updateLaunchPads = (p, dt) => {
+    world.launchPads.forEach((pad, i) => {
+      launchCool[i] = Math.max(0, launchCool[i] - dt);
+      if (launchCool[i] > 0 || p.y > 3) return;
+      if (Math.hypot(p.x - pad.x, p.z - pad.z) > 4) return;
+      launchCool[i] = 1.2;
+      const v = car.chassisBody.velocity;
+      const along = v.x * pad.dir[0] + v.z * pad.dir[1];
+      const push = Math.max(pad.push, along);
+      v.x = pad.dir[0] * push;
+      v.z = pad.dir[1] * push;
+      v.y = pad.lift;
+      audio.whoosh();
+      effects.burst({ x: pad.x, y: 0.5, z: pad.z }, { count: 50, power: 6, up: 12, colors: [NEON.lime, 0xffffff, NEON.cyan] });
+    });
+  };
+
+  // the ring course: through each ring in order
+  let courseNext = 0;
+  const courseSide = world.courseRings.map(() => 0);
+  const courseRel = new THREE.Vector3();
+  const lightCourse = () => {
+    world.courseRings.forEach((r, i) => {
+      const done = i < courseNext;
+      const next = i === courseNext;
+      r.mat.color.setHex(done ? NEON.lime : next ? NEON.amber : NEON.violet);
+      r.mat.opacity = done ? 0.9 : next ? 1 : 0.4;
+    });
+  };
+  const resetCourse = () => {
+    courseNext = 0;
+    lightCourse();
+  };
+  lightCourse();
+  const updateCourse = (p, time) => {
+    world.courseRings.forEach((r, i) => {
+      r.mesh.scale.setScalar(i === courseNext ? 1 + Math.sin(time * 5) * 0.05 : 1);
+      const n = { x: Math.sin(r.yaw), z: Math.cos(r.yaw) };
+      courseRel.set(p.x - r.x, p.y - r.y, p.z - r.z);
+      const side = courseRel.x * n.x + courseRel.z * n.z;
+      const sgn = Math.sign(side);
+      if (courseSide[i] !== 0 && sgn !== 0 && sgn !== courseSide[i] && Math.abs(side) < 3) {
+        const inPlane = Math.hypot(courseRel.x - side * n.x, courseRel.y, courseRel.z - side * n.z);
+        if (inPlane < r.r + 0.6 && i === courseNext) {
+          courseNext++;
+          lightCourse();
+          audio.chime(courseNext);
+          effects.burst({ x: r.x, y: r.y, z: r.z }, { count: 40, power: 6, up: 5, colors: [NEON.amber, NEON.lime, 0xffffff] });
+          if (courseNext === world.courseRings.length) {
+            cb.onToast("Ring course complete");
+            audio.fanfare();
+            effects.burst({ x: r.x, y: 4, z: r.z }, { count: 160, power: 14, up: 12 });
+            setTimeout(resetCourse, 4000);
+          } else cb.onToast(`Ring ${courseNext} / ${world.courseRings.length}`);
+        }
+      }
+      courseSide[i] = sgn || courseSide[i];
+    });
+  };
+
+  // planets: fly close and one slingshots you round it; it spins up and flares
+  const planetCool = world.planets.map(() => 0);
+  const planetColor = new THREE.Color();
+  const updatePlanets = (p, dt) => {
+    world.planets.forEach((pl, i) => {
+      planetCool[i] = Math.max(0, planetCool[i] - dt);
+      pl.spin = Math.max(0, pl.spin - dt * 0.6);
+      pl.mesh.material.emissiveIntensity = 0.32 + pl.spin * 0.25;
+      pl.halo.scale.setScalar(pl.r * (2.9 + pl.spin * 0.25));
+      if (planetCool[i] > 0) return;
+      const dx = p.x - pl.x;
+      const dz = p.z - pl.z;
+      const d = Math.hypot(dx, dz);
+      if (d > pl.r + 4.5) return;
+      planetCool[i] = 3;
+      pl.spin = 2.4;
+      // a slingshot: thrown along the tangent, the way you were going round
+      const v = car.chassisBody.velocity;
+      const tx = -dz / d;
+      const tz = dx / d;
+      const dir = v.x * tx + v.z * tz >= 0 ? 1 : -1;
+      const speed = Math.max(28, Math.hypot(v.x, v.z) * 1.4);
+      v.x = (tx * dir * 0.8 + (dx / d) * 0.45) * speed;
+      v.z = (tz * dir * 0.8 + (dz / d) * 0.45) * speed;
+      v.y = Math.max(v.y, 6);
+      planetColor.set(pl.color);
+      effects.burst(
+        { x: pl.x + (dx / d) * pl.r, y: pl.r * 0.6, z: pl.z + (dz / d) * pl.r },
+        { count: 90, power: 10, up: 8, colors: [planetColor.getHex(), 0xffffff, NEON.ice] },
+      );
+      audio.whoosh();
+      audio.chime(3 + (i % 4));
+      shake = Math.max(shake, 0.35);
+      cb.onToast(`Slingshot round ${pl.name}`);
+    });
+  };
+
+  // the sun: too close and its heat throws you back
+  let sunCool = 0;
+  const updateSun = (p, dt) => {
+    sunCool = Math.max(0, sunCool - dt);
+    const dx = p.x - world.sun.x;
+    const dz = p.z - world.sun.z;
+    const d = Math.hypot(dx, dz) || 1;
+    if (sunCool > 0 || d > 9.5) return;
+    sunCool = 1.5;
+    const v = car.chassisBody.velocity;
+    v.x = (dx / d) * 26;
+    v.z = (dz / d) * 26;
+    v.y = 8;
+    effects.burst({ x: world.sun.x, y: 4.6, z: world.sun.z }, { count: 120, power: 12, up: 6, colors: [NEON.amber, NEON.coral, 0xfff3c0] });
+    audio.impact("ball", 0.8, null);
+    shake = Math.max(shake, 0.5);
+    cb.onToast("Solar flare · too hot");
   };
 
   const hoopSide = world.hoops.map(() => 0);
@@ -376,7 +476,7 @@ export const createGame = (container, { isMobile, callbacks }) => {
       if (hoopSide[i] !== 0 && s !== 0 && s !== hoopSide[i]) {
         const inPlane = Math.hypot(hoopRel.x - side * n.x, hoopRel.y, hoopRel.z - side * n.z);
         if (inPlane < h.r - 0.4) {
-          cb.onToast("🎯 Through the hoop!");
+          cb.onToast("Through the portal");
           audio.whoosh();
           audio.chime(5);
           effects.burst(h.mesh.position, { count: 110, power: 10, up: 8 });
@@ -386,25 +486,69 @@ export const createGame = (container, { isMobile, callbacks }) => {
     });
   };
 
+  // the night lights, on for good
+  world.night.stars.mat.opacity = 0.9;
+
   // ------------------------------------------------------------------
-  // Day / night blend
+  // The black hole: a pull that grows as you get closer. Cross the horizon
+  // and the saucer is swallowed, then thrown out at the far corner.
   // ------------------------------------------------------------------
-  const skyColor = new THREE.Color();
-  const applyNight = (k) => {
-    skyColor.copy(DAY.sky).lerp(NIGHT.sky, k);
-    scene.background.copy(skyColor);
-    scene.fog.color.copy(skyColor);
-    world.ground.material.color.set(COLORS.world).lerp(new THREE.Color(0x3a3f55), k * 0.6);
-    hemi.color.copy(DAY.hemiSky).lerp(NIGHT.hemiSky, k);
-    hemi.groundColor.copy(DAY.hemiGround).lerp(NIGHT.hemiGround, k);
-    hemi.intensity = DAY.hemi + (NIGHT.hemi - DAY.hemi) * k;
-    sun.color.copy(DAY.sun).lerp(NIGHT.sun, k);
-    sun.intensity = DAY.sunI + (NIGHT.sunI - DAY.sunI) * k;
-    world.night.windows.mat.emissiveIntensity = k * 1.1;
-    world.night.lamps.emissiveIntensity = 0.15 + k * 1.8;
-    world.night.glows.forEach((m) => (m.opacity = k * 0.9));
-    world.night.stars.mat.opacity = k;
-    beamMat.opacity = 0.16 + k * 0.18;
+  const blackHole = createBlackHole(scene);
+  let warp = null; // { phase: "in" | "out", t, a, d }
+  let inWell = false;
+  const holeForce = new THREE.Vector2();
+  const handleBlackHole = (dt) => {
+    const b = car.chassisBody;
+    const p = b.position;
+    if (warp && warp.phase === "in") {
+      warp.t += dt;
+      const k = Math.min(1, warp.t / WARP_IN);
+      warp.a += dt * (3 + k * 12);
+      const r = warp.d * (1 - k);
+      car.place(BLACK_HOLE.x + Math.cos(warp.a) * r, 1.4 + k * (blackHole.holeY - 1.4), BLACK_HOLE.z + Math.sin(warp.a) * r, warp.a);
+      carModel.group.scale.setScalar(Math.max(0.04, 1 - k * 0.96));
+      if (k >= 1) {
+        // out the other side, heading for the middle of the map
+        const dx = -EXIT_HOLE.x;
+        const dz = -EXIT_HOLE.z;
+        const len = Math.hypot(dx, dz);
+        car.place(EXIT_HOLE.x, 2.6, EXIT_HOLE.z, Math.atan2(-dz / len, dx / len));
+        b.velocity.set((dx / len) * 26, 4, (dz / len) * 26);
+        warp = { phase: "out", t: 0 };
+        effects.burst({ x: EXIT_HOLE.x, y: 2.4, z: EXIT_HOLE.z }, { count: 140, power: 14, up: 8, colors: ACCENTS });
+        audio.whoosh();
+        audio.chime(6);
+        shake = Math.max(shake, 0.9);
+        cb.onToast("Spat out across the galaxy");
+      }
+      return;
+    }
+    if (warp && warp.phase === "out") {
+      warp.t += dt;
+      const k = Math.min(1, warp.t / WARP_OUT);
+      carModel.group.scale.setScalar(0.04 + k * 0.96);
+      if (k >= 1) warp = null;
+    }
+    const dx = BLACK_HOLE.x - p.x;
+    const dz = BLACK_HOLE.z - p.z;
+    const d = Math.hypot(dx, dz);
+    if (d < BLACK_HOLE.pull) {
+      if (!inWell) {
+        inWell = true;
+        cb.onToast("Gravity well · full thrust to escape");
+      }
+      // stronger the closer you get, with a little swirl
+      const k = 1 - d / BLACK_HOLE.pull;
+      const acc = 62 * k * k + 5 * k;
+      holeForce.set(dx / d, dz / d);
+      b.velocity.x += (holeForce.x - holeForce.y * 0.35) * acc * dt;
+      b.velocity.z += (holeForce.y + holeForce.x * 0.35) * acc * dt;
+      if (d < BLACK_HOLE.capture + 1.4 && !warp) {
+        warp = { phase: "in", t: 0, a: Math.atan2(p.z - BLACK_HOLE.z, p.x - BLACK_HOLE.x), d };
+        audio.whoosh();
+        cb.onToast("Swallowed by the black hole");
+      }
+    } else if (d > BLACK_HOLE.pull + 4) inWell = false;
   };
 
   // ------------------------------------------------------------------
@@ -445,6 +589,12 @@ export const createGame = (container, { isMobile, callbacks }) => {
     input.boost = pressed("ShiftLeft", "ShiftRight") || !!virtual.boost;
     input.handbrake = pressed("Space") || !!virtual.brake;
     if (startTime === null && (input.throttle || input.steer)) startTime = performance.now();
+    if (warp && warp.phase === "in") {
+      input.throttle = 0;
+      input.steer = 0;
+      input.boost = false;
+    }
+    handleBlackHole(dt);
 
     car.update(input, dt);
     physics.world.step(1 / 60, dt, 4);
@@ -456,10 +606,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     const state = car.state;
     forward.set(1, 0, 0).applyQuaternion(carModel.group.quaternion);
     right.set(0, 0, 1).applyQuaternion(carModel.group.quaternion);
-
-    // night blend
-    night += (nightTarget - night) * Math.min(1, dt * 1.6);
-    applyNight(night);
 
     carModel.update({ chassisBody: body, vehicle: car.vehicle, state, dt, night });
 
@@ -554,8 +700,13 @@ export const createGame = (container, { isMobile, callbacks }) => {
 
     updatePads(p, time);
     updateHoops(p);
+    updateLaunchPads(p, dt);
+    updateCourse(p, time);
+    updatePlanets(p, dt);
+    updateSun(p, dt);
 
     world.update(time, dt);
+    blackHole.update(time, dt);
     effects.update(dt);
 
     // camera: fixed isometric angle, eases in on load, zooms out with speed
@@ -592,7 +743,8 @@ export const createGame = (container, { isMobile, callbacks }) => {
     if (hudTimer > 0.1) {
       hudTimer = 0;
       cb.onHud({
-        speed: Math.round(Math.abs(state.forwardSpeed) * 3.6),
+        // speed as a warp factor, 0 to 9.9 at full boost
+        warp: Math.min(9.9, (Math.abs(state.forwardSpeed) / VEHICLE.maxSpeedBoost) * 9.9),
         time: won ? elapsed : startTime ? (performance.now() - startTime) / 1000 : 0,
         boosting: state.boosting,
       });
@@ -606,7 +758,10 @@ export const createGame = (container, { isMobile, callbacks }) => {
   if (process.env.NODE_ENV !== "production") {
     window.__carGame = {
       place: (x, z, yaw = SPAWN.yaw) => car.place(x, 2, z, yaw),
-      toggleNight,
+      planets: world.planets,
+      courseRings: world.courseRings,
+      comet: props.comet,
+      planetBall: props.football.body,
       scene,
       car,
       inspect: (x, y, z, lookY = 1.5) => {
@@ -631,7 +786,6 @@ export const createGame = (container, { isMobile, callbacks }) => {
     },
     openActivePad: () => openPad(activePad),
     resetCar,
-    toggleNight,
     toggleMute,
     dispose: () => {
       cancelAnimationFrame(raf);

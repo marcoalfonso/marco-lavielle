@@ -23,18 +23,18 @@ export const BOUNDARY = 112;
 
 export const TOTAL_CRYSTALS = 10;
 
-// type: "ramp" climbs along its local +X; "hump" is a symmetric bump.
-// yaw rotates local +X onto (cos yaw, 0, -sin yaw).
-export const RAMPS = [
-  { type: "ramp", x: -26, z: 48, yaw: Math.PI, len: 14, width: 9, h: 3.6 },
-  { type: "ramp", x: -46, z: 66, yaw: Math.PI / 2, len: 12, width: 9, h: 3.2 },
-  { type: "hump", x: -32, z: 14, yaw: 0, len: 7, width: 8, h: 1.3 },
-  { type: "hump", x: -42, z: 14, yaw: 0, len: 7, width: 8, h: 1.3 },
-  { type: "hump", x: -52, z: 14, yaw: 0, len: 7, width: 8, h: 1.3 },
-  { type: "hump", x: -62, z: 14, yaw: 0, len: 7, width: 8, h: 1.3 },
+// Launch pads (where the ramps were): fly onto one and gravity flings the
+// saucer up and along `dir`. Nothing to climb, so nothing to get stuck on.
+export const LAUNCH_PADS = [
+  { x: -24, z: 48, dir: [-1, 0], lift: 18, push: 24 }, // through the portal ring, past a crystal
+  { x: -46, z: 72, dir: [0, -1], lift: 15, push: 22 },
+  { x: -34, z: 14, dir: [-1, 0], lift: 14, push: 20 }, // up to the crystal over the old humps
+  { x: -66, z: 30, dir: [1, 0], lift: 12, push: 18 },
 ];
+// kept so older code paths have nothing to build
+export const RAMPS = [];
 
-export const HOOPS = [{ x: -56, y: 5.2, z: 48, r: 3.8, yaw: Math.PI / 2 }];
+export const HOOPS = [{ x: -42, y: 5.6, z: 48, r: 3.8, yaw: Math.PI / 2 }]; // at the top of the first launch pad's arc
 
 // Buildings sit outside the ring on the far (north / west) sides only.
 export const BUILDINGS = [
@@ -51,6 +51,11 @@ export const BUILDINGS = [
 
 export const FOUNTAIN = { x: 17, z: 62, r: 6.8 };
 
+// A black hole in the corner nearest the camera (past the stadium): it pulls
+// the saucer in and spits it out at the far corner.
+export const BLACK_HOLE = { x: 96, z: 96, pull: 24, capture: 3.2 };
+export const EXIT_HOLE = { x: -88, z: -86 };
+
 export const PITCH = { x: 52, z: 48, w: 36, d: 26 }; // goals on the ±X ends
 export const GOAL = { width: 11, height: 4.4, depth: 3.2 };
 
@@ -61,7 +66,18 @@ export const BOWLING = {
 };
 
 export const BRICK_WALL = { x: -38, z: -66, cols: 8, rows: 5 };
-export const DOMINOES = { cx: -50, cz: -22, r: 9, count: 30, a0: -0.2, a1: Math.PI * 1.55 };
+export const DOMINOES = { cx: -50, cz: -22, r: 9 }; // the area the ring course flies round
+// The ring course (where the dominoes were): fly through the rings in order.
+export const COURSE = (() => {
+  const list = [];
+  const n = 7;
+  for (let i = 0; i < n; i++) {
+    const a = -0.3 + (i / n) * Math.PI * 1.7;
+    const r = 15 - i * 0.9;
+    list.push({ x: -50 + Math.cos(a) * r, z: -22 + Math.sin(a) * r, a });
+  }
+  return list;
+})();
 export const CRATES = { x: -66, z: -30 };
 export const CONES = (() => {
   const list = [];
@@ -115,7 +131,7 @@ export const PADS = [
     href: "/about",
     color: "#b09a6e",
   },
-  { id: "bowling-reset", kind: "reset", x: -22, z: -56, size: 6, title: "RESET PINS" },
+  { id: "bowling-reset", kind: "reset", x: -22, z: -56, size: 6, title: "RESET SATS" },
   { id: "props-reset", kind: "reset", x: -14, z: -14, size: 5, title: "RESET NAME" },
 ];
 

@@ -89,6 +89,8 @@ const createSystem = (scene, geometry, material, max, { gravity = 0, drag = 0.98
   return { emit, update, mesh };
 };
 
+const SPARK_COLORS = [0x00bff3, 0xff4fd8, 0x9b6bff, 0xffb347, 0x6ff5ee];
+
 export const createEffects = (scene, isMobile) => {
   const dust = createSystem(
     scene,
@@ -116,11 +118,13 @@ export const createEffects = (scene, isMobile) => {
   const SKIDS = isMobile ? 300 : 700;
   const skidMesh = new THREE.InstancedMesh(
     new THREE.PlaneGeometry(0.55, 0.9),
+    // light trails rather than rubber
     new THREE.MeshBasicMaterial({
-      color: 0x3a3631,
+      color: 0x00bff3,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.35,
       depthWrite: false,
+      blending: THREE.AdditiveBlending,
       polygonOffset: true,
       polygonOffsetFactor: -2,
     }),
@@ -146,7 +150,7 @@ export const createEffects = (scene, isMobile) => {
   const waves = Array.from({ length: 4 }, () => {
     const mesh = new THREE.Mesh(
       new THREE.RingGeometry(0.85, 1, 40),
-      new THREE.MeshBasicMaterial({ color: 0xfffdf7, transparent: true, opacity: 0, depthWrite: false }),
+      new THREE.MeshBasicMaterial({ color: 0x6ff5ee, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending }),
     );
     mesh.rotation.x = -Math.PI / 2;
     mesh.visible = false;
@@ -172,7 +176,7 @@ export const createEffects = (scene, isMobile) => {
       life: 0.9 + Math.random() * 0.5,
       size: 0.6 + Math.random() * 0.5 * strength,
       grow: 1.4,
-      color: COLORS.dust,
+      color: SPARK_COLORS[Math.floor(Math.random() * SPARK_COLORS.length)],
     });
   };
 
@@ -183,12 +187,12 @@ export const createEffects = (scene, isMobile) => {
       life: 0.25 + Math.random() * 0.2,
       size: 0.9 + Math.random() * 0.6,
       grow: -0.4,
-      color: 0xfff0a0,
-      color2: 0xe8581c,
+      color: 0xeafcff,
+      color2: 0xff4fd8,
     });
   };
 
-  const CONFETTI_COLORS = [0xe8581c, 0xe2c14d, 0x6fa06b, 0x6f8094, 0xc08a8a, 0xf5f2ea, 0x7db4c9];
+  const CONFETTI_COLORS = [0x6ff5ee, 0x00bff3, 0xff4fd8, 0x9b6bff, 0xffb347, 0x9dff6b, 0xffffff];
   const burst = (pos, { count = 80, power = 12, up = 10, colors = CONFETTI_COLORS, life = 2.4 } = {}) => {
     for (let i = 0; i < count; i++) {
       const a = Math.random() * Math.PI * 2;

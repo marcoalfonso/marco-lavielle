@@ -3,11 +3,10 @@ import * as CANNON from "cannon-es";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
 import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import fontJson from "three/examples/fonts/helvetiker_bold.typeface.json";
-import { COLORS, matte, canvasTexture } from "./materials.js";
+import { COLORS, NEON, ACCENTS, matte, glow, outline, canvasTexture, roundRect } from "./materials.js";
 import {
   BOWLING,
   BRICK_WALL,
-  DOMINOES,
   CRATES,
   CONES,
   PITCH,
@@ -70,8 +69,9 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   // ------------------------------------------------------------------
   const font = new FontLoader().parse(fontJson);
   const rightDir = new THREE.Vector3(Math.cos(Q), 0, -Math.sin(Q)); // screen-right on the ground
-  const layoutWord = (word, cx, cz, color, size) => {
-    const mat = matte(color, { shininess: 25 });
+  // style: "light" letters glow solid; "glass" letters are dark with lit edges
+  const layoutWord = (word, cx, cz, style, size) => {
+    const mat = style === "light" ? glow(NEON.holo, 0.85, { shininess: 25 }) : matte(0x0b1826, { shininess: 70 });
     const glyphs = word.split("").map((ch) => {
       const geo = new TextGeometry(ch, {
         font,
@@ -99,11 +99,13 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
       body.addShape(new CANNON.Box(new CANNON.Vec3(g.w / 2, g.h / 2, g.d / 2)));
       body.position.set(cx + rightDir.x * along, g.h / 2 + 0.02, cz + rightDir.z * along);
       body.quaternion.setFromEuler(0, Q, 0);
-      add({ mesh: new THREE.Mesh(g.geo, mat), body, kind: "letter", group: "letters", asleep: true });
+      const mesh = new THREE.Mesh(g.geo, mat);
+      outline(mesh, style === "light" ? NEON.ice : NEON.holo, style === "light" ? 0.9 : 0.95, 30);
+      add({ mesh, body, kind: "letter", group: "letters", asleep: true });
     });
   };
-  layoutWord("MARCO", -8.5, -8.5, COLORS.carBody, 3.4);
-  layoutWord("LAVIELLE", -2.6, -2.6, 0x46423a, 2.6);
+  layoutWord("MARCO", -8.5, -8.5, "light", 3.4);
+  layoutWord("LAVIELLE", -2.6, -2.6, "glass", 2.6);
 
   // ------------------------------------------------------------------
   // Bowling: lathe-turned pins + a heavy ball
@@ -122,19 +124,39 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
     [0, 2.4],
   ].map(([x, y]) => new THREE.Vector2(x, y - PIN_H / 2));
   const pinGeo = new THREE.LatheGeometry(pinProfile, 10);
-  const pinMat = matte(COLORS.pin, { shininess: 40 });
-  const stripeGeo = new THREE.CylinderGeometry(0.262, 0.226, 0.14, 10, 1, true);
-  const stripeMat = matte(COLORS.pinStripe, { side: THREE.DoubleSide });
+  const satHullGeo = new THREE.CylinderGeometry(0.34, 0.34, PIN_H * 0.75, 8);
+  const satPanelGeo = new THREE.BoxGeometry(1.0, 1.1, 0.06);
+  const satPanelMat = matte(0x101a3a, { emissive: 0x0a1440, shininess: 90, specular: 0x6f9fff });
+  const satDishGeo = new THREE.ConeGeometry(0.42, 0.3, 14, 1, true);
+  const pinMat = glow(COLORS.pin, 0.35, { shininess: 40 });
   const pins = [];
-  const rowSpacing = 1.9;
-  for (let row = 0; row < 4; row++) {
-    for (let j = 0; j <= row; j++) {
-      const x = BOWLING.apex.x - row * rowSpacing * 0.87;
-      const z = BOWLING.apex.z + (j - row / 2) * rowSpacing;
-      const mesh = new THREE.Mesh(pinGeo, pinMat);
-      const stripe = new THREE.Mesh(stripeGeo, stripeMat);
-      stripe.position.y = 0.7;
-      mesh.add(stripe);
+  // ten satellites holding two rings round the swarm's centre
+  const SWARM = [
+    ...Array.from({ length: 7 }, (_, k) => [3.6, (k / 7) * Math.PI * 2]),
+    ...Array.from({ length: 3 }, (_, k) => [1.4, (k / 3) * Math.PI * 2 + 0.5]),
+  ];
+  for (let row = 0; row < 1; row++) {
+    for (let j = 0; j < SWARM.length; j++) {
+      const [sr, sa] = SWARM[j];
+      const x = BOWLING.apex.x + Math.cos(sa) * sr;
+      const z = BOWLING.apex.z + Math.sin(sa) * sr;
+      // a little satellite: a body, two solar panels and a dish, the size
+      // of the old pin so it falls the same way
+      const mesh = new THREE.Group();
+      const hull = new THREE.Mesh(satHullGeo, pinMat);
+      mesh.add(hull);
+      const tint = ACCENTS[(row + j) % ACCENTS.length];
+      [-1, 1].forEach((side) => {
+        const panel = new THREE.Mesh(satPanelGeo, satPanelMat);
+        panel.position.set(side * 0.78, 0.25, 0);
+        outline(panel, tint, 0.9);
+        mesh.add(panel);
+      });
+      const dish = new THREE.Mesh(satDishGeo, glow(tint, 0.9, { side: THREE.DoubleSide }));
+      dish.position.y = 1.05;
+      dish.rotation.x = Math.PI;
+      mesh.add(dish);
+      hull.castShadow = true;
       const body = new CANNON.Body({ mass: 0.8, material: materials.prop });
       body.addShape(new CANNON.Cylinder(0.3, 0.45, PIN_H, 10));
       body.position.set(x, PIN_H / 2 + 0.01, z);
@@ -150,9 +172,10 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   ballBody.addShape(new CANNON.Sphere(1.3));
   ballBody.position.set(BOWLING.ball.x, 1.3, BOWLING.ball.z);
   const bowlingBall = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.3, 2),
-    matte(0x3b4a6b, { shininess: 90, specular: 0x666666 }),
+    new THREE.IcosahedronGeometry(1.3, 1),
+    matte(0x3a1c08, { emissive: NEON.amber, emissiveIntensity: 0.35, shininess: 90, specular: 0xffd6a0 }),
   );
+  outline(bowlingBall, NEON.amber, 0.75, 1);
   add({ mesh: bowlingBall, body: ballBody, kind: "ball", group: "bowling", asleep: true });
 
   const pinUp = new CANNON.Vec3();
@@ -185,7 +208,29 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   // Brick wall
   // ------------------------------------------------------------------
   const brickGeo = new THREE.BoxGeometry(1.96, 0.96, 0.96);
-  const brickMats = [matte(COLORS.brick), matte(0xb9603f), matte(0xd27d58)];
+  // a force field of hex energy panels (where the brick wall was)
+  const hexTex = canvasTexture(128, 64, (ctx, W, H) => {
+    ctx.fillStyle = "rgba(255,255,255,0.18)";
+    ctx.fillRect(0, 0, W, H);
+    ctx.strokeStyle = "rgba(255,255,255,0.9)";
+    ctx.lineWidth = 2;
+    const r = 9;
+    for (let y = 0, row = 0; y < H + r; y += r * 1.5, row++) {
+      for (let x = row % 2 ? r * 0.87 : 0; x < W + r; x += r * 1.74) {
+        ctx.beginPath();
+        for (let k = 0; k < 6; k++) {
+          const a = (k / 6) * Math.PI * 2 + Math.PI / 6;
+          ctx[k ? "lineTo" : "moveTo"](x + Math.cos(a) * r, y + Math.sin(a) * r);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+    }
+  });
+  const brickMats = [NEON.cyan, NEON.magenta, NEON.violet].map(
+    (c) =>
+      new THREE.MeshBasicMaterial({ map: hexTex, color: c, transparent: true, opacity: 0.75, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }),
+  );
   for (let row = 0; row < BRICK_WALL.rows; row++) {
     const offset = row % 2 ? 1 : 0;
     const cols = BRICK_WALL.cols - (row % 2);
@@ -195,8 +240,11 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
       const body = new CANNON.Body({ mass: 1.4, material: materials.prop });
       body.addShape(new CANNON.Box(new CANNON.Vec3(0.98, 0.48, 0.48)));
       body.position.set(x, y, BRICK_WALL.z);
+      const k = (row + c) % brickMats.length;
+      const brick = new THREE.Mesh(brickGeo, brickMats[k]);
+      outline(brick, [NEON.cyan, NEON.magenta, NEON.violet][k], 0.9);
       add({
-        mesh: new THREE.Mesh(brickGeo, brickMats[(row + c) % brickMats.length]),
+        mesh: brick,
         body,
         kind: "brick",
         group: "bricks",
@@ -206,54 +254,29 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   }
 
   // ------------------------------------------------------------------
-  // Domino spiral
-  // ------------------------------------------------------------------
-  const dominoGeo = new THREE.BoxGeometry(0.5, 3.2, 1.6);
-  const dominoMat = matte(COLORS.domino, { shininess: 30 });
-  const dotMat = matte(COLORS.dominoDot);
-  const dotGeo = new THREE.CircleGeometry(0.16, 8);
-  for (let i = 0; i < DOMINOES.count; i++) {
-    const t = i / (DOMINOES.count - 1);
-    const a = DOMINOES.a0 + (DOMINOES.a1 - DOMINOES.a0) * t;
-    const r = DOMINOES.r * (1 - t * 0.35);
-    const x = DOMINOES.cx + Math.cos(a) * r;
-    const z = DOMINOES.cz + Math.sin(a) * r;
-    const mesh = new THREE.Mesh(dominoGeo, dominoMat);
-    // pips on both faces
-    [0.26, -0.26].forEach((fx) => {
-      [-0.8, 0.8].forEach((py) => {
-        const dot = new THREE.Mesh(dotGeo, dotMat);
-        dot.position.set(fx, py, 0);
-        dot.rotation.y = fx > 0 ? Math.PI / 2 : -Math.PI / 2;
-        mesh.add(dot);
-      });
-    });
-    const body = new CANNON.Body({ mass: 0.8, material: materials.prop });
-    body.addShape(new CANNON.Box(new CANNON.Vec3(0.25, 1.6, 0.8)));
-    body.position.set(x, 1.61, z);
-    // thin axis along the path tangent so they topple into each other
-    body.quaternion.setFromEuler(0, Math.PI / 2 - a, 0);
-    add({ mesh, body, kind: "domino", group: "dominoes", asleep: true });
-  }
-
-  // ------------------------------------------------------------------
   // Crate pyramid
   // ------------------------------------------------------------------
   const crateTex = canvasTexture(128, 128, (ctx) => {
-    ctx.fillStyle = "#c49a62";
+    // a supply pod's panel: a lit frame, a status strip, a hatch
+    ctx.fillStyle = "#14102a";
     ctx.fillRect(0, 0, 128, 128);
-    ctx.strokeStyle = "#9c7646";
-    ctx.lineWidth = 12;
-    ctx.strokeRect(6, 6, 116, 116);
-    ctx.lineWidth = 10;
-    ctx.beginPath();
-    ctx.moveTo(12, 12);
-    ctx.lineTo(116, 116);
-    ctx.moveTo(116, 12);
-    ctx.lineTo(12, 116);
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.9)";
+    ctx.lineWidth = 5;
+    roundRect(ctx, 8, 8, 112, 112, 18);
     ctx.stroke();
+    ctx.fillStyle = "rgba(157, 255, 107, 0.9)";
+    ctx.fillRect(22, 26, 84, 8);
+    ctx.strokeStyle = "rgba(255, 179, 71, 0.5)";
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(64, 78, 22, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.fillStyle = "rgba(255, 179, 71, 0.8)";
+    ctx.beginPath();
+    ctx.arc(64, 78, 6, 0, Math.PI * 2);
+    ctx.fill();
   });
-  const crateMat = new THREE.MeshPhongMaterial({ map: crateTex, shininess: 5 });
+  const crateMat = new THREE.MeshPhongMaterial({ map: crateTex, shininess: 5, emissive: 0xffffff, emissiveMap: crateTex, emissiveIntensity: 0.6 });
   const CRATE = 1.8;
   const crateGeo = new THREE.BoxGeometry(CRATE, CRATE, CRATE);
   for (let layer = 0; layer < 4; layer++) {
@@ -268,30 +291,22 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   }
 
   // ------------------------------------------------------------------
-  // Traffic cones (slalom on the north spoke)
+  // Space buoys (a slalom where the cones were): a lit core in a ring
   // ------------------------------------------------------------------
-  const coneMat = matte(COLORS.cone);
-  const coneWhite = matte(0xf5f2ea);
-  const coneGeo = new THREE.ConeGeometry(0.62, 1.7, 10);
-  const coneBaseGeo = new THREE.BoxGeometry(1.4, 0.16, 1.4);
-  const coneBandGeo = new THREE.CylinderGeometry(0.34, 0.44, 0.24, 10, 1, true);
-  CONES.forEach(({ x, z }) => {
+  const buoyGeo = new THREE.SphereGeometry(0.6, 16, 12);
+  const buoyRingGeo = new THREE.TorusGeometry(0.95, 0.07, 6, 28);
+  CONES.forEach(({ x, z }, i) => {
+    const tint = i % 2 ? NEON.magenta : NEON.cyan;
     const mesh = new THREE.Group();
-    const c = new THREE.Mesh(coneGeo, coneMat);
-    c.position.y = 0.1;
-    c.castShadow = true;
-    mesh.add(c);
-    const base = new THREE.Mesh(coneBaseGeo, coneMat);
-    base.position.y = -0.77;
-    base.castShadow = true;
-    mesh.add(base);
-    const band = new THREE.Mesh(coneBandGeo, coneWhite);
-    band.position.y = 0.05;
-    mesh.add(band);
-    const body = new CANNON.Body({ mass: 0.5, material: materials.prop });
-    body.addShape(new CANNON.Cylinder(0.12, 0.62, 1.7, 8), new CANNON.Vec3(0, 0.1, 0));
-    body.addShape(new CANNON.Box(new CANNON.Vec3(0.7, 0.08, 0.7)), new CANNON.Vec3(0, -0.77, 0));
-    body.position.set(x, 0.86, z);
+    const core = new THREE.Mesh(buoyGeo, glow(tint, 0.9));
+    core.castShadow = true;
+    mesh.add(core);
+    const ring = new THREE.Mesh(buoyRingGeo, glow(NEON.ice, 1));
+    ring.rotation.x = Math.PI / 2 - 0.3;
+    mesh.add(ring);
+    const body = new CANNON.Body({ mass: 0.5, material: materials.bouncy, linearDamping: 0.3 });
+    body.addShape(new CANNON.Sphere(0.6));
+    body.position.set(x, 0.62, z);
     add({ mesh, body, kind: "cone", group: "cones", asleep: true });
   });
 
@@ -299,30 +314,30 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   // Football — truncated-icosahedron look via per-face colours
   // ------------------------------------------------------------------
   const BALL_R = 1.5;
-  const footGeo = new THREE.IcosahedronGeometry(BALL_R, 1);
-  const baseIco = new THREE.IcosahedronGeometry(1, 0).getAttribute("position");
-  const corners = [];
-  for (let i = 0; i < baseIco.count; i++) {
-    const v = new THREE.Vector3().fromBufferAttribute(baseIco, i).normalize();
-    if (!corners.some((c) => c.distanceTo(v) < 1e-3)) corners.push(v);
-  }
-  const fpos = footGeo.getAttribute("position");
-  const fcol = [];
-  const centroid = new THREE.Vector3();
-  const vtx = new THREE.Vector3();
-  for (let i = 0; i < fpos.count; i += 3) {
-    centroid.set(0, 0, 0);
-    for (let k = 0; k < 3; k++) centroid.add(vtx.fromBufferAttribute(fpos, i + k));
-    centroid.normalize();
-    const dark = corners.some((c) => c.dot(centroid) > 0.9);
-    const col = dark ? [0.2, 0.19, 0.18] : [0.97, 0.96, 0.93];
-    for (let k = 0; k < 3; k++) fcol.push(...col);
-  }
-  footGeo.setAttribute("color", new THREE.Float32BufferAttribute(fcol, 3));
+  // the ball is a little banded planet with a ring
+  const planetTex = canvasTexture(256, 128, (ctx, W, H) => {
+    const g = ctx.createLinearGradient(0, 0, 0, H);
+    g.addColorStop(0, "#4a1450");
+    g.addColorStop(0.5, "#ff4fd8");
+    g.addColorStop(1, "#4a1450");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, W, H);
+    for (let k = 0; k < 9; k++) {
+      ctx.globalAlpha = 0.25 + Math.random() * 0.4;
+      ctx.fillStyle = k % 2 ? "#ffd6f4" : "#9b6bff";
+      ctx.fillRect(0, Math.random() * H, W, 4 + Math.random() * 10);
+    }
+  });
   const football = new THREE.Mesh(
-    footGeo,
-    matte(0xffffff, { vertexColors: true, shininess: 30 }),
+    new THREE.SphereGeometry(BALL_R, 28, 18),
+    new THREE.MeshPhongMaterial({ map: planetTex, emissive: 0xffffff, emissiveMap: planetTex, emissiveIntensity: 0.35, shininess: 30 }),
   );
+  const ballRing = new THREE.Mesh(
+    new THREE.RingGeometry(BALL_R * 1.35, BALL_R * 1.8, 40),
+    new THREE.MeshBasicMaterial({ color: NEON.violet, transparent: true, opacity: 0.6, side: THREE.DoubleSide, depthWrite: false }),
+  );
+  ballRing.rotation.x = Math.PI / 2 - 0.4;
+  football.add(ballRing);
   const footBody = new CANNON.Body({
     mass: 5,
     material: materials.bouncy,
@@ -365,8 +380,8 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
   const rain = [];
   const ballRain = (x, z) => {
     for (let i = 0; i < 40; i++) {
-      const color = new THREE.Color().setHSL(Math.random(), 0.65, 0.6);
-      const mesh = new THREE.Mesh(rainGeo, matte(color, { shininess: 60 }));
+      const color = new THREE.Color(ACCENTS[Math.floor(Math.random() * ACCENTS.length)]);
+      const mesh = new THREE.Mesh(rainGeo, glow(color, 0.6, { shininess: 60 }));
       const body = new CANNON.Body({ mass: 0.6, material: materials.bouncy, linearDamping: 0.1 });
       body.addShape(new CANNON.Sphere(0.7));
       body.position.set(x + (Math.random() - 0.5) * 30, 18 + Math.random() * 25, z + (Math.random() - 0.5) * 30);
@@ -405,5 +420,6 @@ export const buildProps = ({ scene, physics, emit, audio }) => {
     resetBowling,
     ballRain,
     football: footProp,
+    comet: ballBody,
   };
 };
