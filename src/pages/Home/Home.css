@@ -410,9 +410,36 @@ body.home-v2-body {
   vector-effect: non-scaling-stroke;
 }
 
-.holo-radar-sweep {
-  transform-origin: 50px 50px;
-  animation: holo-spin 4s linear infinite;
+/* About: the scan beam travelling down the print, then starting again */
+.holo-scan {
+  animation: holo-scan 3.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+@keyframes holo-scan {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  10% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(94px);
+  }
+}
+
+.holo-readout {
+  fill: var(--home-holo);
+  font: 600 3.4px/1 "Orbitron", sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.holo-readout.twinkle {
+  animation: holo-twinkle 1.6s ease-in-out infinite;
 }
 
 @keyframes holo-flow {
@@ -464,38 +491,31 @@ body.home-v2-body {
   opacity: 0.75;
 }
 
-.holo-spin-slow {
-  transform-origin: 50px 50px;
-  animation: holo-spin 40s linear infinite;
-}
-
-@keyframes holo-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.holo-stroke {
+/* Paintings: strokes painting themselves in, holding, then fading so the
+   next pass can paint them again */
+.holo-paint {
   fill: none;
   stroke: #fff;
-  stroke-width: 2.4;
+  stroke-width: 1.7;
   stroke-linecap: round;
-  stroke-dasharray: 120;
-  animation: holo-draw 3.2s ease-in-out infinite;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  vector-effect: non-scaling-stroke;
+  animation: holo-paint 4.8s ease-in-out infinite;
 }
 
-.holo-stroke.thin {
+.holo-paint.is-thin {
   stroke: var(--home-holo);
-  stroke-width: 0.8;
-  animation-delay: 0.25s;
+  stroke-width: 1;
 }
 
-@keyframes holo-draw {
+@keyframes holo-paint {
   0% {
-    stroke-dashoffset: 120;
+    stroke-dashoffset: 100;
+    opacity: 1;
   }
-  45%,
-  70% {
+  35%,
+  75% {
     stroke-dashoffset: 0;
     opacity: 1;
   }
