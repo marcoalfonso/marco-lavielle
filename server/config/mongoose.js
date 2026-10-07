@@ -1,23 +1,14 @@
-var mongoose = require("mongoose"),
-  userModel = require("../models/User");
-clientModel = require("../models/Client");
-postModel = require("../models/Post");
+const mongoose = require('mongoose');
+const User = require('../models/User');
+const Client = require('../models/Client');
+const Post = require('../models/Post');
 
-mongoose.set("strictQuery", false);
+mongoose.set('strictQuery', false);
 
-module.exports = function (config) {
-  mongoose.connect(config.db, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  });
-  var db = mongoose.connection;
-  db.on("error", console.error.bind(console, "connection error.."));
-  db.once("open", function callback() {
-    console.log("marco lavielle db opened");
-  });
-
-  userModel.createDefaultUsers();
-  clientModel.createDefaultClients();
-  postModel.createDefaultPosts();
-  console.log(mongoose.connection.readyState);
+// Connects, then fills an empty database with its first records.
+module.exports = async (config) => {
+	mongoose.connection.on('error', (err) => console.error('Database error:', err.message));
+	await mongoose.connect(config.db);
+	console.log('marco lavielle db opened');
+	await Promise.all([User.createDefaultUsers(), Client.createDefaultClients(), Post.createDefaultPosts()]);
 };

@@ -1,7 +1,7 @@
-var mongoose = require("mongoose"),
-  encrypt = require("../utilities/encryption");
+const mongoose = require("mongoose");
+const encrypt = require("../utilities/encryption");
 
-var userSchema = mongoose.Schema({
+const userSchema = new mongoose.Schema({
   firstName: { type: String, required: "{PATH} is required!" },
   lastName: { type: String, required: "{PATH} is required!" },
   username: {
@@ -16,7 +16,7 @@ var userSchema = mongoose.Schema({
 
 // Never send password material to the client (API responses, login reply).
 userSchema.set("toJSON", {
-  transform: function (doc, ret) {
+  transform: (doc, ret) => {
     delete ret.salt;
     delete ret.hashed_pwd;
     return ret;
@@ -38,33 +38,27 @@ userSchema.methods = {
     return (this.roles || []).indexOf(role) > -1;
   },
 };
-var User = mongoose.model("User", userSchema);
+const User = mongoose.model("User", userSchema);
 
 // No accounts with known passwords are ever seeded. On an empty database an
 // admin is created only when SEED_ADMIN_PASSWORD is set; otherwise use
 // `node scripts/set-password.js <username> --create-admin`.
-function createDefaultUsers() {
-  var password = process.env.SEED_ADMIN_PASSWORD;
+User.createDefaultUsers = async () => {
+  const password = process.env.SEED_ADMIN_PASSWORD;
   if (!password) return;
   if (password.length < encrypt.MIN_PASSWORD_LENGTH) {
-    console.warn(
-      "SEED_ADMIN_PASSWORD is shorter than " +
-        encrypt.MIN_PASSWORD_LENGTH +
-        " characters; no admin seeded.",
-    );
+    console.warn(`SEED_ADMIN_PASSWORD is shorter than ${encrypt.MIN_PASSWORD_LENGTH} characters; no admin seeded.`);
     return;
   }
-  User.countDocuments({}).exec(function (err, count) {
-    if (err || count > 0) return;
-    var admin = new User({
-      firstName: "Marco",
-      lastName: "Lavielle",
-      username: process.env.SEED_ADMIN_USERNAME || "marco",
-      roles: ["admin"],
-    });
-    admin.setPassword(password);
-    admin.save();
+  if ((await User.countDocuments()) > 0) return;
+  const admin = new User({
+    firstName: "Marco",
+    lastName: "Lavielle",
+    username: process.env.SEED_ADMIN_USERNAME || "marco",
+    roles: ["admin"],
   });
-}
+  admin.setPassword(password);
+  await admin.save();
+};
 
-exports.createDefaultUsers = createDefaultUsers;
+module.exports = User;

@@ -1,22 +1,23 @@
-var express = require('express');
-const path = require('path');
-const dotenv = require('dotenv');
-dotenv.config({ path: path.resolve(process.cwd(), '.env.local') });
+const path = require('node:path');
+const express = require('express');
 
-var env = process.env.NODE_ENV = process.env.NODE_ENV || 'development';
+require('dotenv').config({ path: path.resolve(process.cwd(), '.env.local'), quiet: true });
 
-var app = express();
+const env = (process.env.NODE_ENV = process.env.NODE_ENV || 'development');
+const config = require('./server/config/config')[env];
+const configureExpress = require('./server/config/express');
+const connectDatabase = require('./server/config/mongoose');
+const configurePassport = require('./server/config/passport');
+const routes = require('./server/config/routes');
 
-var config = require('./server/config/config')[env];
+const app = express();
+configureExpress(app, config);
+configurePassport();
+app.use(routes);
 
-require('./server/config/express')(app, config);
+connectDatabase(config).catch((err) => {
+	console.error('Could not connect to the database:', err.message);
+	process.exit(1);
+});
 
-require('./server/config/mongoose')(config);
-
-require('./server/config/passport')();
-
-require('./server/config/routes')(app);
-
-//SERVER LISTENER
-app.listen(config.port);
-console.log('Listening on port ' + config.port + '...');
+app.listen(config.port, () => console.log(`Listening on port ${config.port}...`));

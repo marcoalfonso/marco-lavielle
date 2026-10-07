@@ -1,16 +1,16 @@
-var path = require('path');
+const path = require('node:path');
 
-var rootPath = path.normalize(__dirname +'/../../');
+const rootPath = path.normalize(path.join(__dirname, '..', '..'));
 
 module.exports = {
 	development: {
 		db: process.env.DB_URI || 'mongodb://localhost/marco_lavielle',
-		rootPath: rootPath,
+		rootPath,
 		port: process.env.PORT || 4030,
 	},
 	production: {
-		rootPath: rootPath,
 		db: process.env.DB_URI,
-		port: process.env.PORT || 80
-	}
+		rootPath,
+		port: process.env.PORT || 80,
+	},
 };
