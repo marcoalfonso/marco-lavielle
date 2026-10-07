@@ -163,12 +163,79 @@ body.signin-v2-body {
   margin-bottom: calc(-18px - var(--platform-width) * 0.3);
 }
 
-/* phones: no pointer to lean toward; lie flat while typing so the caret
-   and text stay put */
-@media (hover: none) {
-  .signin-v2-panel:focus-within {
-    --tilt-x: 0deg;
-    --tilt-y: 0deg;
+/* touch screens: the panel lies flat, its layers all on the glass (no
+   depth to look skewed with no pointer to lean toward) */
+.signin-v2-panel.is-flat {
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --shift-x: 0px;
+  --shift-y: 0px;
+  transform: none;
+}
+
+.signin-v2-panel.is-flat .holo-corner,
+.signin-v2-panel.is-flat .signin-v2-heading,
+.signin-v2-panel.is-flat .signin-v2-field,
+.signin-v2-panel.is-flat .signin-v2-submit,
+.signin-v2-panel.is-flat .signin-v2-message {
+  transform: none;
+}
+
+/* ...and once motion is allowed, the flat panel tips and drifts with the
+   phone (the --tilt and --shift values come from script) */
+.signin-v2-panel.is-flat.is-moving {
+  transform: translate3d(var(--shift-x), var(--shift-y), 0) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transition: transform 260ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* still while typing, so the caret and text stay put */
+.signin-v2-panel.is-flat.is-moving:focus-within {
+  transform: none;
+}
+
+/* the motion pill, as on the other pages */
+.signin-v2 .signin-v2-motion {
+  position: fixed;
+  z-index: 3;
+  left: 50%;
+  bottom: calc(22px + env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 1px solid rgba(111, 245, 238, 0.35);
+  border-radius: 999px;
+  background: rgba(3, 10, 20, 0.85);
+  color: var(--holo-light);
+  cursor: pointer;
+  font: 600 10px/1 var(--holo-font);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.signin-v2 .signin-v2-motion.is-passive {
+  cursor: default;
+}
+
+.signin-v2-motion-icon {
+  width: 9px;
+  height: 15px;
+  box-sizing: border-box;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+  animation: signin-tilt 2.4s ease-in-out infinite;
+}
+
+@keyframes signin-tilt {
+  0%,
+  100% {
+    transform: rotate(-18deg);
+  }
+  50% {
+    transform: rotate(18deg);
   }
 }
 
@@ -186,8 +253,8 @@ body.signin-v2-body {
     font-size: 24px;
   }
 
-  /* a gentler resting lean on a narrow screen */
-  .signin-v2-panel {
+  /* a gentler resting lean on a narrow screen (with a mouse) */
+  .signin-v2-panel:not(.is-flat) {
     --tilt-x: 3deg;
     --tilt-y: -5deg;
   }
@@ -198,7 +265,12 @@ body.signin-v2-body {
     animation: none;
   }
 
-  .signin-v2-panel {
+  .signin-v2-panel,
+  .signin-v2-panel.is-flat.is-moving {
     transition: none;
+  }
+
+  .signin-v2-motion-icon {
+    animation: none;
   }
 }
