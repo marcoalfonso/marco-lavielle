@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { setDevice } from "actions/appActions";
 
 import Routes from "./routes";
+import Notifications from "components/notify/Notifications";
 
 const MOBILE_BELOW = 812; // px of page width
 
@@ -39,7 +40,12 @@ const App = () => {
     return () => window.removeEventListener("resize", update);
   }, [dispatch]);
 
-  return <Routes />;
+  return (
+    <>
+      <Routes />
+      <Notifications />
+    </>
+  );
 };
 
 export default App;

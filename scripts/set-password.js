@@ -6,69 +6,65 @@
 //
 // On Heroku (uses the app's DB_URI):
 //   heroku run node scripts/set-password.js marco
-var path = require("path");
-var readline = require("readline");
-require("dotenv").config({ path: path.resolve(__dirname, "..", ".env.local") });
-var mongoose = require("mongoose");
-var encrypt = require("../server/utilities/encryption");
-require("../server/models/User");
-var User = mongoose.model("User");
+const path = require("node:path");
+const readline = require("node:readline");
+require("dotenv").config({ path: path.resolve(__dirname, "..", ".env.local"), quiet: true });
+const mongoose = require("mongoose");
+const encrypt = require("../server/utilities/encryption");
+const User = require("../server/models/User");
 
-var args = process.argv.slice(2);
-var username = (args.find(function (a) { return a.indexOf("--") !== 0; }) || "").toLowerCase();
-var createAdmin = args.indexOf("--create-admin") > -1;
+const args = process.argv.slice(2);
+const username = (args.find((a) => !a.startsWith("--")) || "").toLowerCase();
+const createAdmin = args.includes("--create-admin");
 
 if (!username) {
   console.error("Usage: node scripts/set-password.js <username> [--create-admin]");
   process.exit(1);
 }
 
-var dbUri = process.env.DB_URI || "mongodb://localhost/marco_lavielle";
+const dbUri = process.env.DB_URI || "mongodb://localhost/marco_lavielle";
 
 // Ask a question without echoing what is typed.
-function askHidden(question) {
-  return new Promise(function (resolve) {
-    var rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
-    var muted = false;
-    rl._writeToOutput = function (text) {
+const askHidden = (question) =>
+  new Promise((resolve) => {
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout, terminal: true });
+    let muted = false;
+    rl._writeToOutput = (text) => {
       if (!muted) rl.output.write(text);
     };
-    rl.question(question, function (answer) {
+    rl.question(question, (answer) => {
       rl.output.write("\n");
       rl.close();
       resolve(answer);
     });
     muted = true;
   });
-}
 
-async function main() {
+const main = async () => {
   await mongoose.connect(dbUri);
-  var user = await User.findOne({ username: username });
+  let user = await User.findOne({ username });
   if (!user && !createAdmin) {
-    throw new Error('No user "' + username + '" found. Pass --create-admin to create it.');
+    throw new Error(`No user "${username}" found. Pass --create-admin to create it.`);
   }
 
-  var password = await askHidden("New password for " + username + ": ");
+  const password = await askHidden(`New password for ${username}: `);
   if (password.length < encrypt.MIN_PASSWORD_LENGTH) {
-    throw new Error("Password must be at least " + encrypt.MIN_PASSWORD_LENGTH + " characters.");
+    throw new Error(`Password must be at least ${encrypt.MIN_PASSWORD_LENGTH} characters.`);
   }
-  var confirm = await askHidden("Repeat password: ");
+  const confirm = await askHidden("Repeat password: ");
   if (password !== confirm) throw new Error("Passwords do not match.");
 
   if (!user) {
-    user = new User({ firstName: "Marco", lastName: "Lavielle", username: username, roles: ["admin"] });
+    user = new User({ firstName: "Marco", lastName: "Lavielle", username, roles: ["admin"] });
   }
   user.setPassword(password);
   await user.save();
-  console.log('Password updated for "' + username + '".');
-}
+  console.log(`Password updated for "${username}".`);
+};
 
 main()
-  .then(function () {
-    return mongoose.disconnect();
-  })
-  .catch(function (err) {
+  .then(() => mongoose.disconnect())
+  .catch((err) => {
     console.error(err.message);
     mongoose.disconnect();
     process.exitCode = 1;
