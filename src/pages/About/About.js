@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 
 import BodyHologram from "./BodyHologram";
+import "./About.css";
 
 const About = () => {
   const device = useSelector((state) => state.app.device);
@@ -18,26 +19,14 @@ const About = () => {
       id="page"
     >
       <div className="column-1">
-        <a className="uplevel pjax" href="/" data-section="home">
-          <span className="arrow">‹</span>
-          <strong className="logo">
-            <span className="m">M</span>
-            <span className="a">A</span>
-            <span className="r">R</span>
-            <span className="c">C</span>
-            <span className="o">O</span>
-            <br />
-            <span className="l">L</span>
-            <span className="a2">A</span>
-            <span className="v">V</span>
-            <span className="i">I</span>
-            <span className="e">E</span>
-            <span className="l2">L</span>
-            <span className="l3">L</span>
-            <span className="e2">E</span>
-          </strong>
+        {/* the back link the other pages use; the bar keeps the old header's
+            height, so nothing below moves */}
+        <div className="uplevel about-bar">
+          <a className="about-home" href="/">
+            <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
+          </a>
           <h1 className="section-title mobile-only">About</h1>
-        </a>
+        </div>
       </div>
       <div className="about-content">
         <div className="fancy-header">
