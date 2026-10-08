@@ -19,13 +19,12 @@ const About = () => {
       id="page"
     >
       <div className="column-1">
-        {/* the back link the other pages use; the bar keeps the old header's
-            height, so nothing below moves */}
+        {/* the back link the other pages use, where they put it; the bar
+            keeps the old header's height, so nothing below moves */}
         <div className="uplevel about-bar">
           <a className="about-home" href="/">
             <span aria-hidden="true">&lsaquo;</span> Marco Lavielle
           </a>
-          <h1 className="section-title mobile-only">About</h1>
         </div>
       </div>
       <div className="about-content">
