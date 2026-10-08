@@ -10,9 +10,9 @@ import { createRagdoll } from "./ragdoll";
 // as a glowing point cloud, a scan band sweeping up and down, and a HUD
 // platform under the feet. The figure itself comes from ./bodyPoints.
 //
-// The figure is an active rag doll (./ragdoll): on desktop its parts can be
-// grabbed and dragged with the mouse; on phones, tilting and moving the phone
-// sways and jostles it. Points are skinned to the rag doll's bones in the
+// The figure is an active rag doll (./ragdoll): its parts can be grabbed and
+// dragged with the mouse or a finger, and on phones tilting and moving the
+// phone sways and jostles it too. Points are skinned to the rag doll's bones in the
 // vertex shader, blending across joints so bends stay smooth.
 // ---------------------------------------------------------------------------
 
@@ -367,7 +367,7 @@ const BodyHologram = ({ className }) => {
         : null;
     if (intersection) intersection.observe(mount);
 
-    // --- desktop: hover to highlight a body part, drag to pull it around
+    // --- hover to highlight a body part (mouse); drag it around (mouse or touch)
     const canvas = renderer.domElement;
     const raycaster = new THREE.Raycaster();
     const ndc = new THREE.Vector2();
@@ -379,6 +379,7 @@ const BodyHologram = ({ className }) => {
     let pointerX = 0;
     let hot = -1;
     let dragging = false;
+    // e: anything with clientX / clientY (a pointer event or a touch)
     const localRay = (e) => {
       const r = canvas.getBoundingClientRect();
       ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
@@ -395,46 +396,87 @@ const BodyHologram = ({ className }) => {
       const r = slot.getBoundingClientRect();
       pointerX = Math.max(-1, Math.min(1, ((e.clientX - r.left) / r.width) * 2 - 1));
     };
+    // the drag itself, shared by the mouse and by touch
+    const grab = (at) => {
+      const [o, d] = localRay(at);
+      const hit = ragdoll.pick(o, d);
+      if (!hit) return false;
+      dragging = true;
+      hot = hit.index;
+      planePoint.fromArray(hit.point);
+      planeNormal.set(0, 0, -1).applyQuaternion(camera.quaternion).transformDirection(toLocal);
+      ragdoll.startDrag(hit.index, hit.point);
+      setShowDragHint(false);
+      return true;
+    };
+    const pull = (at) => {
+      const [o, d] = localRay(at);
+      // keep the grabbed point on a plane facing the camera
+      const denom = planeNormal.x * d[0] + planeNormal.y * d[1] + planeNormal.z * d[2];
+      if (Math.abs(denom) > 1e-6) {
+        const t =
+          ((planePoint.x - o[0]) * planeNormal.x + (planePoint.y - o[1]) * planeNormal.y + (planePoint.z - o[2]) * planeNormal.z) /
+          denom;
+        ragdoll.moveDrag([o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t]);
+      }
+    };
+    const letGo = () => {
+      if (!dragging) return false;
+      dragging = false;
+      ragdoll.endDrag();
+      return true;
+    };
+
     const onCanvasPointerMove = (e) => {
       if (!isMouse(e) || reduceMotion) return;
+      if (dragging) return pull(e);
       const [o, d] = localRay(e);
-      if (dragging) {
-        // keep the grabbed point on a plane facing the camera
-        const denom = planeNormal.x * d[0] + planeNormal.y * d[1] + planeNormal.z * d[2];
-        if (Math.abs(denom) > 1e-6) {
-          const t =
-            ((planePoint.x - o[0]) * planeNormal.x + (planePoint.y - o[1]) * planeNormal.y + (planePoint.z - o[2]) * planeNormal.z) /
-            denom;
-          ragdoll.moveDrag([o[0] + d[0] * t, o[1] + d[1] * t, o[2] + d[2] * t]);
-        }
-        return;
-      }
       const hit = ragdoll.pick(o, d);
       hot = hit ? hit.index : -1;
       canvas.style.cursor = hit ? "grab" : "";
     };
     const onCanvasPointerDown = (e) => {
       if (!isMouse(e) || e.button !== 0 || reduceMotion) return;
-      const [o, d] = localRay(e);
-      const hit = ragdoll.pick(o, d);
-      if (!hit) return;
+      if (!grab(e)) return;
       e.preventDefault();
-      dragging = true;
-      hot = hit.index;
-      planePoint.fromArray(hit.point);
-      planeNormal.set(0, 0, -1).applyQuaternion(camera.quaternion).transformDirection(toLocal);
-      ragdoll.startDrag(hit.index, hit.point);
       canvas.setPointerCapture(e.pointerId);
       canvas.style.cursor = "grabbing";
-      setShowDragHint(false);
     };
     const onCanvasPointerUp = (e) => {
-      if (!dragging) return;
-      dragging = false;
-      ragdoll.endDrag();
+      if (!isMouse(e) || !letGo()) return;
       if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
       canvas.style.cursor = hot >= 0 ? "grab" : "";
     };
+
+    // Touch: a finger that lands on the body grabs that part (and the page
+    // doesn't scroll for that touch); a finger anywhere else scrolls the page
+    // as usual. Touch events rather than pointer events, because only they
+    // can stop the scroll once the touch has started.
+    let touchId = null;
+    const findTouch = (list) => [...list].find((t) => t.identifier === touchId);
+    const onTouchStart = (e) => {
+      if (reduceMotion || touchId !== null || e.touches.length !== 1) return;
+      const t = e.changedTouches[0];
+      if (!grab(t)) return;
+      touchId = t.identifier;
+      e.preventDefault();
+    };
+    const onTouchMove = (e) => {
+      if (touchId === null) return;
+      const t = findTouch(e.changedTouches);
+      if (!t) return;
+      e.preventDefault();
+      pull(t);
+    };
+    const onTouchEnd = (e) => {
+      if (touchId === null || !findTouch(e.changedTouches)) return;
+      touchId = null;
+      letGo();
+    };
+    canvas.addEventListener("touchstart", onTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", onTouchMove, { passive: false });
+    canvas.addEventListener("touchend", onTouchEnd);
+    canvas.addEventListener("touchcancel", onTouchEnd);
     const onCanvasPointerLeave = () => {
       if (dragging) return;
       hot = -1;
@@ -583,6 +625,10 @@ const BodyHologram = ({ className }) => {
       canvas.removeEventListener("pointerup", onCanvasPointerUp);
       canvas.removeEventListener("pointercancel", onCanvasPointerUp);
       canvas.removeEventListener("pointerleave", onCanvasPointerLeave);
+      canvas.removeEventListener("touchstart", onTouchStart);
+      canvas.removeEventListener("touchmove", onTouchMove);
+      canvas.removeEventListener("touchend", onTouchEnd);
+      canvas.removeEventListener("touchcancel", onTouchEnd);
       window.removeEventListener("devicemotion", onMotion);
       clearTimeout(hintTimer);
       motionRef.current = null;

@@ -1,0 +1,41 @@
+/* About: the "‹ Marco Lavielle" back link the other pages use, in place of
+   the old stacked logo, and placed where they place it. Only the link
+   changes: the heading below keeps its sizes and the page its spacing. */
+.about-bar .about-home {
+  display: inline-block;
+  vertical-align: top;
+  color: #788b94;
+  font: 600 11px/1 "DINWeb", "Lucida Grande", verdana, sans-serif;
+  letter-spacing: 0.3em;
+  text-decoration: none;
+  text-transform: uppercase;
+  white-space: nowrap;
+  -webkit-font-smoothing: antialiased;
+  transition: color 250ms ease;
+}
+
+.about-bar .about-home:hover,
+.about-bar .about-home:focus {
+  color: #fff;
+  text-decoration: none;
+}
+
+/* desktop: 24px down, lined up with the page's content edge (as Thoughts
+   and Software) */
+.desktop .column-1 .about-bar {
+  margin: 0;
+  padding: 24px 0 0 max(32px, calc((100vw - 1280px) / 2 + 32px));
+}
+
+/* phones: 20px down and 16px in, as on the other pages; the bar keeps the
+   height the old header had, so the heading and everything below stay put */
+.mobile .about-bar {
+  box-sizing: border-box;
+  height: 98px;
+  padding: 20px 16px 0;
+}
+
+.mobile .about-bar .about-home {
+  font-size: 10px;
+  letter-spacing: 0.22em;
+}

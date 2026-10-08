@@ -656,11 +656,8 @@ body.home-v2-body {
 }
 
 /* the switch itself: bottom left, a black swatch and a spectrum swatch */
-.colour-toggle {
-  right: auto;
-  left: 28px;
-}
-
+/* the colour switch shares the ui-toggle look (UiVersionToggle.css), and its
+   spot, bottom right */
 .colour-toggle.is-spectrum .ui-toggle-thumb {
   transform: translateX(100%);
 }
@@ -697,12 +694,6 @@ body.home-v2-body {
 
 .colour-toggle .ui-toggle-option.is-active .colour-swatch.is-spectrum {
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-}
-
-@media (max-width: 700px) {
-  .colour-toggle {
-    left: 16px;
-  }
 }
 
 /* --- platform ------------------------------------------------------- */
