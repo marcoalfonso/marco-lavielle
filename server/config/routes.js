@@ -31,9 +31,18 @@ router.post('/logout', (req, res, next) => {
 
 router.all('/api/{*rest}', (req, res) => res.sendStatus(404));
 
+// Pages are the same for every visitor (the app fetches anything personal
+// itself), so Cloudflare may keep a copy for a minute, and keep serving it
+// for a day if this server is down.
+const PAGE_CACHE = 'public, max-age=0, s-maxage=60, stale-while-revalidate=600, stale-if-error=86400';
+const page = (template) => (req, res) => {
+	res.set('Cache-Control', PAGE_CACHE);
+	res.render(template);
+};
+
 // pages: Art has its own template; everything else is the React app
-router.get('/art', (req, res) => res.render('index-art.ejs'));
-router.get('/{*rest}', (req, res) => res.render('index-react.ejs', { bootstrappedUser: req.user }));
+router.get('/art', page('index-art.ejs'));
+router.get('/{*rest}', page('index-react.ejs'));
 
 // anything that throws (or rejects) ends up here
 router.use((err, req, res, next) => {
