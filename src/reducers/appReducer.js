@@ -1,3 +1,4 @@
+import { deviceFor } from 'device'
 /*
  * The reducer takes care of our data
  * Using actions, we can change our application state
@@ -28,7 +29,7 @@ const initialState = {
   posts: null,
   post : null,
   user: null,
-  device: null,
+  device: deviceFor(),
   paintings: [
     { 
       link: '../images/paintings/clovelly_beach.jpg',

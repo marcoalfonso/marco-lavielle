@@ -1,11 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import { useDispatch } from "react-redux";
 import { setDevice } from "actions/appActions";
 
 import Routes from "./routes";
 import Notifications from "components/notify/Notifications";
-
-const MOBILE_BELOW = 812; // px of page width
+import { deviceFor } from "device";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -19,14 +18,13 @@ const App = () => {
   }, []);
 
   // "mobile" or "desktop" on <html> and <body> (and in the store), by the
-  // page's width, kept up to date as the window resizes
-  useEffect(() => {
+  // page's width, kept up to date as the window resizes. A layout effect, so
+  // the classes are on before the first frame is painted.
+  useLayoutEffect(() => {
     let device = null;
     const update = () => {
-      const width = document.documentElement.clientWidth;
-      if (!width) return;
-      const next = width < MOBILE_BELOW ? "mobile" : "desktop";
-      if (next === device) return;
+      const next = deviceFor();
+      if (!next || next === device) return;
       device = next;
       const other = next === "mobile" ? "desktop" : "mobile";
       [document.documentElement, document.body].forEach((el) => {

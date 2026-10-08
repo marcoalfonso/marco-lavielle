@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import { getClients, getPosts } from "actions/appActions";
@@ -9,6 +9,30 @@ const Homepage = () => {
   const dispatch = useDispatch();
   const { device, clients, posts, paintings } = useSelector((state) => state.app);
   const [section, setSection] = useState("preview-section-1");
+  const [loaded, setLoaded] = useState(false);
+
+  // The intro: the site's CSS animates everything from its resting state to
+  // ".loaded" (the instrument opening out, the rings spinning up...), so the
+  // page is first painted without "loaded" (here and on <body>), then gets it
+  // on the next frame.
+  useLayoutEffect(() => {
+    const body = document.body;
+    body.classList.remove("loaded");
+    let second = null;
+    const first = requestAnimationFrame(() => {
+      // the app may have put it back on <body> meanwhile
+      body.classList.remove("loaded");
+      second = requestAnimationFrame(() => {
+        body.classList.add("loaded");
+        setLoaded(true);
+      });
+    });
+    return () => {
+      cancelAnimationFrame(first);
+      cancelAnimationFrame(second);
+      body.classList.add("loaded");
+    };
+  }, []);
 
   useEffect(() => {
     dispatch(getClients());
@@ -20,7 +44,7 @@ const Homepage = () => {
 
   return (
     <main
-      className={`page loaded ${device} detected ${section} homepage`}
+      className={`page${loaded ? " loaded" : ""} ${device} detected ${section} homepage`}
       id="page"
     >
       <h1 className="logo home-logo">
