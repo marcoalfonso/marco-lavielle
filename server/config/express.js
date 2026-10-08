@@ -58,7 +58,9 @@ module.exports = (app, config) => {
 			cacheControl: false,
 			// only files served from public/ get these (never the API or pages)
 			setHeaders: (res, filePath) => {
-				if (!production) return;
+				// development: always check for a fresh copy (with no header at all,
+				// browsers guess, and can keep showing an old bundle)
+				if (!production) return res.set('Cache-Control', 'no-cache');
 				if (res.req.query.v) {
 					res.set('Cache-Control', 'public, max-age=31536000, immutable');
 				} else if (IMAGE.test(filePath)) {
