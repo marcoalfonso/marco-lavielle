@@ -98,7 +98,7 @@ Animated exits (cube, Journal) use `components/navigation/navigateAfter.js`: `pu
   - HTML pages `s-maxage=60` with stale-if-error for a day (Cloudflare only caches HTML if a Cache Rule makes it eligible);
   - the API is not cached by browsers or Cloudflare, but the server caches reads for 60 s.
 - Sessions use the default MemoryStore, so everyone is signed out on each restart (daily, and on deploy).
-- Favicon (`public/favicon.ico`, `.svg`, and the app icons) is a translucent glass cube. The social card is `public/images/social/marcolavielle.jpg` (1200×630), with Open Graph and Twitter meta in both templates.
+- Favicon (`public/favicon.ico`, `.svg`, and the app icons) is a translucent glass cube. The social card is `public/images/social/marcolavielle-card.jpg` (2400×1260, rendered at 2x so LinkedIn's shrunk copy stays sharp; small labels sized up for the same reason), with Open Graph and Twitter meta in both templates. When the card changes, give it a **new file name**: LinkedIn and X keep their copy per image URL. The old `marcolavielle.jpg` stays for links shared before. Its source is `scripts/social-card/card.html` (how to render it is at the top of the file).
 
 ## Testing habits
 

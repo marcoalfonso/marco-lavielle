@@ -1,0 +1,67 @@
+<!doctype html>
+<!--
+  The social sharing card (public/images/social/marcolavielle-card.jpg).
+  Laid out at 1200x630; render it at 2x (2400x1260) with headless Chrome,
+  e.g. a 1200x630 viewport with deviceScaleFactor 2, screenshot, then save as
+  JPEG (quality ~92). Give a changed card a new file name: LinkedIn and X keep
+  their copy per image URL.
+-->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800&display=swap">
+<style>
+@font-face { font-family: DINWeb; src: url(../../public/fonts/DINWebPro-Medium.woff); }
+html, body { margin: 0; }
+body { width: 1200px; height: 630px; overflow: hidden; position: relative; font-family: DINWeb, "Lucida Grande", Verdana, sans-serif;
+  background: radial-gradient(ellipse 60% 75% at 72% 50%, #0a2733 0%, #031018 45%, #010207 80%); color: #eaf7ff; }
+/* faint grid */
+body::before { content: ""; position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(111,245,238,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(111,245,238,0.05) 1px, transparent 1px);
+  background-size: 42px 42px; mask-image: radial-gradient(ellipse 70% 80% at 70% 50%, #000 30%, transparent 80%); }
+.corner { position: absolute; width: 34px; height: 34px; border: 2px solid rgba(111,245,238,0.7); }
+.tl { top: 28px; left: 28px; border-right: 0; border-bottom: 0; } .tr { top: 28px; right: 28px; border-left: 0; border-bottom: 0; }
+.bl { bottom: 28px; left: 28px; border-right: 0; border-top: 0; } .br { bottom: 28px; right: 28px; border-left: 0; border-top: 0; }
+.text { position: absolute; left: 92px; top: 0; bottom: 0; display: flex; flex-direction: column; justify-content: center; width: 560px; }
+/* small labels sized to survive the networks' shrinking and recompression */
+.kicker { color: #6ff5ee; font: 700 19px/1 Orbitron; letter-spacing: 0.24em; white-space: nowrap; margin-bottom: 28px; }
+h1 { margin: 0; font: 800 80px/1.02 Orbitron; color: #fff; text-shadow: 0 0 24px rgba(111,245,238,0.35); }
+.role { margin-top: 28px; color: #2fd0ff; font: 700 27px/1 Orbitron; letter-spacing: 0.24em; }
+.url { margin-top: 50px; display: inline-flex; align-self: flex-start; align-items: center; gap: 14px; padding: 15px 26px; border: 2px solid rgba(111,245,238,0.6);
+  border-radius: 999px; color: #f2fbff; font: 600 25px/1 DINWeb, "Lucida Grande", Verdana, sans-serif; letter-spacing: 0.08em; box-shadow: 0 0 18px rgba(0,191,243,0.25); }
+.url i { width: 11px; height: 11px; border-radius: 50%; background: #6ff5ee; box-shadow: 0 0 10px #6ff5ee; }
+/* the cube */
+.stage { position: absolute; left: 820px; top: 315px; perspective: 1400px; }
+.cube { --h: 135px; position: absolute; width: 270px; height: 270px; left: -135px; top: -135px; transform-style: preserve-3d;
+  transform: rotateX(-24deg) rotateY(38deg) rotateZ(4deg); }
+.face { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; box-sizing: border-box;
+  background: rgba(3, 14, 22, 0.92); border: 1px solid rgba(111,245,238,0.25); }
+.cell { border: 2px solid rgba(111,245,238,0.6); border-radius: 9px; background: rgba(4,12,24,0.6);
+  box-shadow: 0 0 10px rgba(0,191,243,0.45), inset 0 0 14px rgba(0,191,243,0.2); }
+.cell.c { border-color: #bffffb; background: rgba(111,245,238,0.16); box-shadow: 0 0 22px rgba(111,245,238,0.8), inset 0 0 22px rgba(111,245,238,0.45);
+  display: grid; place-items: center; color: #fff; font: 700 15px/1 Orbitron; letter-spacing: 0.06em; text-shadow: 0 0 8px #6ff5ee; }
+.f1 { transform: translateZ(var(--h)); } .f2 { transform: rotateY(90deg) translateZ(var(--h)); filter: brightness(0.8); }
+.f3 { transform: rotateX(90deg) translateZ(var(--h)); filter: brightness(1.1); }
+.f4 { transform: rotateY(-90deg) translateZ(var(--h)); } .f5 { transform: rotateY(180deg) translateZ(var(--h)); } .f6 { transform: rotateX(-90deg) translateZ(var(--h)); }
+/* the holo pad under it */
+.pad { position: absolute; left: 820px; top: 545px; width: 460px; height: 92px; transform: translate(-50%, -50%); border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0,191,243,0.35), rgba(0,191,243,0.06) 55%, transparent 70%);
+  box-shadow: inset 0 0 0 1.5px rgba(111,245,238,0.25); }
+.pad::before, .pad::after { content: ""; position: absolute; inset: 14px 60px; border-radius: 50%; border: 1.5px dashed rgba(111,245,238,0.35); }
+.pad::after { inset: 30px 130px; border-style: solid; border-color: rgba(111,245,238,0.5); }
+.beam { position: absolute; left: 820px; top: 470px; width: 300px; height: 80px; transform: translateX(-50%);
+  background: linear-gradient(to bottom, transparent, rgba(0,191,243,0.18)); clip-path: polygon(30% 0, 70% 0, 100% 100%, 0 100%); }
+</style></head><body>
+<span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+<div class="text">
+  <div class="kicker">SOFTWARE · PAINTINGS</div>
+  <h1>Marco<br>Lavielle</h1>
+  <div class="role">CODER · PAINTER</div>
+  <div class="url"><i></i>marcolavielle.com</div>
+</div>
+<div class="beam"></div><div class="pad"></div>
+<div class="stage"><div class="cube">
+  <div class="face f1"></div><div class="face f2"></div><div class="face f3"></div><div class="face f4"></div><div class="face f5"></div><div class="face f6"></div>
+</div></div>
+<script>
+const labels = { f1: "ABOUT", f4: "CODE", f3: "ART" };
+document.querySelectorAll(".face").forEach((f) => { for (let i = 0; i < 9; i++) { const c = document.createElement("div"); c.className = "cell" + (i === 4 ? " c" : ""); if (i === 4) c.textContent = labels[[...f.classList].find((k) => labels[k])] || ""; f.appendChild(c); } });
+</script></body></html>
