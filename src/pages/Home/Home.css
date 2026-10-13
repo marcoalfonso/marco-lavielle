@@ -820,6 +820,13 @@ body.home-v2-body {
     padding-left: 0.42em;
   }
 
+  /* tighter on phones, so the longer tagline stays about as wide as the
+     name (the padding matches the spacing, keeping it centred) */
+  .home-v2 .home-v2-tagline {
+    letter-spacing: 0.22em;
+    padding-left: 0.22em;
+  }
+
   .home-v2-stage {
     padding-bottom: 90px;
   }

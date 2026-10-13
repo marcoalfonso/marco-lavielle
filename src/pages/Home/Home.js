@@ -66,7 +66,7 @@ const Home = () => {
     <main className={colours === "spectrum" ? "home-v2 is-spectrum" : "home-v2"}>
       <header className="home-v2-header">
         <FlashName className="home-v2-name" />
-        <p className="home-v2-tagline">Coder &middot; Painter</p>
+        <p className="home-v2-tagline">Software Engineer &middot; Painter</p>
       </header>
 
       <div className="home-v2-stage">

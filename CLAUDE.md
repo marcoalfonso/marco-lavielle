@@ -63,7 +63,7 @@ Futuristic, dark, light-drawn UI. Reuse these; new pages should look like they b
 
 ## Pages (what Marco has approved; don't undo without asking)
 
-- **Home (`/`, V2):** a Rubik's cube of light (`src/pages/Home/RubikCube.js`). Centre squares are links (Software, Paintings, Thoughts, About, Game, GitHub). Each face shows a line-art hologram (`HoloArt.js`). It tumbles, can be dragged, and follows phone tilt (capped at 30°). Picking a face whirls, flattens and shrinks to a dot, then navigates. Marco prefers the original cube start (no intro animation). He rejected redesigns of the Paintings and About holograms, so keep them as they are. There's a colour toggle and a V1/V2 toggle.
+- **Home (`/`, V2):** the name, the tagline "Software Engineer · Painter", and a Rubik's cube of light (`src/pages/Home/RubikCube.js`). Centre squares are links (Software, Paintings, Thoughts, About, Game, GitHub). Each face shows a line-art hologram (`HoloArt.js`). It tumbles, can be dragged, and follows phone tilt (capped at 30°). Picking a face whirls, flattens and shrinks to a dot, then navigates. Marco prefers the original cube start (no intro animation). He rejected redesigns of the Paintings and About holograms, so keep them as they are. There's a colour toggle and a V1/V2 toggle.
 - **V1 (`/v1`):** the old homepage, black background, kept as is.
 - **Software (`/software`):**
   - an Earth that forms from a point of light, then a black hole, then the Earth, with a gold arc from **Mexico** (dot on Mexico City) to Sydney;
@@ -98,7 +98,7 @@ Animated exits (cube, Journal) use `components/navigation/navigateAfter.js`: `pu
   - HTML pages `s-maxage=60` with stale-if-error for a day (Cloudflare only caches HTML if a Cache Rule makes it eligible);
   - the API is not cached by browsers or Cloudflare, but the server caches reads for 60 s.
 - Sessions use the default MemoryStore, so everyone is signed out on each restart (daily, and on deploy).
-- Favicon (`public/favicon.ico`, `.svg`, and the app icons) is a translucent glass cube. The social card is `public/images/social/marcolavielle-card.jpg` (2400×1260, rendered at 2x so LinkedIn's shrunk copy stays sharp; small labels sized up for the same reason), with Open Graph and Twitter meta in both templates. When the card changes, give it a **new file name**: LinkedIn and X keep their copy per image URL. The old `marcolavielle.jpg` stays for links shared before. Its source is `scripts/social-card/card.html` (how to render it is at the top of the file).
+- Favicon (`public/favicon.ico`, `.svg`, and the app icons) is a translucent glass cube. The social card is `public/images/social/marcolavielle-card-v2.jpg` (2400×1260, rendered at 2x so LinkedIn's shrunk copy stays sharp; small labels sized up for the same reason), with Open Graph and Twitter meta in both templates. When the card changes, give it a **new file name**: LinkedIn and X keep their copy per image URL. Older cards (`marcolavielle.jpg`, `marcolavielle-card.jpg`) stay for links shared before. Its source is `scripts/social-card/card.html` (how to render it is at the top of the file).
 
 ## Testing habits
 
