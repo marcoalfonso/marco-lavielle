@@ -291,7 +291,7 @@ const Homepage = () => {
         </span>
       </div>
       <div className="home-last-location mobile-only">
-        <h3>Coder/Painter</h3>
+        <h3>Software Engineer · Painter</h3>
         <section className="location-details">
           <h1 className="location-name long">
             <a className="transitioned">
