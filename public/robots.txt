@@ -1,0 +1,6 @@
+# Everything public may be crawled (search engines, and the link-preview
+# crawlers of X, LinkedIn, Facebook, Slack...). Admin and the API stay out.
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
