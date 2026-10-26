@@ -4,7 +4,7 @@ export const EXPERIENCE = [
   {
     id: "qantas-2024",
     company: "Qantas",
-    role: "Senior Front End Engineer",
+    role: "Senior Full Stack Engineer",
     from: "2024-08",
     to: null,
     image: "/images/software/qantas.jpg",
