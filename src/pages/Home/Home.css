@@ -655,9 +655,13 @@ body.home-v2-body {
   border-color: hsl(var(--cell-hue, 183) 100% 75%);
 }
 
-/* the switch itself: bottom left, a black swatch and a spectrum swatch */
-/* the colour switch shares the ui-toggle look (UiVersionToggle.css), and its
-   spot, bottom right */
+/* the colour switch shares the ui-toggle look (UiVersionToggle.css) but sits
+   bottom left, opposite the UI version switch */
+.ui-toggle.colour-toggle {
+  right: auto;
+  left: 28px;
+}
+
 .colour-toggle.is-spectrum .ui-toggle-thumb {
   transform: translateX(100%);
 }
@@ -836,7 +840,11 @@ body.home-v2-body {
   }
 
 
-  /* clear of the UI version toggle in the corner */
+  .ui-toggle.colour-toggle {
+    left: 16px;
+  }
+
+  /* clear of the toggles in the corners */
   .home-v2-hints {
     bottom: 74px;
   }

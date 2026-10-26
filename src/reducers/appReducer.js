@@ -30,6 +30,8 @@ const initialState = {
   post : null,
   user: null,
   device: deviceFor(),
+  // `hidden: true` keeps a painting out of the gallery (and the counts)
+  // without deleting it; remove the flag to show it again
   paintings: [
     { 
       link: '../images/paintings/clovelly_beach.jpg',
@@ -46,6 +48,7 @@ const initialState = {
     { 
       link: '../images/paintings/swimmer.jpg',
       status: 'Sold',
+      hidden: true,
     },
     { 
       link: '../images/paintings/abstract_1.jpg',
@@ -54,6 +57,7 @@ const initialState = {
     { 
       link: '../images/paintings/straya.jpg',
       status: 'Sold',
+      hidden: true,
     },
     { 
       link: '../images/paintings/abstract_3.jpg',
@@ -93,7 +97,7 @@ const initialState = {
       link: '../images/paintings/hydrangea.jpg',
       status: 'Sold',
     },
-  ]
+  ].filter((painting) => !painting.hidden),
 }
 
 const appReducer = (state = initialState, action) => {

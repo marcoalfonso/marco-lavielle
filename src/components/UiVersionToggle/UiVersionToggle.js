@@ -12,8 +12,8 @@ const VERSIONS = [
   { id: "v2", label: "V2", to: "/" },
 ];
 
-// Hidden for the launch; set to true to bring the switch back (/v1 still works).
-const SHOW_TOGGLE = false;
+// Set to false to hide the switch (/v1 still works).
+const SHOW_TOGGLE = true;
 
 const UiVersionToggle = ({ current }) =>
   SHOW_TOGGLE &&
