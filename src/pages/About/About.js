@@ -52,10 +52,6 @@ const About = () => {
                 <dd>Marco Lavielle</dd>
                 <dt>Location</dt>
                 <dd>Little Bay, NSW, Sydney</dd>
-                <dt>Telephone</dt>
-                <dd>
-                  <a href="tel:+61423478156">0423 478 156</a>
-                </dd>
                 <dt>Email</dt>
                 <dd>
                   <a href="mailto:marcoalfonso@gmail.com">
