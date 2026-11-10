@@ -34,12 +34,17 @@ const Homepage = () => {
     };
   }, []);
 
+  // The phone layout (black background, the footer links in their place
+  // under the sections) hangs off "home-v1" on <html>. Add it before the
+  // first paint, or the footer is drawn at the top and then jumps down.
+  useLayoutEffect(() => {
+    document.documentElement.classList.add("home-v1");
+    return () => document.documentElement.classList.remove("home-v1");
+  }, []);
+
   useEffect(() => {
     dispatch(getClients());
     dispatch(getPosts());
-    // same black as the V2 homepage
-    document.documentElement.classList.add("home-v1");
-    return () => document.documentElement.classList.remove("home-v1");
   }, [dispatch]);
 
   return (
